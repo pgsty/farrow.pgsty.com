@@ -66,6 +66,8 @@ Debian/Ubuntu 使用 `root:<调用者可用组> 4750`。桌面系统通过 ACL �
 
 检查 `farrow status`、`farrow ssh-config` 与串口日志。Farrow 自身 SSH 使用回环管理端口；
 Ansible 直连固定 IP。
+`doctor` 的通用可用性扫描会排除已应用部署保留的固定 IP；`up` 与 `start` 仍会拒绝
+已经接受 SSH 的新增节点或已停止节点地址。
 
 ## Catalog 或镜像校验失败
 

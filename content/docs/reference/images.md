@@ -37,7 +37,7 @@ farrow image pull u24
 For a pull, Farrow:
 
 1. refreshes `catalog.json` and its adjacent `.minisig` from `--repo`, then
-   `FARROW_REPO`, then the compiled default repository;
+   `FARROW_REPO`, then an optional compiled public default;
 2. verifies the signature with an embedded active or standby public key;
 3. selects the Catalog's default release; standalone `image pull` uses the
    native architecture, while lifecycle resolution honors `vm_arch`;
@@ -45,10 +45,11 @@ For a pull, Farrow:
 5. otherwise downloads the repository artifact, with the Catalog's immutable
    HTTPS upstream URL as fallback.
 
-The current compiled default is the development repository
-`https://m0/farrow`; no public image service is claimed yet. An explicit
-repository failure is fatal, while an unreachable compiled default falls back
-to the embedded Catalog.
+Ordinary public builds have no compiled repository default: they use the
+embedded signed Catalog and its immutable upstream URLs. An explicit repository
+failure is fatal. A future release may compile in a public mirror only after it
+is live; an unavailable non-explicit compiled default falls back to the embedded
+Catalog.
 
 ## Runtime policy
 

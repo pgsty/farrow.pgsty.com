@@ -17,7 +17,7 @@ hero:
     Farrow 在 macOS 与 Linux 上，把 Pigsty 兼容的 Inventory 启动成固定 IP 的
     QEMU 虚拟机。同一份文件既描述 VM，也部署 Pigsty；没有项目模型，也没有需要
     对账的第二种配置。
-  note: 简化后的代码线最近一次真机重放是 2026-08-27，覆盖 macOS arm64 与 Ubuntu amd64；尚无公开 v1 软件包。
+  note: 简化后的代码线最近一次真机重放是 2026-08-27，覆盖 macOS arm64 与 Ubuntu amd64；尚无公开 1.0 软件包。
   note_icon: fa-solid fa-flask
   image:
     light: images/farrow-hero-light.svg?v=20260827
@@ -77,7 +77,7 @@ principles:
     - { icon: fa-solid fa-file-lines, title: 一份事实, desc: Pigsty Inventory 同时是 VM 规格与部署清单。 }
     - { icon: fa-solid fa-server, title: 节点粒度, desc: 新增是增量的；变更与删除必须显式执行。 }
     - { icon: fa-solid fa-fingerprint, title: 可归属, desc: 变更前核验进程身份、属主、路径与网络 manifest。 }
-    - { icon: fa-solid fa-microchip, title: 原生, desc: 只用 HVF 或 KVM，不静默跨架构模拟。 }
+    - { icon: fa-solid fa-microchip, title: 显式运行时, desc: 默认使用原生 HVF/KVM；Catalog 规则或显式请求的 TCG 始终可见。 }
 
 faq:
   eyebrow: 简短回答

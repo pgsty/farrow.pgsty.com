@@ -38,7 +38,7 @@ farrow image pull --help
 | 命令 | 期望状态来源 |
 |---|---|
 | `setup [template]` | 显式 `-f`，否则发现配置，否则生成 `meta`；模板与 `-f` 互斥 |
-| `init [template]` | 生成新 Inventory，不读取期望状态 |
+| `init [template]` | 生成新 Inventory，不读取期望状态；`-f/--force` 显式替换输出文件 |
 | `validate` | 显式 `-f`，再发现配置；绝不回退到已应用状态 |
 | `plan`、`up`、`reload`、`recreate` | 显式 `-f`，再发现配置，最后回退到已应用规格 |
 | 其他生命周期/访问命令 | 不读取期望配置；按需使用已应用状态或带属主标记的状态 |
@@ -49,6 +49,9 @@ farrow image pull --help
 |---|---|
 | `--json`、`--yaml` | stdout 机器可读；进度仍写 stderr |
 | `--verbose` | stderr 有界诊断 |
+| `-c`、`--cidr` | 为 `init`/`setup` 生成模板或宿主网络检查/安装选择 RFC1918 `/24` |
+| `-f`、`--file` | 为读取期望状态的命令选择 Inventory |
+| `-f`、`--force`（`init`） | 覆盖生成的 Inventory 输出文件 |
 | `--yes` | 应用已展示的宿主/setup 计划 |
 | `--force` | 跳过 destroy/recreate 交互确认；无终端时必须显式给出 |
 | `--no-wait` | QMP/进程身份确认后返回，不等 Guest readiness |

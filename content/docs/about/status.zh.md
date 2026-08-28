@@ -33,6 +33,27 @@ Darwin 的 `network.json` 丢失时，也可用字节一致的接口双份证据
 Snapshot 还构建并验证了四个平台归档、两个架构的 DEB/RPM、SPDX、Checksum、依赖、权限
 以及归档/软件包一致性。没有发布任何产物；这些结果也不会扩展本真机矩阵。
 
+## 0.1.0 就绪重放：2026-08-28
+
+从本次 Review 工作树复制出的隔离干净 Commit 以 `v0.1.0` 打标签后，完整通过稳定版 Local
+Release：四平台 Archive、amd64/arm64 DEB 与 RPM、依赖许可证、SPDX、Homebrew Formula、
+Installer、Release Metadata、Checksum，以及临时 Cosign Signature/Provenance Round Trip。
+生成的用户态 Installer 还在隔离 HOME 中连续执行两次并保持幂等。
+
+对应 Darwin/arm64 二进制处理了两台 QMP Socket 被外部删除的运行中节点：仅 stop/start
+这两台，13.7 秒后均恢复 readiness，另外两台同伴的 boot ID 保持不变。随后四台均报告
+QMP/进程身份匹配，`plan` 返回 `none`，`doctor` 通过，控制节点到同伴 SSH 正常。在 Ubuntu
+26.04 amd64 上，DEB 与 tar Payload 字节一致，包内二进制可运行；干净镜像视图直接使用内置
+17 工件 Catalog，不探测私有镜像，KVM/QEMU 10.2.1 doctor smoke 通过。DEB 仅解包，未安装。
+
+这些只是本地 Candidate 证据，并非已发布版本。真实源码 Commit/Tag、远端 CI/OIDC Bundle、
+公开仓库与文档 DNS，以及干净宿主的 Homebrew/DEB/RPM 安装仍是独立门禁。
+
+随后一次完整 macOS 出厂清理暴露了源码测试对已安装 `qemu-img` 的依赖：空白宿主无法仅列出
+Catalog。现在只有真正需要校验本地 qcow2 字节时才解析 Store；回归测试会显式从 `PATH`
+移除 QEMU，完整 `make check` 已在 QEMU/Farrow/网络状态全部不存在时通过。由于该源码修复
+晚于上面的 Artifact Candidate，正式打标签前必须从最终 Commit 重新生成稳定版 Candidate。
+
 ## EL7/EL8 兼容性：2026-08-28
 
 Commit `7c666c7` 在两轮独立 Claude Code Opus 5 max 对抗审查后恢复 EL7/EL8。第一轮因

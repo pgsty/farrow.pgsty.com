@@ -33,7 +33,7 @@ farrow image pull u24
 
 拉取时 Farrow 会：
 
-1. 按 `--repo`、`FARROW_REPO`、编译期默认仓库的顺序刷新 `catalog.json` 与相邻
+1. 按 `--repo`、`FARROW_REPO`、可选编译期公共默认仓库的顺序刷新 `catalog.json` 与相邻
    `.minisig`；
 2. 使用内置 active 或 standby 公钥验证签名；
 3. 选择 Catalog 默认 Release；独立 `image pull` 使用本机架构，生命周期解析遵循
@@ -41,8 +41,9 @@ farrow image pull u24
 4. 只有尺寸、SHA-256、qcow2 结构全部匹配时才复用本地文件；
 5. 否则下载仓库工件，仓库缺失时回退到 Catalog 中不可变的 HTTPS Upstream URL。
 
-当前编译默认值仍是开发仓库 `https://m0/farrow`，尚未声称存在公开镜像服务。显式仓库
-失败会报错；无法访问编译默认仓库时则回退到内置 Catalog。
+普通公共构建没有编译期默认仓库，直接使用内置签名 Catalog 与其中不可变的 Upstream URL。
+显式仓库失败会报错；只有公共镜像真正上线后，未来 Release 才可将其编入默认值；不可达的
+非显式编译默认值仍会回退到内置 Catalog。
 
 ## 运行时策略
 

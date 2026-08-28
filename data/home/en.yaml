@@ -17,7 +17,7 @@ hero:
     Farrow boots a Pigsty-compatible inventory into fixed-IP QEMU virtual
     machines on macOS and Linux. The same file describes the VMs and deploys
     Pigsty; there is no project model or second configuration to reconcile.
-  note: The simplified line was last native-replayed on macOS arm64 and Ubuntu amd64 on 2026-08-27; no public v1 package exists yet.
+  note: The simplified line was last native-replayed on macOS arm64 and Ubuntu amd64 on 2026-08-27; no public 1.0 package exists yet.
   note_icon: fa-solid fa-flask
   image:
     light: images/farrow-hero-light.svg?v=20260827
@@ -77,7 +77,7 @@ principles:
     - { icon: fa-solid fa-file-lines, title: One fact, desc: The Pigsty inventory is the VM specification and deployment inventory. }
     - { icon: fa-solid fa-server, title: Node-granular, desc: Additions are incremental; changes and deletion require explicit commands. }
     - { icon: fa-solid fa-fingerprint, title: Owned, desc: "Process identity, ownership, paths, and network manifests are verified before mutation." }
-    - { icon: fa-solid fa-microchip, title: Native, desc: HVF or KVM only; no silent cross-architecture emulation. }
+    - { icon: fa-solid fa-microchip, title: Explicit runtime, desc: Native HVF/KVM by default; catalogued or requested TCG is always visible. }
 
 faq:
   eyebrow: Short answers

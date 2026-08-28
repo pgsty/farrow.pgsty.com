@@ -22,6 +22,8 @@ Demo 目录、生成二进制与 Release 输出树都不是源码输入，不应
 
 ```bash
 make build
+make module-check
+make shell-check
 make test
 make race
 make vet
@@ -45,6 +47,8 @@ Archive 与 Linux Package 只携带匹配二进制、`LICENSE`、精简源码 RE
 
 构建成功绝不代表发布。Commit、Tag、Archive/Package、签名/证明、上传、CI 与公开消费是
 彼此独立的门禁。
+稳定版 Local Release 命令还要求干净且已打标签的 Commit 与 `origin` Remote，因为
+GoReleaser 会记录仓库身份。
 
 ## 镜像归一化
 

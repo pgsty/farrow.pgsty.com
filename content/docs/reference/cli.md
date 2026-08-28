@@ -40,7 +40,7 @@ is command-scoped; `-f` is deliberately not a global flag:
 | Commands | Desired-state source |
 |---|---|
 | `setup [template]` | explicit `-f`, otherwise discovery, otherwise generate `meta`; template and `-f` are exclusive |
-| `init [template]` | generate a new inventory; read no desired state |
+| `init [template]` | generate a new inventory; read no desired state; `-f/--force` explicitly replaces the output |
 | `validate` | explicit `-f`, then discovery; never applied state |
 | `plan`, `up`, `reload`, `recreate` | explicit `-f`, then discovery, then the applied resolved specification |
 | other lifecycle/access commands | no desired-state inventory; use applied or marker-owned state as applicable |
@@ -51,6 +51,9 @@ is command-scoped; `-f` is deliberately not a global flag:
 |---|---|
 | `--json`, `--yaml` | machine-readable stdout; progress remains on stderr |
 | `--verbose` | bounded diagnostics on stderr |
+| `-c`, `--cidr` | select the RFC1918 `/24` for generated `init`/`setup` templates or host-network inspection/install |
+| `-f`, `--file` | select an Inventory for commands that read desired state |
+| `-f`, `--force` (`init`) | overwrite the generated Inventory output |
 | `--yes` | apply a displayed host/setup plan |
 | `--force` | skip the interactive destroy/recreate confirmation; required without a terminal |
 | `--no-wait` | return after QMP/process identity without guest readiness |

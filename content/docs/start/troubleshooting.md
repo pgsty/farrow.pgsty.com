@@ -72,6 +72,9 @@ restore the host entry or run `farrow destroy <node> --force`.
 
 Check `farrow status`, `farrow ssh-config`, and the serial log. Farrow's own
 SSH uses a loopback management port; direct Ansible traffic uses the fixed IP.
+`doctor` excludes fixed IPs reserved by the applied deployment from its generic
+eligibility scan; `up` and `start` still reject a new or stopped node address
+that already accepts SSH.
 
 ## Catalog or image verification fails
 

@@ -18,14 +18,15 @@ farrow version
 farrow doctor
 ```
 
-There is no published v1 package yet. Do not substitute an unofficial binary
-for the matching `farrow` and `farrow-hosts-helper` build.
+There is no published 1.0 package; every 0.x build remains pre-1.0. Do not
+substitute an unofficial binary for the matching `farrow` and
+`farrow-hosts-helper` build.
 
 The source build requires Go 1.27.x. macOS also needs an existing Homebrew
 installation; Farrow can install QEMU through Homebrew but never bootstraps
-Homebrew itself. The current compiled image repository is the development host
-`https://m0/farrow`; use `FARROW_REPO` or `--repo` when another reachable mirror
-is required.
+Homebrew itself. Public builds start with the embedded signed Catalog and its
+immutable HTTPS upstream artifacts. Use `FARROW_REPO` or `--repo` to opt into a
+reachable mirror; no private development host is probed by default.
 
 ## Host requirements and dated evidence
 
@@ -46,6 +47,13 @@ macOS needs Homebrew. Linux needs systemd plus either NetworkManager or
 systemd-networkd. `farrow setup` installs missing supported packages through
 Homebrew, APT, or DNF.
 
+Package-manager downloads honor the configured `HTTP_PROXY`, `HTTPS_PROXY`,
+`ALL_PROXY`, and `NO_PROXY` variables, including their lowercase forms.
+Homebrew runs as the invoking user and inherits them directly. When APT or DNF
+crosses sudo, Farrow asks sudo to preserve only those configured proxy names;
+the setup plan lists the names but never their possibly credential-bearing
+values.
+
 ## What setup changes
 
 Run a dry plan first if desired:
@@ -58,6 +66,12 @@ farrow setup --yes
 Setup may install QEMU dependencies, prepare the host fixed-IP network, and
 install the narrow root-owned hosts publisher. It prints each mutation and
 the reason for sudo before applying anything.
+
+On a terminal, Farrow-controlled downloads show a byte-accurate progress bar,
+percentage, transfer rate, and ETA. Homebrew/APT/DNF do not expose a reliable
+total-work API, so their install phase uses an animated indeterminate bar plus
+elapsed time instead of inventing a percentage. Structured stdout remains
+machine-readable; progress stays on stderr.
 
 In automation use `--yes`. Non-interactive sudo works with either a cached
 credential or a suitable NOPASSWD policy; every privileged command still uses

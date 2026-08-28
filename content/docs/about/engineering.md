@@ -24,6 +24,8 @@ Generated output is disposable:
 
 ```bash
 make build
+make module-check
+make shell-check
 make test
 make race
 make vet
@@ -50,6 +52,8 @@ stays on this versioned site rather than being copied into every binary payload.
 
 Never infer publication from a successful build. Commit, tag, archive/package,
 signature/attestation, upload, CI, and public consumption are distinct gates.
+The stable local release command additionally requires a clean tagged commit
+and its `origin` remote because GoReleaser records repository identity.
 
 ## Image normalization
 

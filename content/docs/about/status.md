@@ -41,6 +41,35 @@ DEB/RPM architectures, SPDX documents, checksums, dependencies, modes, and
 archive/package parity. Nothing was published, and those results do not extend
 this native matrix.
 
+## 0.1.0 readiness replay — 2026-08-28
+
+An isolated clean commit tagged `v0.1.0` from the review working tree completed
+the stable local release path: four archives, amd64/arm64 DEB and RPM packages,
+dependency licenses, SPDX documents, Homebrew formula, installer, release
+metadata, checksums, and an ephemeral Cosign signature/provenance round trip.
+The generated user installer was idempotent in an isolated home directory.
+
+The resulting Darwin/arm64 binary repaired two live nodes whose QMP sockets had
+been removed externally by stopping and starting only those nodes. Both reached
+readiness in 13.7 seconds; the two untouched peers retained their boot IDs.
+All four then reported matching QMP/process identity, `plan` returned `none`,
+`doctor` passed, and control-to-peer SSH worked. On Ubuntu 26.04 amd64, the DEB
+and tar payloads were byte-identical, the packaged binary ran, its clean image
+view used the embedded 17-artifact Catalog without probing a private mirror,
+and the KVM/QEMU 10.2.1 doctor smoke passed. The DEB was extracted, not installed.
+
+This is local candidate evidence, not a published release: the real source
+commit/tag, remote CI/OIDC bundles, public repository and documentation DNS,
+and clean-host Homebrew/DEB/RPM installation remain separate gates.
+
+A later full macOS factory reset exposed one source-test dependency on an
+already installed `qemu-img`: catalog-only `image list` could not run on a
+blank host. The store is now resolved lazily only when local qcow2 bytes need
+validation, regression tests explicitly remove QEMU from `PATH`, and the full
+`make check` passes with QEMU/Farrow/network state absent. Because that source
+fix postdates the artifact candidate above, regenerate the stable candidate
+from the final commit before tagging.
+
 ## EL7/EL8 compatibility — 2026-08-28
 
 Commit `7c666c7` restored EL7/EL8 after two independent Claude Code Opus 5 max
