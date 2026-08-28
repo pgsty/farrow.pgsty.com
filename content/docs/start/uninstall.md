@@ -25,10 +25,11 @@ An interactive terminal asks you to type `destroy`. Scripts and CI must add
 
 ## 2. Remove optional integrations
 
-If you installed SSH aliases or `/etc/hosts` entries:
+Whole-deployment destroy already removes the default `farrow` SSH integration.
+If you installed a custom fragment name or `/etc/hosts` entries:
 
 ```bash
-farrow ssh-config --remove --name farrow
+farrow ssh-config --remove --name lab
 farrow hosts uninstall
 farrow hosts uninstall --yes
 ```

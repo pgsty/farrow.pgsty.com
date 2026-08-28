@@ -23,10 +23,11 @@ farrow destroy --purge
 
 ## 2. 移除可选集成
 
-如果安装过 SSH 别名或 `/etc/hosts` 条目：
+整体 destroy 已自动移除默认 `farrow` SSH integration。如果使用过自定义 fragment 名称或
+`/etc/hosts` 条目：
 
 ```bash
-farrow ssh-config --remove --name farrow
+farrow ssh-config --remove --name lab
 farrow hosts uninstall
 farrow hosts uninstall --yes
 ```

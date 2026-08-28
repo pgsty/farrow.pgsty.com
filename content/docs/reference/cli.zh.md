@@ -7,7 +7,7 @@ aliases: [/docs/reference/json-api/]
 ---
 
 ```text
-farrow [--json|--yaml] [--verbose] <command> [flags] [node...]
+farrow [--json|--yaml] [-v|--verbose] <command> [flags] [node...]
 ```
 
 已安装的二进制是当前版本最准确的参考。每一条可见命令都自带操作边界与可复制样例：
@@ -27,11 +27,30 @@ farrow image pull --help
 | 范围 | 命令 |
 |---|---|
 | 准备 | `setup`、`init`、`validate`、`doctor` |
-| 生命周期 | `plan`、`up`、`start`、`stop`/`halt`、`restart`、`reload`、`recreate`、`status`、`destroy` |
+| 生命周期 | `plan`、`up`、`start`、`stop`、`restart`、`reload`、`recreate`、`status`、`destroy` |
 | 访问 | `ssh`、`exec`、`logs`、`provision`、`ssh-config`、`ss`、`hosts` |
 | 镜像 | `image list/info/pull/import/sync/prune/reset-manifest` |
 | 宿主网络 | `network status/install/uninstall` |
 | 其他 | `version`、`completion` |
+
+常用命令提供作用域明确的短别名：
+
+| 命令 | 别名 | 命令 | 别名 |
+|---|---|---|---|
+| `setup` | `s` | `init` | `i` |
+| `validate` | `v` | `plan` | `pl` |
+| `recreate` | `rc` | `status` | `st` |
+| `destroy` | `de` | `provision` | `p` |
+| `ssh-config` | `sc` | `hosts` | `h` |
+| `image` | `images`、`im` | `doctor` | `dt` |
+| `network` | `n`、`net` | `exec` / `logs` | `ex` / `l` |
+| `version` | `ver` | `completion` | `cp` |
+
+`up`、`ssh`、`ss` 本身已经很短；`start`、`stop`、`restart`、`reload`
+刻意不公开别名；旧 `halt` 仅作为隐藏的 deprecated 兼容命令保留。命名空间内部，
+`hosts` 与 `network` 的 install/uninstall 使用 `i`/`u`，`network status` 使用 `st`；
+`image` 使用 `list=ls`、`info=in`、`pull=p`、
+`prune=pr`、`sync=sy`、`import=i`。涉及恢复边界的 `reset-manifest` 保持完整命令名。
 
 使用已应用状态的命令可在任意目录运行。配置来源由命令决定，`-f` 刻意不做全局参数：
 
@@ -47,16 +66,22 @@ farrow image pull --help
 
 | 参数 | 含义 |
 |---|---|
-| `--json`、`--yaml` | stdout 机器可读；进度仍写 stderr |
-| `--verbose` | stderr 有界诊断 |
+| `--json`、`--yaml` | stdout 机器可读；进度仍写 stderr；刻意不设短参数 |
+| `-v`、`--verbose` | stderr 有界诊断 |
 | `-c`、`--cidr` | 为 `init`/`setup` 生成模板或宿主网络检查/安装选择 RFC1918 `/24` |
 | `-f`、`--file` | 为读取期望状态的命令选择 Inventory |
-| `-f`、`--force`（`init`） | 覆盖生成的 Inventory 输出文件 |
-| `--yes` | 应用已展示的宿主/setup 计划 |
-| `--force` | 跳过 destroy/recreate 交互确认；无终端时必须显式给出 |
-| `--no-wait` | QMP/进程身份确认后返回，不等 Guest readiness |
+| `-r`、`--repo` | 为需要解析下载的命令选择镜像/制品仓库 |
+| `-m`、`--mode` | 在提供该参数的命令中选择 macOS `host`/`shared` 网络模式 |
+| `-d`、`--dry-run` | 只展示 setup/image 计划，不改变状态 |
+| `-y`、`--yes` | 应用已展示的宿主/setup/image 计划 |
+| `-f`、`--force`（`init`、`destroy`） | 覆盖生成文件或跳过 destroy 确认 |
+| `--force`（`recreate`） | 跳过 recreate 确认；因为 `-f` 用于选择 Inventory，所以只保留长参数 |
+| `-n`、`--no-wait` | QMP/进程身份确认后返回，不等 Guest readiness |
 | `--delete-persistent` | 整体销毁时也删持久盘；不能与节点选择器一起使用 |
 | `--purge` | 整体处置：删除磁盘、密钥与 deployment 状态，保留镜像 |
+
+`--allow-downgrade`、`--sudo`、`--delete-persistent`、`--purge` 等低频或扩大风险
+边界的参数刻意只保留长版本；因此整套 CLI 中 `-d` 始终表示 Dry-run。
 
 如果失败命令尚未输出更丰富的类型化结果，结构化模式会先输出一份包含 `error` 与
 `message` 的对象，再返回约定的非零退出码；已经携带失败状态的结果后面绝不会追加第二份
@@ -64,7 +89,10 @@ JSON/YAML 文档。
 
 `plan` 是只读操作，即使 action 为 `recreate` 或 `blocked-removal` 也返回成功；自动化必须
 检查 action 与 `create`、`recreate`、`missing` 字段。`up` 会创建新增节点、启动选中的
-已停止节点；破坏性 drift 则返回冲突，不会被静默应用。
+已停止节点，并根据完整的 applied deployment 重建默认 marker-owned SSH 配置；`recreate`
+同样执行全量刷新，节点级 destroy 删除旧条目，整体 destroy 移除默认集成。`start` 只负责
+启动已创建节点。破坏性 drift 仍返回冲突，不会被静默应用。如果 VM 生命周期成功但 SSH
+收敛失败，结构化输出会携带 VM 状态并报告部分 `ssh_config` 失败，退出码为 7。
 
 `status` 会为每个节点报告持久化的 `guest_arch` 与 `accelerator`；文本和结构化输出都会
 明确显示 TCG。
@@ -76,7 +104,7 @@ JSON/YAML 文档。
 属于 Farrow，之后的参数属于 OpenSSH 或远端程序。
 
 加载 `farrow completion bash|zsh|fish|powershell` 可获得命令与作用域准确的参数补全，
-同时补全模板、镜像别名、枚举参数，以及从期望/已应用规格只读解析出的节点名。
+同时补全命令别名、模板、镜像别名、枚举参数，以及从期望/已应用规格只读解析出的节点名。
 
 ## 退出码
 
