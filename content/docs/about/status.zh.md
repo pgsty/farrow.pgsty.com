@@ -35,7 +35,7 @@ Snapshot 还构建并验证了四个平台归档、两个架构的 DEB/RPM、SPD
 
 ## EL7/EL8 兼容性：2026-08-28
 
-Commit `f60013a` 在两轮独立 Claude Code Opus 5 max 对抗审查后恢复 EL7/EL8。第一轮因
+Commit `7c666c7` 在两轮独立 Claude Code Opus 5 max 对抗审查后恢复 EL7/EL8。第一轮因
 破坏前运行时预检顺序与签名 Catalog 基线迁移问题给出 BLOCK；修复并补回归测试后，第二轮
 给出 PASS，且没有 Required Fix。
 

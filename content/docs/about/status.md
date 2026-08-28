@@ -43,7 +43,7 @@ this native matrix.
 
 ## EL7/EL8 compatibility — 2026-08-28
 
-Commit `f60013a` restored EL7/EL8 after two independent Claude Code Opus 5 max
+Commit `7c666c7` restored EL7/EL8 after two independent Claude Code Opus 5 max
 adversarial reviews. The first review blocked on destructive runtime preflight
 ordering and signed-Catalog baseline migration; both were fixed, regression
 tested, and the second review returned PASS with no required fixes.

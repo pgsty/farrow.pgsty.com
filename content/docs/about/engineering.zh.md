@@ -39,8 +39,9 @@ make license-check
 
 `packaging/`、`.goreleaser.yaml` 与 `.github/workflows` 属于源码；它们生成的目录不是。
 Archive 与 Linux Package 只携带匹配二进制、`LICENSE`、精简源码 README、
-`THIRD_PARTY_LICENSES.md`、构建元数据与准确上游许可证字节。详细文档留在版本化网站，
-不再复制到每份二进制 Payload。
+构建元数据，以及根据 `go.mod` 锁定模块版本重建的准确上游许可证字节。生成的许可证文本
+在 Archive 中位于 `licenses/`，不作为源码跟踪。详细文档留在版本化网站，不再复制到每份
+二进制 Payload。
 
 构建成功绝不代表发布。Commit、Tag、Archive/Package、签名/证明、上传、CI 与公开消费是
 彼此独立的门禁。

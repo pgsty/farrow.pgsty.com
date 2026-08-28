@@ -43,9 +43,10 @@ the public render remain separate gates.
 Release tooling under `packaging/`, `.goreleaser.yaml`, and `.github/workflows`
 is source, even though its generated directories are not. Archives and Linux
 packages contain the matching binaries plus `LICENSE`, the minimal source
-README, `THIRD_PARTY_LICENSES.md`, build metadata, and exact upstream license
-bytes. Detailed documentation stays on this versioned site rather than being
-copied into every binary payload.
+README, build metadata, and exact upstream license bytes reconstructed from the
+module versions pinned by `go.mod`. Those generated license texts live under
+`licenses/` in archives and are not tracked as source. Detailed documentation
+stays on this versioned site rather than being copied into every binary payload.
 
 Never infer publication from a successful build. Commit, tag, archive/package,
 signature/attestation, upload, CI, and public consumption are distinct gates.
