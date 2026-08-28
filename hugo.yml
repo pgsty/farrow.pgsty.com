@@ -39,7 +39,7 @@ languages:
           weight: 10
           params:
             icon: fa-solid fa-rocket
-            description: Install, tutorial, daily operations, and troubleshooting
+            description: Two-command quick start, operations, images, builds, and cleanup
         - identifier: docs-reference
           parent: docs
           name: Reference
@@ -80,7 +80,7 @@ languages:
           weight: 10
           params:
             icon: fa-solid fa-rocket
-            description: 安装、教程、日常操作与故障排查
+            description: 两条命令快速上手，以及管理、镜像、构建与清理
         - identifier: docs-reference
           parent: docs
           name: 参考

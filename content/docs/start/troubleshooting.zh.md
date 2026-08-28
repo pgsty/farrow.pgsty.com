@@ -1,7 +1,7 @@
 ---
 title: 故障排查
 description: 面向 setup、网络、镜像、漂移、中断状态与 SSH 的简短安全手册。
-weight: 40
+weight: 30
 icon: fa-solid fa-life-ring
 ---
 

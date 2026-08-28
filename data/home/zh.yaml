@@ -24,7 +24,7 @@ hero:
     dark: images/farrow-hero-dark.svg?v=20260827
     alt: 一份 Pigsty Inventory 变成一套固定 IP 的 Farrow deployment
   actions:
-    - { label: 跟随教程, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
+    - { label: 快速上手, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
     - { label: 查阅参考, url: docs/reference/, icon: fa-solid fa-book-open, style: ghost }
   detail:
     label: 真机验证与限制
@@ -39,10 +39,10 @@ facts:
   columns: 4
   link_label: 查看详情
   items:
+    - { value: 2, label: 条正常命令, desc: setup + up, url: docs/start/tutorial/ }
     - { value: 1, label: 份 Inventory, desc: farrow.yml 或 pigsty.yml, url: docs/reference/configuration/ }
     - { value: 1, label: 套用户 Deployment, desc: 状态位于 ~/.farrow, url: docs/about/design/ }
     - { value: 4, label: 个已重放节点, desc: 增量扩容, url: docs/start/tutorial/ }
-    - { value: 2, label: 种真机宿主, desc: macOS arm64 + Linux amd64, url: docs/about/status/ }
 
 entry_points:
   eyebrow: 两个顶级栏目
@@ -51,21 +51,20 @@ entry_points:
   columns: 3
   link_label: 打开
   items:
-    - { title: 开始使用, meta: 安装与操作, icon: fa-solid fa-rocket, desc: 安装、教程、日常操作与故障排查。, url: docs/start/ }
+    - { title: 开始使用, meta: 两条命令启动, icon: fa-solid fa-rocket, desc: 快速上手，以及按需阅读的管理、排障、镜像、构建与清理。, url: docs/start/ }
     - { title: 参考, meta: 准确契约, icon: fa-solid fa-code, desc: Inventory 变量、命令、参数、输出与退出码。, url: docs/reference/ }
     - { title: 关于, meta: 设计与证据, icon: fa-solid fa-circle-info, desc: 简化模型、真机矩阵、限制与发布门禁。, url: docs/about/ }
-    - { title: 教程, meta: 一台扩到四台, icon: fa-solid fa-play, desc: 最短的新手完整路径，包括交给 Pigsty。, url: docs/start/tutorial/ }
+    - { title: 快速上手, meta: 一台扩到四台, icon: fa-solid fa-play, desc: setup 与 up 启动，再通过同一份配置增量扩容。, url: docs/start/tutorial/ }
     - { title: 配置, meta: vm_* 字段, icon: fa-solid fa-file-code, desc: 默认值、磁盘、共享、命名、地址与漂移。, url: docs/reference/configuration/ }
     - { title: 博客, meta: 历史动态, icon: fa-solid fa-newspaper, desc: 开发快照与发布说明，与当前文档分离。, url: blog/ }
 
 first_command:
   eyebrow: 正常路径
-  title: 准备一次，然后启动
-  text: 在 farrow.yml 或 pigsty.yml 所在目录执行。
+  title: 两条命令，完成准备与启动
+  text: 在空目录执行；setup 会生成默认单节点配置。
   code: |-
     farrow setup
     farrow up
-    farrow status
   lang: bash
   note: 增加主机行后再次 up：创建新节点、启动选中的已停止节点，运行中节点不受影响；删掉一行永远不会删除 VM。
 
@@ -89,14 +88,14 @@ faq:
     - question: 可以直接使用 pigsty.yml 吗？
       answer: 可以。Farrow 读取已记录的 VM 字段，以及用于命名、控制节点和管理员身份的一小组 Pigsty 字段；其余参数保持不透明。
     - question: setup 会修改宿主吗？
-      answer: 会。依赖、固定 IP 网络与 hosts helper 变更都会先展示并确认；Linux 网络 smoke 失败会按归属 manifest 回滚。
+      answer: 会。依赖、固定 IP 网络与 hosts helper 变更都会先展示并确认；空目录中还会生成默认单节点配置。
     - question: Farrow 可以用于生产吗？
       answer: 不可以。它仍是 pre-1.0 的本地开发运行时；请在状态页查看准确验证矩阵与开放门禁。
 
 cta:
-  title: 从一份文件、三条命令开始。
-  desc: 跟随精简教程，之后按需查阅参考。
+  title: 从两条命令开始。
+  desc: 跟随快速上手，之后只按需要查阅独立教程与参考。
   actions:
-    - { label: 教程, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
+    - { label: 快速上手, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
     - { label: 参考, url: docs/reference/, icon: fa-solid fa-book-open, style: ghost }
     - { label: 状态, url: docs/about/status/, icon: fa-solid fa-list-check, style: ghost }

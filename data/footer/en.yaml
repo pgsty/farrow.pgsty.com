@@ -5,10 +5,12 @@ brand:
 columns:
   - title: Start
     links:
-      - { label: Installation, url: docs/start/installation/ }
-      - { label: Tutorial, url: docs/start/tutorial/ }
-      - { label: Operations, url: docs/start/operations/ }
+      - { label: Quick Start, url: docs/start/tutorial/ }
+      - { label: Daily Operations, url: docs/start/operations/ }
       - { label: Troubleshooting, url: docs/start/troubleshooting/ }
+      - { label: Image Repositories, url: docs/start/images/ }
+      - { label: Build from Source, url: docs/start/source-build/ }
+      - { label: Uninstall, url: docs/start/uninstall/ }
   - title: Reference
     links:
       - { label: Configuration, url: docs/reference/configuration/ }

@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
 description: Short, safe runbooks for setup, networking, images, drift, interrupted state, and SSH.
-weight: 40
+weight: 30
 icon: fa-solid fa-life-ring
 ---
 

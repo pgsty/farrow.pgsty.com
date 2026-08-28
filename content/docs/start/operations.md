@@ -1,9 +1,9 @@
 ---
-title: Operations
+title: Daily Operations
 description: "The normal lifecycle for the one deployment: inspect, access, scale, change, stop, and destroy."
-weight: 30
+weight: 20
 icon: fa-solid fa-gears
-aliases: [/docs/start/lifecycle/, /docs/start/provisioning/, /docs/start/images/]
+aliases: [/docs/start/lifecycle/, /docs/start/provisioning/]
 ---
 
 ## Inspect and access
@@ -13,12 +13,15 @@ farrow status
 farrow ssh meta
 farrow exec node-1 -- hostname
 farrow logs meta --source serial
-farrow ss                         # install SSH aliases; then: ssh meta
+farrow ss                         # manually refresh the SSH aliases if needed
 ```
 
 Applied state is under `~/.farrow`; these commands work from any directory.
 Status includes the persisted Guest architecture and accelerator, so TCG is
 never an invisible fallback.
+`farrow up` rebuilds the default SSH aliases from the complete applied
+deployment after the selected VMs are started, so a scoped `up` never drops
+unselected peers and plain `ssh meta` works without a separate `farrow ss` step.
 `plan`, `up`, `reload`, and `recreate` prefer `-f`, then a discovered
 Inventory, then the applied spec when no file exists. `validate` always needs
 a file.
@@ -26,19 +29,21 @@ a file.
 ## Stop and start
 
 ```bash
-farrow stop                       # alias: halt
+farrow stop
 farrow start
 farrow restart node-1
 farrow reload -f farrow.yml       # stop, re-read config, converge
 ```
 
-`restart` uses applied state. `reload` reads the Inventory again.
+`start` only powers on already-created VMs and does not refresh SSH aliases.
+`restart` uses applied state. `reload` reads the Inventory again and follows
+the complete `up` path after stopping.
 
 ## Change the deployment
 
 ```bash
 farrow plan
-farrow up                         # create additions and start stopped selected nodes
+farrow up                         # create/start selected nodes and install SSH aliases
 farrow recreate node-1 --force    # applies a changed VM definition
 ```
 
@@ -52,7 +57,8 @@ Inventory changes fall into three visible fields:
 
 Deleting YAML never deletes a VM. Unconsumed Pigsty changes produce
 `action:none`; native naming and node-admin fields are consumed even though
-they do not begin with `vm_`.
+they do not begin with `vm_`. Successful recreate refreshes the complete SSH
+fragment as well.
 
 ## Destroy
 
@@ -65,22 +71,14 @@ farrow destroy --force --purge
 
 `--delete-persistent` and `--purge` are valid only for whole-deployment
 destroy, not with node selectors. `--purge` removes persistent disks, keys,
-and deployment state; images remain cached. Host network removal is separate
+and deployment state; images remain cached. Node destroy refreshes the SSH
+fragment for remaining peers, while whole destroy removes the default Farrow
+SSH integration. Host network removal is separate
 and refuses while a VM is attached:
 
 ```bash
 farrow network uninstall --yes
 ```
 
-## Images
-
-```bash
-farrow image list
-farrow image info u24
-farrow image pull u24
-farrow image prune --dry-run
-```
-
-Images are signed-catalog entries and SHA-256 checked before use. Current
-images are `testing`, except EOL EL7 which is `deprecated`, so starts print the
-corresponding warning.
+See [Image Repositories](../images/) for image selection, mirrors, and cache
+pruning, or [Uninstall and Clean Up](../uninstall/) to remove host state.

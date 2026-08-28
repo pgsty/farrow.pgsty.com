@@ -5,10 +5,12 @@ brand:
 columns:
   - title: 开始使用
     links:
-      - { label: 安装, url: docs/start/installation/ }
-      - { label: 教程, url: docs/start/tutorial/ }
-      - { label: 日常操作, url: docs/start/operations/ }
+      - { label: 快速上手, url: docs/start/tutorial/ }
+      - { label: 日常管理, url: docs/start/operations/ }
       - { label: 故障排查, url: docs/start/troubleshooting/ }
+      - { label: 镜像仓库, url: docs/start/images/ }
+      - { label: 从源码构建, url: docs/start/source-build/ }
+      - { label: 卸载与清理, url: docs/start/uninstall/ }
   - title: 参考
     links:
       - { label: 配置, url: docs/reference/configuration/ }
