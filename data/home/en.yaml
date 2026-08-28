@@ -1,0 +1,102 @@
+sections:
+  - hero
+  - { type: metrics, key: facts }
+  - { type: cards, key: entry_points }
+  - { type: command-box, key: first_command }
+  - { type: principles, key: principles }
+  - faq
+  - cta
+
+hero:
+  eyebrow: Pre-1.0 · Native Go + QEMU
+  title_lines:
+    - One inventory.
+    - One deployment.
+  title_size: 4.15rem
+  lead: >-
+    Farrow boots a Pigsty-compatible inventory into fixed-IP QEMU virtual
+    machines on macOS and Linux. The same file describes the VMs and deploys
+    Pigsty; there is no project model or second configuration to reconcile.
+  note: The simplified line was last native-replayed on macOS arm64 and Ubuntu amd64 on 2026-08-27; no public v1 package exists yet.
+  note_icon: fa-solid fa-flask
+  image:
+    light: images/farrow-hero-light.svg?v=20260827
+    dark: images/farrow-hero-dark.svg?v=20260827
+    alt: One Pigsty inventory becomes one fixed-IP Farrow deployment
+  actions:
+    - { label: Follow the tutorial, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
+    - { label: Read the reference, url: docs/reference/, icon: fa-solid fa-book-open, style: ghost }
+  detail:
+    label: Native validation and limits
+    url: docs/about/status/
+    icon: fa-solid fa-list-check
+
+facts:
+  eyebrow: The current model
+  title: Less machinery, clearer behavior
+  text: Farrow targets one trusted local Pigsty lab, not a general-purpose cloud control plane.
+  animate: true
+  columns: 4
+  link_label: Details
+  items:
+    - { value: 1, label: inventory, desc: farrow.yml or pigsty.yml, url: docs/reference/configuration/ }
+    - { value: 1, label: deployment per user, desc: state under ~/.farrow, url: docs/about/design/ }
+    - { value: 4, label: nodes replayed, desc: additive scale-out, url: docs/start/tutorial/ }
+    - { value: 2, label: native hosts, desc: macOS arm64 + Linux amd64, url: docs/about/status/ }
+
+entry_points:
+  eyebrow: Two top-level sections
+  title: Documentation and blog
+  text: Documentation has only three directories; the blog keeps historical updates separate from the current contract.
+  columns: 3
+  link_label: Open
+  items:
+    - { title: Start, meta: Install and operate, icon: fa-solid fa-rocket, desc: "Installation, tutorial, daily operations, and troubleshooting.", url: docs/start/ }
+    - { title: Reference, meta: Exact contracts, icon: fa-solid fa-code, desc: "Inventory variables, commands, flags, output, and exit codes.", url: docs/reference/ }
+    - { title: About, meta: Design and evidence, icon: fa-solid fa-circle-info, desc: "The simplified model, native test matrix, limits, and release gates.", url: docs/about/ }
+    - { title: Tutorial, meta: One node to four, icon: fa-solid fa-play, desc: "The shortest complete beginner path, including Pigsty handoff.", url: docs/start/tutorial/ }
+    - { title: Configuration, meta: vm_* fields, icon: fa-solid fa-file-code, desc: "Defaults, disks, shares, naming, addressing, and drift.", url: docs/reference/configuration/ }
+    - { title: Blog, meta: Historical updates, icon: fa-solid fa-newspaper, desc: "Development snapshots and release notes, kept outside the current docs.", url: blog/ }
+
+first_command:
+  eyebrow: Normal path
+  title: Prepare once, then boot
+  text: Run these commands beside farrow.yml or pigsty.yml.
+  code: |-
+    farrow setup
+    farrow up
+    farrow status
+  lang: bash
+  note: Add host lines and run up again; new nodes are created, stopped selected nodes start, and running peers stay untouched. Removing a line never destroys a VM.
+
+principles:
+  eyebrow: Product boundaries
+  title: Deliberate constraints
+  columns: 4
+  items:
+    - { icon: fa-solid fa-file-lines, title: One fact, desc: The Pigsty inventory is the VM specification and deployment inventory. }
+    - { icon: fa-solid fa-server, title: Node-granular, desc: Additions are incremental; changes and deletion require explicit commands. }
+    - { icon: fa-solid fa-fingerprint, title: Owned, desc: "Process identity, ownership, paths, and network manifests are verified before mutation." }
+    - { icon: fa-solid fa-microchip, title: Native, desc: HVF or KVM only; no silent cross-architecture emulation. }
+
+faq:
+  eyebrow: Short answers
+  title: Before you begin
+  items:
+    - question: Is the working directory still a Farrow project?
+      answer: No. State is one deployment under ~/.farrow. An explicit or discovered Inventory supplies desired state; without one, lifecycle commands can fall back to the applied spec.
+      open: true
+    - question: Can I use pigsty.yml directly?
+      answer: Yes. Farrow consumes the documented VM fields plus a small naming, control-node, and node-admin whitelist; other Pigsty settings stay opaque.
+    - question: Does setup modify the host?
+      answer: Yes. It prints and confirms dependency, fixed-IP network, and hosts-helper changes. Linux network smoke failures are rolled back through the ownership manifest.
+    - question: Is Farrow ready for production?
+      answer: No. It is a pre-1.0 local development runtime; read the status page for the exact verified matrix and open release gates.
+
+cta:
+  title: Start with one file and three commands.
+  desc: Follow the concise tutorial, then keep the reference nearby.
+  actions:
+    - { label: Tutorial, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
+    - { label: Reference, url: docs/reference/, icon: fa-solid fa-book-open, style: ghost }
+    - { label: Status, url: docs/about/status/, icon: fa-solid fa-list-check, style: ghost }

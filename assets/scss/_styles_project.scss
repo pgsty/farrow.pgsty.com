@@ -1,0 +1,27 @@
+:root {
+  --td-brand-copper: #9f2448;
+  --td-brand-copper-dim: #bd5874;
+  --td-brand-mark-from: #70203b;
+  --td-brand-mark-to: #dc5678;
+  --td-brand-line-strong: #c9a3ad;
+}
+
+[data-bs-theme='dark'] {
+  --td-brand-copper: #ff8ca8;
+  --td-brand-copper-dim: #d96783;
+  --td-brand-mark-from: #ffb3c5;
+  --td-brand-mark-to: #ff6f96;
+  --td-brand-line-strong: #754352;
+}
+
+.td-landing-hero code {
+  white-space: nowrap;
+}
+
+.td-content table.evidence-table {
+  min-width: 720px !important;
+}
+
+.evidence-table code {
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,102 @@
+sections:
+  - hero
+  - { type: metrics, key: facts }
+  - { type: cards, key: entry_points }
+  - { type: command-box, key: first_command }
+  - { type: principles, key: principles }
+  - faq
+  - cta
+
+hero:
+  eyebrow: Pre-1.0 · 原生 Go + QEMU
+  title_lines:
+    - 一份 Inventory，
+    - 一套 Deployment。
+  title_size: 4.15rem
+  lead: >-
+    Farrow 在 macOS 与 Linux 上，把 Pigsty 兼容的 Inventory 启动成固定 IP 的
+    QEMU 虚拟机。同一份文件既描述 VM，也部署 Pigsty；没有项目模型，也没有需要
+    对账的第二种配置。
+  note: 简化后的代码线最近一次真机重放是 2026-08-27，覆盖 macOS arm64 与 Ubuntu amd64；尚无公开 v1 软件包。
+  note_icon: fa-solid fa-flask
+  image:
+    light: images/farrow-hero-light.svg?v=20260827
+    dark: images/farrow-hero-dark.svg?v=20260827
+    alt: 一份 Pigsty Inventory 变成一套固定 IP 的 Farrow deployment
+  actions:
+    - { label: 跟随教程, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
+    - { label: 查阅参考, url: docs/reference/, icon: fa-solid fa-book-open, style: ghost }
+  detail:
+    label: 真机验证与限制
+    url: docs/about/status/
+    icon: fa-solid fa-list-check
+
+facts:
+  eyebrow: 当前模型
+  title: 更少的机制，更清楚的行为
+  text: Farrow 面向一套可信的本地 Pigsty 实验环境，不是通用云控制平面。
+  animate: true
+  columns: 4
+  link_label: 查看详情
+  items:
+    - { value: 1, label: 份 Inventory, desc: farrow.yml 或 pigsty.yml, url: docs/reference/configuration/ }
+    - { value: 1, label: 套用户 Deployment, desc: 状态位于 ~/.farrow, url: docs/about/design/ }
+    - { value: 4, label: 个已重放节点, desc: 增量扩容, url: docs/start/tutorial/ }
+    - { value: 2, label: 种真机宿主, desc: macOS arm64 + Linux amd64, url: docs/about/status/ }
+
+entry_points:
+  eyebrow: 两个顶级栏目
+  title: 文档与博客
+  text: 文档只保留三个目录；博客承载历史动态，不再与当前契约混在一起。
+  columns: 3
+  link_label: 打开
+  items:
+    - { title: 开始使用, meta: 安装与操作, icon: fa-solid fa-rocket, desc: 安装、教程、日常操作与故障排查。, url: docs/start/ }
+    - { title: 参考, meta: 准确契约, icon: fa-solid fa-code, desc: Inventory 变量、命令、参数、输出与退出码。, url: docs/reference/ }
+    - { title: 关于, meta: 设计与证据, icon: fa-solid fa-circle-info, desc: 简化模型、真机矩阵、限制与发布门禁。, url: docs/about/ }
+    - { title: 教程, meta: 一台扩到四台, icon: fa-solid fa-play, desc: 最短的新手完整路径，包括交给 Pigsty。, url: docs/start/tutorial/ }
+    - { title: 配置, meta: vm_* 字段, icon: fa-solid fa-file-code, desc: 默认值、磁盘、共享、命名、地址与漂移。, url: docs/reference/configuration/ }
+    - { title: 博客, meta: 历史动态, icon: fa-solid fa-newspaper, desc: 开发快照与发布说明，与当前文档分离。, url: blog/ }
+
+first_command:
+  eyebrow: 正常路径
+  title: 准备一次，然后启动
+  text: 在 farrow.yml 或 pigsty.yml 所在目录执行。
+  code: |-
+    farrow setup
+    farrow up
+    farrow status
+  lang: bash
+  note: 增加主机行后再次 up：创建新节点、启动选中的已停止节点，运行中节点不受影响；删掉一行永远不会删除 VM。
+
+principles:
+  eyebrow: 产品边界
+  title: 刻意保留的约束
+  columns: 4
+  items:
+    - { icon: fa-solid fa-file-lines, title: 一份事实, desc: Pigsty Inventory 同时是 VM 规格与部署清单。 }
+    - { icon: fa-solid fa-server, title: 节点粒度, desc: 新增是增量的；变更与删除必须显式执行。 }
+    - { icon: fa-solid fa-fingerprint, title: 可归属, desc: 变更前核验进程身份、属主、路径与网络 manifest。 }
+    - { icon: fa-solid fa-microchip, title: 原生, desc: 只用 HVF 或 KVM，不静默跨架构模拟。 }
+
+faq:
+  eyebrow: 简短回答
+  title: 开始之前
+  items:
+    - question: 工作目录还是 Farrow 项目吗？
+      answer: 不是。状态是 ~/.farrow 下唯一的一套 deployment；显式或当前目录发现的 Inventory 提供期望状态，没有文件时生命周期命令可回退到已应用规格。
+      open: true
+    - question: 可以直接使用 pigsty.yml 吗？
+      answer: 可以。Farrow 读取已记录的 VM 字段，以及用于命名、控制节点和管理员身份的一小组 Pigsty 字段；其余参数保持不透明。
+    - question: setup 会修改宿主吗？
+      answer: 会。依赖、固定 IP 网络与 hosts helper 变更都会先展示并确认；Linux 网络 smoke 失败会按归属 manifest 回滚。
+    - question: Farrow 可以用于生产吗？
+      answer: 不可以。它仍是 pre-1.0 的本地开发运行时；请在状态页查看准确验证矩阵与开放门禁。
+
+cta:
+  title: 从一份文件、三条命令开始。
+  desc: 跟随精简教程，之后按需查阅参考。
+  actions:
+    - { label: 教程, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
+    - { label: 参考, url: docs/reference/, icon: fa-solid fa-book-open, style: ghost }
+    - { label: 状态, url: docs/about/status/, icon: fa-solid fa-list-check, style: ghost }

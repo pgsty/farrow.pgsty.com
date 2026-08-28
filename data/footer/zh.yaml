@@ -1,0 +1,26 @@
+brand:
+  name: FARROW
+  tagline: 一份 Inventory，一套本地 Deployment
+  slogan: 面向 macOS 与 Linux Pigsty 开发环境的原生 QEMU 虚拟机。
+columns:
+  - title: 开始使用
+    links:
+      - { label: 安装, url: docs/start/installation/ }
+      - { label: 教程, url: docs/start/tutorial/ }
+      - { label: 日常操作, url: docs/start/operations/ }
+      - { label: 故障排查, url: docs/start/troubleshooting/ }
+  - title: 参考
+    links:
+      - { label: 配置, url: docs/reference/configuration/ }
+      - { label: 命令行, url: docs/reference/cli/ }
+      - { label: 镜像, url: docs/reference/images/ }
+      - { label: 镜像流水线, url: docs/reference/image-pipeline/ }
+  - title: 关于
+    links:
+      - { label: 设计, url: docs/about/design/ }
+      - { label: 当前状态, url: docs/about/status/ }
+      - { label: 工程与发布, url: docs/about/engineering/ }
+  - title: 博客
+    links:
+      - { label: 全部文章, url: blog/ }
+      - { label: 发布说明, url: blog/release/ }

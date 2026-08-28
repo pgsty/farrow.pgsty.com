@@ -1,0 +1,180 @@
+baseURL: https://farrow.pgsty.com/
+title: Farrow
+timeZone: Asia/Shanghai
+defaultContentLanguage: en
+defaultContentLanguageInSubdir: false
+enableRobotsTXT: true
+# Keep public timestamps independent from local-only history until a durable
+# remote repository and CI publication path exist.
+enableGitInfo: false
+enableEmoji: true
+hasCJKLanguage: true
+capitalizeListTitles: false
+
+module:
+  hugoVersion:
+    extended: true
+    min: "0.160.1"
+  imports:
+    - path: github.com/pgsty/oink
+
+languages:
+  en:
+    label: English
+    locale: en-US
+    weight: 1
+    title: Farrow
+    params:
+      description: Native QEMU virtual machines for Pigsty development
+    menus:
+      main:
+        - identifier: docs
+          name: Docs
+          pageRef: /docs
+          weight: 10
+        - identifier: docs-start
+          parent: docs
+          name: Start
+          pageRef: /docs/start
+          weight: 10
+          params:
+            icon: fa-solid fa-rocket
+            description: Install, tutorial, daily operations, and troubleshooting
+        - identifier: docs-reference
+          parent: docs
+          name: Reference
+          pageRef: /docs/reference
+          weight: 20
+          params:
+            icon: fa-solid fa-code
+            description: Configuration, command-line, and image contracts
+        - identifier: docs-about
+          parent: docs
+          name: About
+          pageRef: /docs/about
+          weight: 30
+          params:
+            icon: fa-solid fa-circle-info
+            description: Simplified design, validation, limits, and release gates
+        - identifier: blog
+          name: Blog
+          pageRef: /blog
+          weight: 20
+  zh:
+    label: 简体中文
+    locale: zh-CN
+    weight: 2
+    title: Farrow
+    params:
+      description: 面向 Pigsty 开发环境的原生 QEMU 虚拟机运行时
+    menus:
+      main:
+        - identifier: docs
+          name: 文档
+          pageRef: /docs
+          weight: 10
+        - identifier: docs-start
+          parent: docs
+          name: 开始使用
+          pageRef: /docs/start
+          weight: 10
+          params:
+            icon: fa-solid fa-rocket
+            description: 安装、教程、日常操作与故障排查
+        - identifier: docs-reference
+          parent: docs
+          name: 参考
+          pageRef: /docs/reference
+          weight: 20
+          params:
+            icon: fa-solid fa-code
+            description: 配置、命令行与镜像准确契约
+        - identifier: docs-about
+          parent: docs
+          name: 关于
+          pageRef: /docs/about
+          weight: 30
+          params:
+            icon: fa-solid fa-circle-info
+            description: 简化设计、真机验证、限制与发布门禁
+        - identifier: blog
+          name: 博客
+          pageRef: /blog
+          weight: 20
+
+taxonomies:
+  categories: categories
+  tags: tags
+
+permalinks:
+  blog: '/:sections/:contentbasename/'
+
+markup:
+  tableOfContents:
+    startLevel: 2
+    endLevel: 4
+  goldmark:
+    parser:
+      wrapStandAloneImageWithinParagraph: false
+      attribute:
+        block: true
+    renderer:
+      unsafe: true
+    extensions:
+      footnote: true
+      linkify: true
+      table: true
+      taskList: true
+      typographer: true
+  highlight:
+    noClasses: false
+    codeFences: true
+
+outputs:
+  home: [HTML, RSS, markdown, LLMS]
+  page: [HTML, markdown]
+  section: [HTML, RSS, print, markdown]
+
+params:
+  description: Native Go and QEMU runtime for reproducible Pigsty development virtual machines on macOS and Linux.
+  logo: images/farrow-mark.svg
+  version: pre-1.0
+  copyright:
+    authors: '[PGSTY](https://pgsty.com/) and Farrow contributors'
+    from_year: 2026
+  footer_center_info: 'Built with [Oink](https://oink.pgsty.com/)'
+  offline_search: true
+  offline_search_on_serve: true
+  offline_search_index: content
+  offline_search_summary_length: 90
+  offline_search_max_results: 12
+  time_format_blog: 2006-01-02
+  time_format_default: 2006-01-02
+  page_width: normal
+  reading_width: normal
+  ui:
+    typography: technical
+    theme_color: '#9f2448'
+    theme_color_dark: '#ff8ca8'
+    landing_search: true
+    navbar_autohide: false
+    section_index: cards
+    blog_index: cards
+    blog_index_toggle: true
+    breadcrumb: true
+    sidebar_menu_compact: true
+    sidebar_menu_foldable: true
+    sidebar_root_enabled: true
+    sidebar_root_menu: true
+    sidebar_expand_levels: 2
+    sidebar_item_overflow: wrap
+    dark_mode: true
+    image_zoom: true
+    page_context_menu:
+      enable: true
+      assistant_links: false
+      links: []
+    feedback:
+      enable: false
+    reading_time: false
+    share: []
