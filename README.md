@@ -29,6 +29,10 @@ The production site is built warning-strict and published at
 `https://farrow.pgsty.com/`. Pages settings and DNS must authorize that domain
 before deployment.
 
+Cloudflare Pages must define `HUGO_VERSION=0.165.0` in both the Production and
+Preview build environments. Cloudflare's default Hugo can be older than the
+minimum required by Oink; `HUGO_SERVER` is not a recognized version selector.
+
 ## Content policy
 
 English and Chinese pages live beside each other as `page.md` and
