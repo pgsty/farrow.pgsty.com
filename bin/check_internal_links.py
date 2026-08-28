@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check internal HTML links and fragments in a built Hugo site."""
+"""Check internal HTML links, assets, and fragments in a built Hugo site."""
 
 from __future__ import annotations
 
@@ -13,14 +13,21 @@ class PageParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.ids: set[str] = set()
-        self.links: list[str] = []
+        self.references: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         values = dict(attrs)
         if values.get("id"):
             self.ids.add(values["id"] or "")
         if tag in {"a", "area", "link"} and values.get("href"):
-            self.links.append(values["href"] or "")
+            self.references.append(values["href"] or "")
+        if tag in {"audio", "iframe", "img", "script", "source", "video"} and values.get("src"):
+            self.references.append(values["src"] or "")
+        if tag in {"img", "source"} and values.get("srcset"):
+            for candidate in (values["srcset"] or "").split(","):
+                reference = candidate.strip().split(maxsplit=1)[0]
+                if reference:
+                    self.references.append(reference)
 
 
 def public_url(path: Path, root: Path) -> str:
@@ -67,7 +74,7 @@ def main() -> int:
         if "/_print/" in source_url or source_url.startswith("/_print/"):
             continue
         base_url = "https://farrow.pgsty.com" + source_url
-        for raw in parsed.links:
+        for raw in parsed.references:
             split = urlsplit(raw)
             if split.scheme in {"mailto", "tel", "javascript", "data"}:
                 continue
@@ -94,7 +101,7 @@ def main() -> int:
         print(f"internal link check failed: {len(errors)} error(s)")
         return 1
 
-    print(f"internal link check passed: {len(pages)} HTML page(s)")
+    print(f"internal link and asset check passed: {len(pages)} HTML page(s)")
     return 0
 
 

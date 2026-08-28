@@ -4,9 +4,9 @@ This directory contains the bilingual documentation site for Farrow. English
 is served at `/`; Simplified Chinese is served at `/zh/`. The site uses Hugo
 Extended and Oink 0.8.0.
 
-Farrow is pre-1.0. The current checkout is the working distribution path;
-there is no public source repository or Releases channel yet. Public pages
-must not imply otherwise.
+Farrow is pre-1.0. Public pages must describe only source repositories,
+Releases channels, and package paths that are actually available at the same
+checkpoint; a local build or draft is never publication evidence.
 
 ## Local development
 
@@ -25,14 +25,15 @@ make build
 make check
 ```
 
-The production site is built warning-strict and published at
-`https://farrow.pgsty.com/`. Pages settings and DNS must authorize that domain
-before deployment.
+The production target is `https://farrow.pgsty.com/` and its build is warning-
+strict. Pages settings and DNS must authorize that domain before publication.
 
-The source-controlled `wrangler.toml` defines `HUGO_VERSION=0.165.0` for both
-the Production and Preview build environments. Cloudflare's default Hugo can
-be older than the minimum required by Oink; `HUGO_SERVER` is not a recognized
-version selector.
+The source-controlled `wrangler.toml` defines the Pages project and direct-
+upload output directory. It does not configure the Git build image: set
+`HUGO_VERSION=0.165.0` in Cloudflare Pages **Settings → Environment variables**
+for both Production and Preview. Wrangler `[vars]` are Pages Functions runtime
+bindings, not build-time variables. Cloudflare's default Hugo can be older than
+the minimum required by Oink; `HUGO_SERVER` is not a recognized version selector.
 
 ## Content policy
 
