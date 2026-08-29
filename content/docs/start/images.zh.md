@@ -19,20 +19,25 @@ farrow image info d13:stable
 ```
 
 内置 Family 包括 `el7`、`el8`、`el9`、`el10`、`d12`、`d13`、`u22`、`u24`、
-`u26`。裸名称选择 `stable`，`name:channel` 选择频道，`name@version` 固定精确版本：
+`u26`。裸名称选择 `stable`，`name:channel` 选择频道；`name@version` 优先精确匹配，
+较短的数值 Selector 则按点分量边界选择最新匹配版本：
 
 ```yaml
 all:
   vars:
-    vm_image: el9:stable
+    vm_image: el9
+    vm_version: 9.7
 ```
+
+这里 `9.7` 选择最新 9.7.x Build，`9` 选择最新 9.x Release。若希望跟随仓库可移动的
+Stable Channel，则改用 `vm_image: el9:stable`。
 
 再次运行 `farrow up`。新增节点使用新镜像；已经存在的节点不会被隐式重建，定义变更需要
 显式执行 `farrow recreate <node>`。
 
 > [!WARNING]
-> 当前内置镜像仍为 `testing`，EOL 的 `el7` 为 `deprecated`。下载与摘要校验成功只证明
-> 工件完整性，不代表生产支持。
+> 除兼容用途的 EOL `el7`、EL9 9.3/9.6 与 EL10 10.0 为 `deprecated` 外，
+> 其余内置版本均为 `supported`。
 
 ## 使用镜像站
 

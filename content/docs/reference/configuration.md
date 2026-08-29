@@ -40,7 +40,8 @@ values are errors.
 | Variable | Default | Meaning |
 |---|---|---|
 | `vm_skip` | `false` | do not virtualize this real/external host |
-| `vm_image` | `u24` | image alias |
+| `vm_image` | `d13` | image family, channel reference, or `image@version` selector |
+| `vm_version` | unset | newest numeric version matching this prefix, such as `9` or `9.7` |
 | `vm_arch` | `native` | deployment-wide Guest architecture: `native`, `amd64`, or `arm64` |
 | `vm_cpu` | `2` | vCPU count |
 | `vm_mem` | `4096` | MiB integer, or a size such as `8GiB` |
@@ -51,6 +52,19 @@ values are errors.
 
 An empty host entry is a complete VM. A deployment contains 1–20 managed
 hosts; `vm_cpu` accepts 1–256 and memory must be at least 512 MiB.
+
+`vm_version` keeps short version intent separate from the image family:
+
+```yaml
+vm_image: el9
+vm_version: 9.7
+```
+
+An exact Catalog version wins first. Otherwise Farrow matches only on a dot
+component boundary and selects the numerically newest match: `9.7` resolves to
+the newest `9.7.*` build, while `9` resolves to the newest 9.x release. Numeric
+components are compared as integers, so 9.10 sorts after 9.9. Do not combine
+`vm_version` with a `vm_image` that already contains `:channel` or `@version`.
 
 `vm_arch` is stricter than ordinary per-host VM fields: when present it must
 resolve to one value on every managed host, so define it once in `all.vars`.

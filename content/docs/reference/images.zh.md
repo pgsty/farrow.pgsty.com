@@ -10,37 +10,45 @@ Farrow 使用物化的静态 Catalog 与不可变 qcow2 工件。官方与 HTTP 
 二进制，但二进制决定信任哪些签名公钥与镜像安全规则。
 
 > [!WARNING]
-> EL7 标记为 `deprecated`；其余内置镜像均为 `testing`，不是 `supported`。`up`
-> 打印的警告是刻意保留的；拉取成功只证明完整性，不代表生产支持承诺。
+> EL7、EL9 9.3/9.6 与 EL10 10.0 是 `deprecated` 兼容镜像；其余内置版本均为
+> `supported`。
 
 ## 别名与拉取顺序
 
-内置 Catalog 包含 9 个 Family、17 个工件：`el7` 只有 amd64；`el8`、`el9`、
-`el10`、`d12`、`d13`、`u22`、`u24`、`u26` 均有 amd64 与 arm64。默认请求为
-本机架构的 `d13:stable`。
+内置 Catalog 包含 9 个 Family、27 个工件：`el7` 只有 amd64，其余 Family 均有
+amd64 与 arm64。EL9 包含 9.3、9.6、9.7、9.8；EL10 包含 10.0、10.1、10.2。
+默认请求为本机架构的 `d13:stable`。
 
 | 别名 | 发行版 | 架构 | 启动 | 状态 |
 |---|---|---|---|---|
 | `el7` | CentOS Linux 7.9 / 2211 | amd64 | BIOS | deprecated |
-| `el8` | Rocky Linux 8.10 | amd64、arm64 | UEFI | testing |
-| `el9`、`el10` | Rocky Linux | amd64、arm64 | UEFI | testing |
-| `d12`、`d13` | Debian | amd64、arm64 | UEFI | testing |
-| `u22`、`u24`、`u26` | Ubuntu | amd64、arm64 | UEFI | testing |
+| `el8` | Rocky Linux 8.10 | amd64、arm64 | UEFI | supported |
+| `el9` | Rocky Linux 9.7 / 9.8 | amd64、arm64 | UEFI | supported |
+| `el9` | Rocky Linux 9.3 / 9.6 | amd64、arm64 | UEFI | deprecated |
+| `el10` | Rocky Linux 10.1 / 10.2 | amd64、arm64 | UEFI | supported |
+| `el10` | Rocky Linux 10.0 | amd64、arm64 | UEFI | deprecated |
+| `d12`、`d13` | Debian | amd64、arm64 | UEFI | supported |
+| `u22`、`u24`、`u26` | Ubuntu | amd64、arm64 | UEFI | supported |
 
 ```bash
 farrow image list
 farrow image info d13
 farrow image info d13:stable
+farrow image info el9@9.7
 farrow image pull d13@20260810.2566.0
 farrow image pull d13 --arch arm64
 ```
+
+Catalog 状态只表达支持策略，不是启动开关：`supported` 表示已通过声明的支持门禁；
+`testing` 可在显式测试/风险接受下使用，但不受支持；`deprecated` 只为 EOL 兼容保留；
+`unknown` 尚无支持分类。非 `supported` 条目仍可运行，但会打印警告。
 
 拉取时 Farrow 会：
 
 1. 按 `--repo`、`FARROW_REPO`、可选编译期公共默认仓库的顺序刷新 `catalog.json` 与相邻
    `.minisig`；
 2. 验证必需的签名，或将用户显式选择的本地/HTTPS 仓库记录为未签名；
-3. 解析 `image[:channel]` 或 `image@version`，缺省为 `d13:stable`；独立
+3. 解析 `image[:channel]` 或 `image@version-prefix`，缺省为 `d13:stable`；独立
    `image pull` 使用本机架构，生命周期解析遵循 `vm_arch`；
 4. 只有尺寸、SHA-256、qcow2 结构全部匹配时才复用本地文件；
 5. 否则下载仓库工件，仓库缺失时回退到 Catalog 中不可变的 HTTPS Upstream URL。
@@ -108,8 +116,10 @@ farrow/
 ```
 
 `repo.yaml` 保存人工意图：默认值、别名、Channel、精确版本、架构、启动模式、状态和可选
-Upstream；不保存任何生成的摘要或大小。`catalog.json` 保持同一逻辑树，但为每个 Variant
-物化文件名、SHA-256、工件大小和虚拟大小。
+Upstream。`source_user` 表示发行版原始镜像内置的登录账号（例如 `rocky`）；离线归一化
+会用它清理并锁定该上游账号，随后把它保留为导入溯源。它不会替换 deployment SSH 用户
+（默认 `dba`）。该文件不保存任何生成的摘要或大小；`catalog.json` 保持同一逻辑树，
+但为每个 Variant 物化文件名、SHA-256、工件大小和虚拟大小。
 
 ```yaml
 schema: 1
@@ -130,8 +140,9 @@ images:
 不显式设置 `file` 时，两个预期工件分别是 `images/d13-1-amd64.qcow2` 与
 `images/d13-1-arm64.qcow2`；已有自定义文件可在 Variant 中覆盖为安全 basename。
 
-`stable`、`testing` 是可移动 Channel，绝不进入工件文件名。不可变工件身份是
-`(image, exact version, arch)`：
+Channel 与数值前缀都是可移动 Selector。存在精确 Key 时优先精确匹配；否则只在点分量
+边界匹配并选择数值语义最新版本（`el9@9.7` 选择最新 9.7 Build，`el9@9` 选择最新
+9.x Release）。不可变工件身份仍是 `(image, exact version, arch)`：
 
 ```text
 d13:stable + native

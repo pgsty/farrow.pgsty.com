@@ -31,7 +31,7 @@ SOURCE_DATE_EPOCH=1787486400
   --artifact-url 'https://images.example/u24/{sha256}.qcow2' \
   --license NOASSERTION \
   --source-date-epoch "$SOURCE_DATE_EPOCH" \
-  --manifest-version 2026082801
+  --manifest-version 2026082903
 ```
 
 Source/Output 必须是绝对路径；Source 必须 Canonical、普通、非符号链接、复制期间稳定，

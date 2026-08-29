@@ -12,32 +12,41 @@ binary, but the binary decides which signing keys and image safety rules are
 trusted.
 
 > [!WARNING]
-> EL7 is `deprecated`; every other built-in image is currently `testing`, not
-> `supported`. The warning printed by `up` is intentional: a successful pull
-> is an integrity result, not a production-support promise.
+> EL7, EL9 9.3/9.6, and EL10 10.0 are `deprecated` compatibility images. All
+> other built-in versions are `supported`.
 
 ## Aliases and pull order
 
-The embedded Catalog contains 9 families and 17 artifacts: `el7` is
-amd64-only; `el8`, `el9`, `el10`, `d12`, `d13`, `u22`, `u24`, and `u26`
-have amd64 and arm64 artifacts. `d13:stable` on the native architecture is the
-default request.
+The embedded Catalog contains 9 families and 27 artifacts: `el7` is
+amd64-only; every other family has amd64 and arm64 artifacts. EL9 includes
+9.3, 9.6, 9.7, and 9.8; EL10 includes 10.0, 10.1, and 10.2. `d13:stable` on
+the native architecture is the default request.
 
 | Alias | Distribution | Architectures | Boot | Status |
 |---|---|---|---|---|
 | `el7` | CentOS Linux 7.9 / 2211 | amd64 | BIOS | deprecated |
-| `el8` | Rocky Linux 8.10 | amd64, arm64 | UEFI | testing |
-| `el9`, `el10` | Rocky Linux | amd64, arm64 | UEFI | testing |
-| `d12`, `d13` | Debian | amd64, arm64 | UEFI | testing |
-| `u22`, `u24`, `u26` | Ubuntu | amd64, arm64 | UEFI | testing |
+| `el8` | Rocky Linux 8.10 | amd64, arm64 | UEFI | supported |
+| `el9` | Rocky Linux 9.7 / 9.8 | amd64, arm64 | UEFI | supported |
+| `el9` | Rocky Linux 9.3 / 9.6 | amd64, arm64 | UEFI | deprecated |
+| `el10` | Rocky Linux 10.1 / 10.2 | amd64, arm64 | UEFI | supported |
+| `el10` | Rocky Linux 10.0 | amd64, arm64 | UEFI | deprecated |
+| `d12`, `d13` | Debian | amd64, arm64 | UEFI | supported |
+| `u22`, `u24`, `u26` | Ubuntu | amd64, arm64 | UEFI | supported |
 
 ```bash
 farrow image list
 farrow image info d13
 farrow image info d13:stable
+farrow image info el9@9.7
 farrow image pull d13@20260810.2566.0
 farrow image pull d13 --arch arm64
 ```
+
+Catalog status values are advisory rather than an activation switch:
+`supported` has passed the declared support gate; `testing` is available for
+explicit test/risk acceptance but is not supported; `deprecated` is retained
+only for EOL compatibility; and `unknown` has no support classification.
+Non-`supported` entries remain runnable and print a warning.
 
 For a pull, Farrow:
 
@@ -45,7 +54,7 @@ For a pull, Farrow:
    `FARROW_REPO`, then an optional compiled public default;
 2. verifies a required signature, or records the explicitly selected local or
    HTTPS repository as unsigned;
-3. resolves `image[:channel]` or `image@version`, defaulting to
+3. resolves `image[:channel]` or `image@version-prefix`, defaulting to
    `d13:stable`; standalone `image pull` uses the native architecture, while
    lifecycle resolution honors `vm_arch`;
 4. reuses a local file only after size, SHA-256, and qcow2 checks pass;
@@ -124,8 +133,12 @@ farrow/
 ```
 
 `repo.yaml` stores author intent: defaults, aliases, channels, exact versions,
-architectures, boot mode, status, and optional upstream URLs. It contains no
-generated checksum or size fields. `catalog.json` uses the same logical tree but
+architectures, boot mode, status, and optional upstream URLs. `source_user`
+names the login account originally baked into the distribution image (for
+example `rocky`); offline normalization uses it to sanitize and lock that
+upstream account, then retains it as import provenance. It does not replace the
+deployment SSH user (`dba` by default). The file contains no generated
+checksum or size fields. `catalog.json` uses the same logical tree but
 materializes each variant's file, SHA-256, artifact size, and virtual size.
 
 ```yaml
@@ -148,8 +161,11 @@ With no explicit `file`, the two expected artifacts are
 `images/d13-1-amd64.qcow2` and `images/d13-1-arm64.qcow2`. A variant may use a
 safe basename override for an existing custom file.
 
-`stable` and `testing` are movable channels and never appear in artifact file
-names. The immutable artifact identity is `(image, exact version, arch)`:
+Channels and numeric prefixes are movable selectors. An exact key wins;
+otherwise a prefix matches on dot-component boundaries and chooses the
+numerically newest version (`el9@9.7` selects the newest 9.7 build, while
+`el9@9` selects the newest 9.x release). The immutable artifact identity remains
+`(image, exact version, arch)`:
 
 ```text
 d13:stable + native

@@ -67,8 +67,41 @@ already installed `qemu-img`: catalog-only `image list` could not run on a
 blank host. The store is now resolved lazily only when local qcow2 bytes need
 validation, regression tests explicitly remove QEMU from `PATH`, and the full
 `make check` passes with QEMU/Farrow/network state absent. Because that source
-fix postdates the artifact candidate above, regenerate the stable candidate
-from the final commit before tagging.
+fix postdates the artifact candidate above, that artifact set is historical;
+the final source candidate below was regenerated from the later commit.
+
+## Final 0.1.0 source candidate — 2026-08-29
+
+Clean source commit `e8e08315ac7d07e30d1ea1adb98131dde293eacd` passed
+`make check` and `goreleaser check`: unit/race tests, vet, staticcheck,
+govulncheck, all four cross-builds, the simulated image-pipeline boundary,
+dependency-license verification, and GoReleaser configuration validation.
+
+An isolated clone temporarily tagged that exact commit as `v0.1.0` and passed
+the stable local release path. It built and verified four platform archives,
+amd64/arm64 DEB and RPM packages, eight SPDX documents, paired helper digests,
+archive/package parity, a Homebrew formula, installer, release metadata, and
+20 checksummed final assets. The extracted Darwin/arm64 binary reported version
+`0.1.0` and the exact source commit. The temporary tag was not added to the
+source repository; real tag, push, remote CI/OIDC bundles, and publication
+remain separate release actions.
+
+## Schema-3 Catalog closure — 2026-08-29
+
+Catalog revision `2026082903` is the current source and development-repository
+checkpoint: 9 families and 27 architecture-specific artifacts. The embedded
+Catalog and published `catalog.json` have the same SHA-256
+`571b1ff9c7d4d42355df3392ea62a339471c2d01d868669a7625fac8b93f245d`;
+the published `repo.yaml` also matches the source-controlled authoring file.
+Fresh HTTP and HTTPS clients accepted the detached signature from production
+key `4686B39A40F9B562`.
+
+All 27 published qcow2 files (19 GiB total) passed a full SHA-256 sweep against
+the Catalog. A clean temporary Farrow home then downloaded the complete
+409.3 MiB Darwin/arm64 default `d13:stable` artifact, rehashed it, and accepted
+its qcow2 structure and virtual size. These are publication-integrity and
+client-path checks, not a replacement for the native lifecycle matrix below;
+no existing VM was recreated for this Catalog check.
 
 ## EL7/EL8 compatibility — 2026-08-28
 
@@ -77,10 +110,10 @@ adversarial reviews. The first review blocked on destructive runtime preflight
 ordering and signed-Catalog baseline migration; both were fixed, regression
 tested, and the second review returned PASS with no required fixes.
 
-Catalog `2026082801` is signed and active on the development repository: 9
-families, 17 image artifacts, and 19 SHA-verified repository payloads including
-the two socket_vmnet archives. A clean client accepted the public signature and
-exact embedded digest.
+At that checkpoint, Catalog `2026082801` was signed and active on the
+development repository: 9 families, 17 image artifacts, and 19 SHA-verified
+repository payloads including the two socket_vmnet archives. A clean client
+accepted the public signature and exact embedded digest.
 
 An isolated macOS arm64 lifecycle replay booted Rocky Linux 8.10 arm64 with the
 built-in TCG compatibility rule, passed stop/start and readiness in 44.2 seconds,
@@ -100,7 +133,8 @@ open.
 - a complete current Pigsty `configure → farrow up → install.yml` run;
 - published Homebrew/DEB/RPM consumption and release CI.
 
-Current images remain `testing`, except EOL EL7 which is `deprecated`. Active
-and standby Catalog public keys are embedded, but the repository must move off
-the development host and private-key custody/rotation plus release custody must
-be formalized before 1.0.
+Current built-in versions are `supported`, except EOL EL7 and the retained
+compatibility versions EL9 9.3/9.6 and EL10 10.0, which are `deprecated`.
+Active and standby Catalog public keys are embedded, but the repository must
+move off the development host and private-key custody/rotation plus release
+custody must be formalized before 1.0.

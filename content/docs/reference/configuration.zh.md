@@ -33,7 +33,8 @@ Farrow 读取主机 IP、`nodename`、`admin_ip`、`pg_cluster`、`pg_seq`、
 | 变量 | 默认值 | 含义 |
 |---|---|---|
 | `vm_skip` | `false` | 不虚拟化这台真实/外部主机 |
-| `vm_image` | `u24` | 镜像别名 |
+| `vm_image` | `d13` | 镜像 Family、Channel 引用或 `image@version` Selector |
+| `vm_version` | 未设置 | 匹配 `9`、`9.7` 等数值前缀的最新版本 |
 | `vm_arch` | `native` | 部署级 Guest 架构：`native`、`amd64` 或 `arm64` |
 | `vm_cpu` | `2` | vCPU 数量 |
 | `vm_mem` | `4096` | MiB 整数，或 `8GiB` 等尺寸 |
@@ -44,6 +45,18 @@ Farrow 读取主机 IP、`nodename`、`admin_ip`、`pg_cluster`、`pg_seq`、
 
 空主机条目就是一台完整 VM。每套 deployment 支持 1–20 台托管主机；`vm_cpu` 范围
 1–256，内存至少 512 MiB。
+
+`vm_version` 将简短的版本意图与镜像 Family 分开：
+
+```yaml
+vm_image: el9
+vm_version: 9.7
+```
+
+Catalog 中存在完全相同的版本时优先精确匹配；否则只在点分量边界匹配，并选择数值语义上
+最新的结果：`9.7` 选择最新 `9.7.*` Build，`9` 选择最新 9.x Release。各分量按整数
+比较，因此 9.10 晚于 9.9。`vm_version` 不能与已经带 `:channel` 或 `@version` 的
+`vm_image` 同时使用。
 
 `vm_arch` 比普通逐主机字段更严格：出现时必须在所有托管主机上解析为同一个值，因此
 应只在 `all.vars` 定义一次。修改它属于 deployment envelope 变化，必须整体重建。

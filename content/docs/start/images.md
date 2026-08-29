@@ -20,22 +20,27 @@ farrow image info d13:stable
 
 Built-in families are `el7`, `el8`, `el9`, `el10`, `d12`, `d13`, `u22`,
 `u24`, and `u26`. A bare name selects `stable`; `name:channel` selects a
-channel, and `name@version` pins an exact version:
+channel. An exact `name@version` key wins; a shorter numeric selector chooses
+the newest matching version on dot-component boundaries:
 
 ```yaml
 all:
   vars:
-    vm_image: el9:stable
+    vm_image: el9
+    vm_version: 9.7
 ```
+
+Here `9.7` selects the newest 9.7.x build; `9` selects the newest 9.x release.
+Use `vm_image: el9:stable` instead when the repository's movable stable channel
+is the intended policy.
 
 Run `farrow up` again. New nodes use the selected image; existing nodes are
 never rebuilt implicitly. A definition change requires an explicit
 `farrow recreate <node>`.
 
 > [!WARNING]
-> Built-in images are currently `testing`; EOL `el7` is `deprecated`.
-> Successful download and digest verification prove artifact integrity, not
-> production support.
+> Built-in versions are `supported` except deprecated compatibility images:
+> EOL `el7`, EL9 9.3/9.6, and EL10 10.0.
 
 ## Use a mirror
 
