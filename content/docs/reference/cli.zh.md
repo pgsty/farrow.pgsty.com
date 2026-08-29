@@ -29,7 +29,7 @@ farrow image pull --help
 | 准备 | `setup`、`init`、`validate`、`doctor` |
 | 生命周期 | `plan`、`up`、`start`、`stop`、`restart`、`reload`、`recreate`、`status`、`destroy` |
 | 访问 | `ssh`、`exec`、`logs`、`provision`、`ssh-config`、`ss`、`hosts` |
-| 镜像 | `image list/info/pull/import/sync/prune/reset-manifest` |
+| 镜像 | `image list/info/pull/import/sync/prune/reset-manifest`、`repo scan/build/verify` |
 | 宿主网络 | `network status/install/uninstall` |
 | 其他 | `version`、`completion` |
 

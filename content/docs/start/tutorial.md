@@ -123,7 +123,7 @@ Start it:
 farrow up
 ```
 
-The first run downloads and verifies the default `u24` image, then waits for
+The first run resolves, downloads, and verifies the default `d13:stable` image, then waits for
 guest readiness. This is example output from macOS arm64; the spec hash, PID,
 and accelerator vary by inventory and host:
 

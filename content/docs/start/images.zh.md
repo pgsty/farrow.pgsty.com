@@ -5,7 +5,8 @@ weight: 40
 icon: fa-solid fa-box-archive
 ---
 
-正常使用不需要先执行镜像命令：`farrow up` 会自动拉取并校验默认的 `u24` 镜像。
+正常使用不需要先执行镜像命令：`farrow up` 默认按本机架构解析 `d13:stable`，并拉取
+最终对应的不可变版本。
 
 ## 选择镜像
 
@@ -13,16 +14,17 @@ icon: fa-solid fa-box-archive
 
 ```bash
 farrow image list
-farrow image info u24
+farrow image info d13
+farrow image info d13:stable
 ```
 
 内置 Family 包括 `el7`、`el8`、`el9`、`el10`、`d12`、`d13`、`u22`、`u24`、
-`u26`。在 Inventory 中通过 `vm_image` 选择：
+`u26`。裸名称选择 `stable`，`name:channel` 选择频道，`name@version` 固定精确版本：
 
 ```yaml
 all:
   vars:
-    vm_image: el9
+    vm_image: el9:stable
 ```
 
 再次运行 `farrow up`。新增节点使用新镜像；已经存在的节点不会被隐式重建，定义变更需要
@@ -37,7 +39,7 @@ all:
 为单条命令指定仓库：
 
 ```bash
-farrow image pull --repo https://mirror.example/farrow u24
+farrow image pull d13 --repo https://mirror.example/farrow
 farrow up --repo https://mirror.example/farrow
 ```
 
@@ -48,8 +50,35 @@ export FARROW_REPO=https://mirror.example/farrow
 farrow up
 ```
 
-`FARROW_REPO` 也可以是绝对本地目录。Farrow 仍会验证签名 Catalog、文件大小、SHA-256 与
-qcow2 结构；显式仓库不可达时会直接报错。
+`FARROW_REPO` 也可以是绝对本地目录。显式本地或 HTTPS 仓库可使用未签名 Catalog；HTTP
+仓库必须提供可信密钥签名。文件大小、SHA-256 与 qcow2 结构始终校验；显式仓库不可达时
+直接报错。
+
+## 构建静态仓库
+
+仓库只是一个可以直接 rsync 或静态 HTTP 托管的目录：
+
+```text
+farrow/
+├── repo.yaml
+├── catalog.json
+├── catalog.json.minisig       # 可选
+└── images/
+    └── d13-1-arm64.qcow2
+```
+
+`repo.yaml` 是唯一人工维护源，`catalog.json` 由工具生成：
+
+```bash
+farrow repo scan /srv/farrow
+farrow repo build /srv/farrow
+farrow repo verify /srv/farrow
+```
+
+`scan` 只读；`build` 永不修改 `repo.yaml` 或镜像字节，它运行完整的 `qemu-img check`，
+并物化文件名、SHA-256、工件大小和虚拟大小。`build`、`verify` 需要本机
+`qemu-img`，`scan` 不需要。在安装 QEMU 的机器上构建后，发布时先上传不可变 QCOW，
+最后发布 `catalog.json`。
 
 ## 导入与清理
 

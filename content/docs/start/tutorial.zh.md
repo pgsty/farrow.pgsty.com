@@ -114,7 +114,7 @@ all:
 farrow up
 ```
 
-第一次运行会自动下载并校验默认 `u24` 镜像，然后等待 Guest 就绪。下面是 macOS arm64 上的
+第一次运行会自动解析、下载并校验默认的 `d13:stable` 镜像，然后等待 Guest 就绪。下面是 macOS arm64 上的
 输出示例；spec hash、PID 与加速器会随配置和宿主变化：
 
 ```text

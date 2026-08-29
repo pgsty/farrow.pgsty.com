@@ -5,9 +5,11 @@ weight: 30
 icon: fa-solid fa-hard-drive
 ---
 
-Farrow uses a signed static-file Catalog plus immutable qcow2 artifacts. A
-Catalog update does not require a new Farrow binary, but the binary decides
-which signing keys and image safety rules are trusted.
+Farrow uses a materialized static-file Catalog plus immutable qcow2 artifacts.
+Official and HTTP Catalogs are signed; explicitly selected local and HTTPS
+repositories may be unsigned. A Catalog update does not require a new Farrow
+binary, but the binary decides which signing keys and image safety rules are
+trusted.
 
 > [!WARNING]
 > EL7 is `deprecated`; every other built-in image is currently `testing`, not
@@ -18,7 +20,8 @@ which signing keys and image safety rules are trusted.
 
 The embedded Catalog contains 9 families and 17 artifacts: `el7` is
 amd64-only; `el8`, `el9`, `el10`, `d12`, `d13`, `u22`, `u24`, and `u26`
-have amd64 and arm64 artifacts. `u24` is the VM default.
+have amd64 and arm64 artifacts. `d13:stable` on the native architecture is the
+default request.
 
 | Alias | Distribution | Architectures | Boot | Status |
 |---|---|---|---|---|
@@ -30,17 +33,21 @@ have amd64 and arm64 artifacts. `u24` is the VM default.
 
 ```bash
 farrow image list
-farrow image info u24
-farrow image pull u24
+farrow image info d13
+farrow image info d13:stable
+farrow image pull d13@20260810.2566.0
+farrow image pull d13 --arch arm64
 ```
 
 For a pull, Farrow:
 
 1. refreshes `catalog.json` and its adjacent `.minisig` from `--repo`, then
    `FARROW_REPO`, then an optional compiled public default;
-2. verifies the signature with an embedded active or standby public key;
-3. selects the Catalog's default release; standalone `image pull` uses the
-   native architecture, while lifecycle resolution honors `vm_arch`;
+2. verifies a required signature, or records the explicitly selected local or
+   HTTPS repository as unsigned;
+3. resolves `image[:channel]` or `image@version`, defaulting to
+   `d13:stable`; standalone `image pull` uses the native architecture, while
+   lifecycle resolution honors `vm_arch`;
 4. reuses a local file only after size, SHA-256, and qcow2 checks pass;
 5. otherwise downloads the repository artifact, with the Catalog's immutable
    HTTPS upstream URL as fallback.
@@ -64,19 +71,20 @@ the native QEMU family; foreign architectures require the matching system
 emulator and UEFI firmware before `plan`, `up`, or `recreate` can proceed.
 
 ```bash
-farrow image pull --repo https://mirror.example/farrow u24
+farrow image pull d13 --repo https://mirror.example/farrow
 FARROW_REPO=/absolute/local/repository farrow up
 ```
 
-Repository URLs may be HTTP or HTTPS because the Catalog signature and image
-digest remain authoritative; immutable upstream artifact URLs must be HTTPS.
+Unsigned repositories must be local paths or HTTPS. HTTP repositories require a
+Catalog signed by a trusted key. Immutable upstream artifact URLs must be HTTPS.
 
 ## Trust and verification
 
 Current ordinary builds embed both production public verification keys. The
 private signing keys are external to the source repository. Catalog activation
-rejects unknown keys, malformed content, equivocation, and versions below the
-recorded high-water mark unless the operator explicitly allows a downgrade.
+rejects unknown keys, malformed content, equivocation, and revisions below the
+repository-scoped high-water mark unless the operator explicitly allows a
+downgrade.
 
 Every accepted image must be a size- and SHA-256-matched plain qcow2 with no
 backing file, external data file, encryption, or unknown incompatible feature.
@@ -92,10 +100,75 @@ farrow image reset-manifest
 `reset-manifest` restores the embedded bootstrap Catalog but keeps the
 anti-rollback high-water mark.
 
+For repository-scoped recovery, pass the same root explicitly:
+
+```bash
+farrow image sync --repo /srv/farrow --allow-downgrade /srv/farrow/catalog.json
+farrow image reset-manifest --repo /srv/farrow
+```
+
+`--repo` selects the independent high-water slot. If omitted, `FARROW_REPO`,
+then the compiled default, is used.
+
+## Static repository format
+
+The published root is deliberately small:
+
+```text
+farrow/
+├── repo.yaml
+├── catalog.json
+├── catalog.json.minisig       # optional except for HTTP
+└── images/
+    └── <image>-<version>-<arch>.qcow2
+```
+
+`repo.yaml` stores author intent: defaults, aliases, channels, exact versions,
+architectures, boot mode, status, and optional upstream URLs. It contains no
+generated checksum or size fields. `catalog.json` uses the same logical tree but
+materializes each variant's file, SHA-256, artifact size, and virtual size.
+
+```yaml
+schema: 1
+revision: 1
+defaults: { image: d13, channel: stable, arch: native, boot: uefi }
+images:
+  d13:
+    aliases: [debian13, trixie, debian]
+    channels: { stable: "1" }
+    versions:
+      "1":
+        status: unknown
+        variants:
+          amd64: {}
+          arm64: {}
+```
+
+With no explicit `file`, the two expected artifacts are
+`images/d13-1-amd64.qcow2` and `images/d13-1-arm64.qcow2`. A variant may use a
+safe basename override for an existing custom file.
+
+`stable` and `testing` are movable channels and never appear in artifact file
+names. The immutable artifact identity is `(image, exact version, arch)`:
+
+```text
+d13:stable + native
+  -> d13@20260810.2566.0 + arm64
+  -> images/d13-20260810.2566.0-arm64.qcow2
+```
+
+`farrow repo scan` is read-only. `build` performs strict YAML validation,
+full qcow2 inspection/checking, and atomic Catalog replacement without changing
+`repo.yaml` or QCOW bytes. `verify` requires the generated Catalog bytes to
+match a fresh materialization exactly. `build` and `verify` require local
+`qemu-img`; `scan` does not. Build on a QEMU host, then rsync artifacts first
+and the Catalog last.
+
 ## Local layout and imports
 
 Images live under `FARROW_HOME/images` (default `~/.farrow/images`): family
-directories contain downloaded artifacts, `manifests/` stores Catalog state,
+directories contain downloaded artifacts, `manifests/` stores Catalog state
+with an independent high-water entry per repository,
 and `local/` plus `local-images.json` hold imports. There is no old
 `~/.farrow/cache` or content-addressed `sha256/` hierarchy.
 
@@ -120,7 +193,7 @@ Prune lists exact unreferenced images and stale staging files before deletion.
 An image referenced by applied deployment state is never a candidate. Images
 remain cached after `destroy`, including `destroy --purge`.
 
-The compiled Catalog can be exported byte-for-byte with
+The compiled schema-3 Catalog can be exported byte-for-byte with
 `go run ./tools/catalogexport /absolute/new/catalog.json`. A public Catalog at
 the embedded version must use those exact bytes; same-version different bytes
 are rejected as equivocation. Release signing and image Catalog signing remain
