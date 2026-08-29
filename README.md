@@ -2,7 +2,7 @@
 
 This directory contains the bilingual documentation site for Farrow. English
 is served at `/`; Simplified Chinese is served at `/zh/`. The site uses Hugo
-Extended and Oink 0.8.0.
+Extended and Oink 1.0.0.
 
 Farrow is pre-1.0. Public pages must describe only source repositories,
 Releases channels, and package paths that are actually available at the same
