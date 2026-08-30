@@ -47,7 +47,7 @@ facts:
 entry_points:
   eyebrow: Two top-level sections
   title: Documentation and blog
-  text: Documentation has only three directories; the blog keeps historical updates separate from the current contract.
+  text: Documentation stays compact and current; the blog adds design reasoning, technical articles, and release history.
   columns: 3
   link_label: Open
   items:
@@ -56,7 +56,7 @@ entry_points:
     - { title: About, meta: Design and evidence, icon: fa-solid fa-circle-info, desc: "The simplified model, native test matrix, limits, and release gates.", url: docs/about/ }
     - { title: Quick Start, meta: One node to four, icon: fa-solid fa-play, desc: "Boot with setup and up, then scale additively from the same inventory.", url: docs/start/tutorial/ }
     - { title: Configuration, meta: vm_* fields, icon: fa-solid fa-file-code, desc: "Defaults, disks, shares, naming, addressing, and drift.", url: docs/reference/configuration/ }
-    - { title: Blog, meta: Historical updates, icon: fa-solid fa-newspaper, desc: "Development snapshots and release notes, kept outside the current docs.", url: blog/ }
+    - { title: Blog, meta: Design and history, icon: fa-solid fa-newspaper, desc: "Accepted design records, project articles, development snapshots, and release notes.", url: blog/ }
 
 first_command:
   eyebrow: Normal path

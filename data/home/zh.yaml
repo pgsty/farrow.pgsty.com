@@ -47,7 +47,7 @@ facts:
 entry_points:
   eyebrow: 两个顶级栏目
   title: 文档与博客
-  text: 文档只保留三个目录；博客承载历史动态，不再与当前契约混在一起。
+  text: 文档保持紧凑并描述当前行为；博客补充设计理由、技术文章与发布历史。
   columns: 3
   link_label: 打开
   items:
@@ -56,7 +56,7 @@ entry_points:
     - { title: 关于, meta: 设计与证据, icon: fa-solid fa-circle-info, desc: 简化模型、真机矩阵、限制与发布门禁。, url: docs/about/ }
     - { title: 快速上手, meta: 一台扩到四台, icon: fa-solid fa-play, desc: setup 与 up 启动，再通过同一份配置增量扩容。, url: docs/start/tutorial/ }
     - { title: 配置, meta: vm_* 字段, icon: fa-solid fa-file-code, desc: 默认值、磁盘、共享、命名、地址与漂移。, url: docs/reference/configuration/ }
-    - { title: 博客, meta: 历史动态, icon: fa-solid fa-newspaper, desc: 开发快照与发布说明，与当前文档分离。, url: blog/ }
+    - { title: 博客, meta: 设计与历史, icon: fa-solid fa-newspaper, desc: 已接受的设计记录、项目文章、开发快照与发布注记。, url: blog/ }
 
 first_command:
   eyebrow: 正常路径

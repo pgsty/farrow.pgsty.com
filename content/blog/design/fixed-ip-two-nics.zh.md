@@ -1,0 +1,96 @@
+---
+title: "为什么每个 Farrow 节点都有两张网卡"
+linkTitle: "固定 IP，双网卡"
+description: "为什么 Farrow 把管理出网与宿主、节点、Ansible 和 Pigsty 使用的固定地址网络分离。"
+date: 2026-08-27T20:00:00+08:00
+weight: 20
+categories: [设计]
+tags: [网络, QEMU, Pigsty]
+icon: fa-solid fa-network-wired
+---
+
+Pigsty Inventory 用稳定地址标识机器。PostgreSQL 复制、etcd 成员、HAProxy 后端、VIP、
+监控目标与 Ansible 都假设 `10.10.10.11` 始终代表同一个节点。回环端口转发可以把 SSH 或
+PostgreSQL 暴露给宿主，却无法把这种网络身份提供给其它节点。
+
+因此 Farrow 不让用户在“方便的 NAT 模式”和“高级固定网络模式”之间二选一。每个正常节点
+同时获得两种能力，并由两张网卡分别承担。
+
+## 一张网卡不该承担两项冲突职责
+
+| 网卡 | 地址方式 | 职责 |
+| --- | --- | --- |
+| 管理网卡 | QEMU User-mode NAT、DHCP | DNS、默认路由、互联网出站与回环 SSH 备用路径 |
+| `private0` | Inventory 固定地址 | 宿主到节点、节点间、Ansible、Pigsty 服务与 VIP 流量 |
+
+管理网卡刻意保持普通：一张新的 Cloud Image 在应用尚未安装前就能访问软件仓库，宿主无需
+安装 NAT 规则或 DHCP 服务。
+
+私有网卡则刻意保持单纯：一个确定的 RFC1918 地址，没有默认路由，也没有 DNS。Guest 只有
+在准确地址已经出现，并确认没有多余路由和 DNS 后才写 Ready Marker。能访问互联网、但实验室
+网络配置错误的节点，不会被当成“基本就绪”。
+
+> [!NOTE]
+> **决策状态：当前有效。** 这套拓扑属于 Farrow 的正常生命周期，并不是可选的
+> “Private Mode”。当前平台边界见[设计参考](/zh/docs/about/design/)。
+
+## 地址规划归 Inventory 所有
+
+所有受管 Host 位于同一个规范 RFC1918 `/24`：
+
+| 范围 | 含义 |
+| --- | --- |
+| `.1` | 宿主侧私有网络地址 |
+| `.2`–`.8` | 保留边界，包括有效的二层 VIP 空间 |
+| `.9`–`.254` | 节点固定地址 |
+
+私有侧不运行 DHCP。Cloud-init 直接得到 Inventory 已声明的准确地址。这样就不需要第二份地址
+数据库，第一次 Ansible 连接与后续部署也始终使用同一身份。
+
+对于自动生成的配置，如果默认子网被占用，setup 可以从一组有限候选中选择空闲网段；显式
+提供的 Inventory 绝不会为了绕过冲突而被静默改写。宿主接口、所有节点、Pigsty 地址与别名
+必须对同一个子网达成一致。
+
+## 后端因平台而异，Guest 契约保持一致
+
+Guest 在所有支持宿主上看到相同拓扑，Farrow 则跟随宿主真正的网络管理者：
+
+- **macOS：** 固定版本的 `socket_vmnet` 服务提供私有链路。Host Mode 默认，Shared Mode
+  必须显式选择；QEMU 仍以普通用户运行。
+- **NetworkManager 活跃的 Linux：** Farrow 通过 `nmcli` 创建自有 `farrow0` Bridge，
+  并与活跃的 firewalld 策略配合。
+- **systemd-networkd 管理的 Linux：** Farrow 安装自有 Unit，并借助发行版
+  `qemu-bridge-helper` 保持 QEMU 非特权。
+- **networkd 尚未启动：** 只有预变更扫描能证明现有 Unit 不会接管真实宿主网卡时，才允许
+  激活它。
+
+同时支持两种 Linux 管理器不是为了抽象而抽象。如果只因为 Farrow 会写 `.network` 文件，就在
+桌面或 RHEL 家族宿主上启动 networkd，可能破坏宿主真实网络；后端必须服从当前已经负责网络
+的组件。
+
+## 宿主网络是一项事务
+
+Bridge 或 vmnet Daemon 会跨越一次 CLI 进程，也会跨越特权边界，因此 Farrow 把安装视为
+可逆宿主事务：
+
+1. 检查 Route、Interface、Service、属主与已有状态；
+2. 修改前打印准确计划；
+3. Apply 前立即重新检查前置条件；
+4. 用 root-owned 状态记录 Farrow 创建了什么、此前存在什么；
+5. 证明普通用户 QEMU 确实可以接入；
+6. 全部 Readiness 检查通过后才接受安装。
+
+一个碰巧占用相同 `.1/24` 的外部接口不会被接管；已经变化的自有文件不会被覆盖；Uninstall
+会在已记录节点仍运行时拒绝，并且只恢复 Manifest 明确记录的前态。失败意味着停止，而不是
+授权程序删除挡路的任何东西。
+
+## 接受的取舍
+
+Guest 互联网流量经过 QEMU User-mode Network。这不是理论上最快的转发路径，但它让普通出网
+保持非特权且跨平台。真正影响 Pigsty 实验室的流量——宿主到 Guest、复制、服务调用，以及从
+控制节点分发软件包——都留在私有链路上。
+
+最终形成一个清晰的职责分离：管理网卡让机器容易 Bootstrap，私有网卡让它成为地址稳定的
+实验室成员，两者都不需要假装成对方。
+
+下一篇：[声明式不等于破坏式](/zh/blog/design/convergence-without-surprise/)。

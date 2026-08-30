@@ -60,6 +60,30 @@ languages:
           name: Blog
           pageRef: /blog
           weight: 20
+        - identifier: blog-article
+          parent: blog
+          name: Article
+          pageRef: /blog/article
+          weight: 10
+          params:
+            icon: fa-solid fa-newspaper
+            description: Project articles and long-form technical notes
+        - identifier: blog-design
+          parent: blog
+          name: Design
+          pageRef: /blog/design
+          weight: 20
+          params:
+            icon: fa-solid fa-pen-ruler
+            description: Architecture decisions, trade-offs, and implementation boundaries
+        - identifier: blog-release
+          parent: blog
+          name: Release
+          pageRef: /blog/release
+          weight: 30
+          params:
+            icon: fa-solid fa-clipboard-list
+            description: Release notes and preserved development records
   zh:
     label: 简体中文
     locale: zh-CN
@@ -101,6 +125,30 @@ languages:
           name: 博客
           pageRef: /blog
           weight: 20
+        - identifier: blog-article
+          parent: blog
+          name: 文章
+          pageRef: /blog/article
+          weight: 10
+          params:
+            icon: fa-solid fa-newspaper
+            description: 项目文章与长篇技术记录
+        - identifier: blog-design
+          parent: blog
+          name: 设计
+          pageRef: /blog/design
+          weight: 20
+          params:
+            icon: fa-solid fa-pen-ruler
+            description: 架构决策、方案取舍与实现边界
+        - identifier: blog-release
+          parent: blog
+          name: 发布
+          pageRef: /blog/release
+          weight: 30
+          params:
+            icon: fa-solid fa-clipboard-list
+            description: 发布注记与保留的开发记录
 
 taxonomies:
   categories: categories

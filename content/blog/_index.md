@@ -11,5 +11,6 @@ cascade:
   theme_color_dark: '#fda4af'
 ---
 
-Current notes and preserved development history. Older entries retain the
-Piglet name because they describe pre-rename artifacts, not current behavior.
+Articles, design notes, release notes, and preserved development history.
+Older entries retain the Piglet name because they describe pre-rename
+artifacts, not current behavior.

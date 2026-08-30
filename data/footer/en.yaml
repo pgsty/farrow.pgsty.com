@@ -24,5 +24,6 @@ columns:
       - { label: Engineering, url: docs/about/engineering/ }
   - title: Blog
     links:
-      - { label: All posts, url: blog/ }
-      - { label: Release notes, url: blog/release/ }
+      - { label: Article, url: blog/article/ }
+      - { label: Design, url: blog/design/ }
+      - { label: Release, url: blog/release/ }

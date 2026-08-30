@@ -1,9 +1,9 @@
 ---
-title: Release archive
-linkTitle: Archive
+title: Release Notes
+linkTitle: Release
 description: Preserved pre-Farrow development records; Farrow has no public release yet.
-weight: 10
-icon: fa-solid fa-tags
+weight: 30
+icon: fa-solid fa-clipboard-list
 sidebar_root_menu: false
 cascade:
   type: blog

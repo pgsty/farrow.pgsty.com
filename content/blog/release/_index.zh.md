@@ -1,9 +1,9 @@
 ---
-title: 发布档案
-linkTitle: 历史档案
+title: 发布注记
+linkTitle: 发布
 description: 迁名前开发记录；Farrow 尚无公开版本。
-weight: 10
-icon: fa-solid fa-tags
+weight: 30
+icon: fa-solid fa-clipboard-list
 sidebar_root_menu: false
 cascade:
   type: blog

@@ -24,5 +24,6 @@ columns:
       - { label: 工程与发布, url: docs/about/engineering/ }
   - title: 博客
     links:
-      - { label: 全部文章, url: blog/ }
-      - { label: 发布说明, url: blog/release/ }
+      - { label: 文章, url: blog/article/ }
+      - { label: 设计, url: blog/design/ }
+      - { label: 发布, url: blog/release/ }
