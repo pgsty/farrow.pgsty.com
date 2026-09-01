@@ -28,12 +28,10 @@ make check
 The production target is `https://farrow.pgsty.com/` and its build is warning-
 strict. Pages settings and DNS must authorize that domain before publication.
 
-The source-controlled `wrangler.toml` defines the Pages project and direct-
-upload output directory. It does not configure the Git build image: set
-`HUGO_VERSION=0.165.0` in Cloudflare Pages **Settings → Environment variables**
-for both Production and Preview. Wrangler `[vars]` are Pages Functions runtime
-bindings, not build-time variables. Cloudflare's default Hugo can be older than
-the minimum required by Oink; `HUGO_SERVER` is not a recognized version selector.
+The source-controlled `wrangler.toml` defines the Pages project, output
+directory, and `HUGO_VERSION=0.165.0` for both Production and Preview. Keep this
+pin: Cloudflare's default Hugo can be older than the minimum required by Oink;
+`HUGO_SERVER` is not a recognized version selector.
 
 ## Content policy
 
