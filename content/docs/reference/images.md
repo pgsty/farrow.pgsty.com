@@ -40,6 +40,7 @@ farrow image info d13:stable
 farrow image info el9@9.7
 farrow image pull d13@20260810.2566.0
 farrow image pull d13 --arch arm64
+farrow update
 ```
 
 Catalog status values are advisory rather than an activation switch:
@@ -50,22 +51,26 @@ Non-`supported` entries remain runnable and print a warning.
 
 For a pull, Farrow:
 
-1. refreshes `catalog.json` and its adjacent `.minisig` from `--repo`, then
-   `FARROW_REPO`, then an optional compiled public default;
-2. verifies a required signature, or records the explicitly selected local or
-   HTTPS repository as unsigned;
-3. resolves `image[:channel]` or `image@version-prefix`, defaulting to
+1. opens one trusted local Catalog snapshot for the complete command;
+2. if that repository has never been checked successfully, or its successful
+   check is at least seven days old, probes `catalog.json` and its adjacent
+   `.minisig` once; a failed automatic probe backs off for one hour and keeps
+   using the cached or embedded Catalog;
+3. verifies a required signature, or records the explicitly selected local or
+   HTTPS repository as unsigned, before atomically activating new metadata;
+4. resolves `image[:channel]` or `image@version-prefix`, defaulting to
    `d13:stable`; standalone `image pull` uses the native architecture, while
    lifecycle resolution honors `vm_arch`;
-4. reuses a local file only after size, SHA-256, and qcow2 checks pass;
-5. otherwise downloads the repository artifact, with the Catalog's immutable
+5. reuses a local file only after size, SHA-256, and qcow2 checks pass;
+6. otherwise downloads the repository artifact, with the Catalog's immutable
    HTTPS upstream URL as fallback.
 
-Ordinary public builds have no compiled repository default: they use the
-embedded signed Catalog and its immutable upstream URLs. An explicit repository
-failure is fatal. A future release may compile in a public mirror only after it
-is live; an unavailable non-explicit compiled default falls back to the embedded
-Catalog.
+Released builds use `https://repo.pigsty.cc/farrow` after `--repo` and
+`FARROW_REPO`. Automatic Catalog-refresh failure never blocks a command that the
+trusted cached or embedded Catalog can satisfy. A missing image still requires a
+reachable artifact repository or immutable upstream URL. Run `farrow update` to
+bypass both the seven-day lifetime and failure backoff; unlike automatic refresh,
+an explicit update reports failure directly.
 
 ## Runtime policy
 
@@ -101,6 +106,7 @@ Verified base images become read-only; node root disks are overlays and never
 modify the base.
 
 ```bash
+farrow update
 farrow image sync https://repo.example/farrow/catalog.json
 farrow image sync --allow-downgrade /absolute/repo/catalog.json
 farrow image reset-manifest
@@ -108,6 +114,15 @@ farrow image reset-manifest
 
 `reset-manifest` restores the embedded bootstrap Catalog but keeps the
 anti-rollback high-water mark.
+
+`farrow update` refreshes the configured repository. `image sync` remains the
+advanced recovery path for activating an exact URL or local file, including an
+explicit downgrade. Immutable versioned Catalog files are never touched merely
+to record cache freshness; repository-scoped freshness is separate local state.
+A successful `update`, `image sync`, or persisted `reset-manifest` records the
+repository as checked, so automatic refresh will not replace that explicit
+choice for seven days. Resetting a repository that has never stored state leaves
+it due for its first refresh.
 
 For repository-scoped recovery, pass the same root explicitly:
 

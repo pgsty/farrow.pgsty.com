@@ -37,6 +37,7 @@ farrow image info d13:stable
 farrow image info el9@9.7
 farrow image pull d13@20260810.2566.0
 farrow image pull d13 --arch arm64
+farrow update
 ```
 
 Catalog 状态只表达支持策略，不是启动开关：`supported` 表示已通过声明的支持门禁；
@@ -45,17 +46,19 @@ Catalog 状态只表达支持策略，不是启动开关：`supported` 表示已
 
 拉取时 Farrow 会：
 
-1. 按 `--repo`、`FARROW_REPO`、可选编译期公共默认仓库的顺序刷新 `catalog.json` 与相邻
-   `.minisig`；
-2. 验证必需的签名，或将用户显式选择的本地/HTTPS 仓库记录为未签名；
-3. 解析 `image[:channel]` 或 `image@version-prefix`，缺省为 `d13:stable`；独立
+1. 为整条命令打开同一个可信本地 Catalog 快照；
+2. 若该仓库从未成功检查，或上次成功检查已满七天，则只探测一次 `catalog.json` 与相邻
+   `.minisig`；自动探测失败后退避一小时，并继续使用缓存或内置 Catalog；
+3. 验证必需的签名，或将用户显式选择的本地/HTTPS 仓库记录为未签名，然后原子激活新元数据；
+4. 解析 `image[:channel]` 或 `image@version-prefix`，缺省为 `d13:stable`；独立
    `image pull` 使用本机架构，生命周期解析遵循 `vm_arch`；
-4. 只有尺寸、SHA-256、qcow2 结构全部匹配时才复用本地文件；
-5. 否则下载仓库工件，仓库缺失时回退到 Catalog 中不可变的 HTTPS Upstream URL。
+5. 只有尺寸、SHA-256、qcow2 结构全部匹配时才复用本地文件；
+6. 否则下载仓库工件，仓库缺失时回退到 Catalog 中不可变的 HTTPS Upstream URL。
 
-普通公共构建没有编译期默认仓库，直接使用内置签名 Catalog 与其中不可变的 Upstream URL。
-显式仓库失败会报错；只有公共镜像真正上线后，未来 Release 才可将其编入默认值；不可达的
-非显式编译默认值仍会回退到内置 Catalog。
+Release 构建在 `--repo`、`FARROW_REPO` 之后使用 `https://repo.pigsty.cc/farrow`。
+只要可信缓存或内置 Catalog 能满足请求，自动刷新失败就不会阻断命令；缺失镜像仍需要可达的
+工件仓库或不可变 Upstream URL。`farrow update` 会绕过七天有效期与失败退避；与自动刷新
+不同，显式更新失败会直接报错。
 
 ## 运行时策略
 
@@ -86,12 +89,18 @@ Revision；只有操作者显式允许时才可降级。
 Base。
 
 ```bash
+farrow update
 farrow image sync https://repo.example/farrow/catalog.json
 farrow image sync --allow-downgrade /absolute/repo/catalog.json
 farrow image reset-manifest
 ```
 
 `reset-manifest` 恢复二进制内置的 Bootstrap Catalog，但不会清除防回滚 High-water Mark。
+
+`farrow update` 刷新当前配置仓库；`image sync` 仍是激活精确 URL/本地文件及显式降级的高级
+恢复路径。不可变版本 Catalog 不会为了记录缓存新鲜度而被 `touch`，每个仓库的新鲜度是独立
+本地状态。成功的 `update`、`image sync` 或已经落盘的 `reset-manifest` 会把该仓库记为已检查，
+因此七天内自动刷新不会覆盖这次显式选择；尚未保存过状态的仓库执行 reset 后仍会进行首次刷新。
 
 按仓库恢复时要显式传入同一个根目录：
 

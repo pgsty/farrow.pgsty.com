@@ -30,7 +30,7 @@ structured usage error; explicit `--help` always renders human help.
 | Prepare | `setup`, `init`, `validate`, `doctor` |
 | Lifecycle | `plan`, `up`, `start`, `stop`, `restart`, `reload`, `recreate`, `status`, `destroy` |
 | Access | `ssh`, `exec`, `logs`, `provision`, `ssh-config`, `ss`, `hosts` |
-| Images | `image list/info/pull/import/sync/prune/reset-manifest`, `repo scan/build/verify` |
+| Images | `update`, `image list/info/pull/import/sync/prune/reset-manifest`, `repo scan/build/verify` |
 | Host network | `network status/install/uninstall` |
 | Misc | `version`, `completion` |
 
