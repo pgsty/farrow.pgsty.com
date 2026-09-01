@@ -68,12 +68,14 @@ Linux setup 只安装宿主原生模拟器；外来架构还需要对应 `qemu-s
 vm_disks:
   - path: /data
     size: 128
-    fs: xfs
+    fs: auto
     persistent: false
 ```
 
-`path` 同时是磁盘身份与挂载点；`fs` 为 `xfs` 或 `ext4`。`persistent: true` 在普通
-destroy 后保留；`vm_disks: []` 表示不要额外盘。
+`path` 同时是磁盘身份与挂载点；`fs` 为 `auto`、`xfs` 或 `ext4`，省略时保持已发布的
+`xfs` 默认值。显式选择的空白 `auto` 磁盘在 `mkfs.xfs` 可用时优先使用 XFS，否则
+使用 ext4；显式 `xfs`、`ext4` 不会降级，已有文件系统保持不变。`persistent: true`
+在普通 destroy 后保留；`vm_disks: []` 表示不要额外盘。
 
 ## 目录共享
 

@@ -21,7 +21,10 @@ PostgreSQL 暴露给宿主，却无法把这种网络身份提供给其它节点
 | 网卡 | 地址方式 | 职责 |
 | --- | --- | --- |
 | 管理网卡 | QEMU User-mode NAT、DHCP | DNS、默认路由、互联网出站与回环 SSH 备用路径 |
-| `private0` | Inventory 固定地址 | 宿主到节点、节点间、Ansible、Pigsty 服务与 VIP 流量 |
+| 私网网卡（按 MAC 匹配） | Inventory 固定地址 | 宿主到节点、节点间、Ansible、Pigsty 服务与 VIP 流量 |
+
+Farrow 使用确定的 MAC 地址匹配两张物理网卡，不再修改它们的名称。Guest 中看到的名字由镜像
+自身的网络栈决定（通常是 `eth0` 或 `enp0s4`）；网卡角色由 MAC 与地址契约决定，而不是显示名称。
 
 管理网卡刻意保持普通：一张新的 Cloud Image 在应用尚未安装前就能访问软件仓库，宿主无需
 安装 NAT 规则或 DHCP 服务。

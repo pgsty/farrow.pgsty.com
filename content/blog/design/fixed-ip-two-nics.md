@@ -24,7 +24,12 @@ interfaces.
 | Interface | Addressing | Responsibility |
 | --- | --- | --- |
 | management | QEMU user-mode NAT, DHCP | DNS, default route, outbound internet, and loopback SSH fallback |
-| `private0` | fixed Inventory address | host-to-node, node-to-node, Ansible, Pigsty services, and VIP traffic |
+| private, MAC-matched | fixed Inventory address | host-to-node, node-to-node, Ansible, Pigsty services, and VIP traffic |
+
+Farrow matches both physical interfaces by their deterministic MAC addresses
+and does not rename them. Guest-visible names are whatever the image's network
+stack chooses (commonly `eth0` or `enp0s4`); the MAC and address contract, not
+the display name, determines each interface's role.
 
 The management interface is deliberately ordinary. It lets a new cloud image
 reach package repositories before any application exists, without installing

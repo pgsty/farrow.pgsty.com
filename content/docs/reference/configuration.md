@@ -78,11 +78,14 @@ architecture also needs its matching `qemu-system-*` binary and firmware.
 vm_disks:
   - path: /data
     size: 128
-    fs: xfs
+    fs: auto
     persistent: false
 ```
 
-`path` is the disk identity and mount point. `fs` is `xfs` or `ext4`.
+`path` is the disk identity and mount point. `fs` is `auto`, `xfs`, or `ext4`;
+omitting it retains the released `xfs` default. An explicitly selected `auto`
+disk uses XFS when `mkfs.xfs` is available and otherwise uses ext4. Explicit
+`xfs` and `ext4` never fall back, and an existing filesystem is preserved.
 `persistent: true` survives normal destroy. Use `vm_disks: []` for no extra
 disk.
 
