@@ -1,7 +1,7 @@
 ---
 title: Release Notes
 linkTitle: Release
-description: Preserved pre-Farrow development records; Farrow has no public release yet.
+description: Current Farrow releases plus preserved pre-rename development records.
 weight: 30
 icon: fa-solid fa-clipboard-list
 sidebar_root_menu: false
@@ -12,6 +12,6 @@ cascade:
 ---
 
 > [!IMPORTANT]
-> Farrow is pre-1.0. No public repository, Releases page, or downloadable
-> Farrow artifact is available. Entries below are historical Piglet records;
-> they do not establish post-rename Farrow validation or support.
+> Farrow is pre-1.0. Current signed release notes appear alongside preserved
+> Piglet development records; historical entries do not establish support for
+> current Farrow bytes.

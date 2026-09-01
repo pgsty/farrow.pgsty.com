@@ -8,6 +8,24 @@ aliases: [/docs/project/, /docs/project/status/, /docs/project/roadmap/, /docs/p
 
 Farrow 仍是 pre-1.0。源码测试、带日期的真机重放、软件包、发布、CI 与线上站点是不同门禁。
 
+## Farrow 0.2.0 发布：2026-09-01
+
+源码 Commit `59d1b62aebb3d044a317e4006cc8a0bf56f4feaf` 已标记 `v0.2.0`。
+该准确 Commit 的源码 CI 与独立手动触发的 Packaging Workflow 均通过。稳定版 Local
+Release 路径还构建并验证了四平台 Archive、amd64/arm64 DEB 与 RPM、8 份 SPDX、
+配套 Helper 摘要、Archive/Package 一致性、Homebrew Formula、Installer、Release
+Metadata 与 19 项最终 Checksum。
+
+当前 macOS arm64/HVF 重放在 MonoProxy 的 `10.0.0.0/8` 覆盖排除路由存在时执行：
+选点创建 `u24-1`、SSH、stop/start、增量创建已缓存的 `el9-1`、含五个 absent desired
+peer 的 whole status、两节点 SSH，以及 whole destroy/SSH fragment 清理全部通过。
+在 Ubuntu 26.04 amd64/KVM 上，当前 Linux 二进制无变更地审计了一套现存四节点
+Farrow Deployment，并进入控制 Guest。
+
+编译默认镜像仓库仍是签名的 COS 入口 `https://repo.pigsty.cc/farrow`。独立检查的
+`https://repo.pgsty.com/farrow` 源站提供字节一致的 Catalog、Authoring Metadata、
+Checksum 与镜像，并已将 Nginx Worker 收敛为只读权限。
+
 ## 最近一次有记录的真机重放：2026-08-27
 
 该矩阵只属于当天真正执行过的准确 Checkpoint；后续源码或文档修改不会自动继承真机证明。
@@ -104,7 +122,7 @@ Root 已验证；当前 Linux/amd64 原生 Farrow 生命周期仍待重放。
 - 当前 Linux/amd64 原生 EL7 生命周期；
 - 当前 9p share 重放；
 - 完整的 Pigsty `configure → farrow up → install.yml`；
-- 公开 Homebrew/DEB/RPM 安装与发布 CI。
+- 干净宿主上的公开 Homebrew/DEB/RPM 安装。
 
 当前内置版本均为 `supported`，只有 EOL EL7 与保留兼容版本 EL9 9.3/9.6、EL10 10.0
 为 `deprecated`。active/standby Catalog 公钥已经内置，但镜像仓库仍需迁离开发宿主，

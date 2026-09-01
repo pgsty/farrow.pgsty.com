@@ -9,6 +9,27 @@ aliases: [/docs/project/, /docs/project/status/, /docs/project/roadmap/, /docs/p
 Farrow is pre-1.0. Source tests, dated native replays, packages, release, CI,
 and the public site are separate gates.
 
+## Farrow 0.2.0 release — 2026-09-01
+
+Source commit `59d1b62aebb3d044a317e4006cc8a0bf56f4feaf` is tagged `v0.2.0`.
+Its source CI and independently dispatched packaging workflow passed the exact
+commit. The stable local release path also built and verified all four platform
+archives, amd64/arm64 DEB and RPM packages, eight SPDX documents, paired helper
+digests, archive/package parity, Homebrew formula, installer, release metadata,
+and 19 checksummed final assets.
+
+The current macOS arm64/HVF replay ran with MonoProxy's covering
+`10.0.0.0/8` exclusion present. Selected `u24-1` create/SSH/stop/start,
+incremental cached `el9-1` create, whole status with five absent desired peers,
+both SSH connections, and whole destroy/SSH-fragment cleanup passed. On Ubuntu
+26.04 amd64/KVM, the current Linux binary audited an existing four-node Farrow
+deployment as live and reached its control guest without mutating that host.
+
+The compiled default image repository remains the signed COS-backed
+`https://repo.pigsty.cc/farrow`. The independently checked
+`https://repo.pgsty.com/farrow` source endpoint serves identical Catalog,
+authoring metadata, checksums, and image bytes with a read-only Nginx worker.
+
 ## Last recorded native replay — 2026-08-27
 
 This matrix belongs to the exact checkpoint exercised that day. Later source
@@ -131,7 +152,7 @@ open.
 - EL7 through the current native Linux/amd64 lifecycle;
 - current 9p share replay;
 - a complete current Pigsty `configure → farrow up → install.yml` run;
-- published Homebrew/DEB/RPM consumption and release CI.
+- clean-host published Homebrew/DEB/RPM consumption.
 
 Current built-in versions are `supported`, except EOL EL7 and the retained
 compatibility versions EL9 9.3/9.6 and EL10 10.0, which are `deprecated`.

@@ -1,7 +1,7 @@
 ---
 title: 发布注记
 linkTitle: 发布
-description: 迁名前开发记录；Farrow 尚无公开版本。
+description: 当前 Farrow 发布与保留的迁名前开发记录。
 weight: 30
 icon: fa-solid fa-clipboard-list
 sidebar_root_menu: false
@@ -12,5 +12,5 @@ cascade:
 ---
 
 > [!IMPORTANT]
-> Farrow 仍处于 pre-1.0，尚无公开仓库、Releases 页面或可下载构件。以下条目是
-> Piglet 时期的历史记录，不能作为 Farrow 迁名后的验证或支持承诺。
+> Farrow 仍处于 pre-1.0。当前签名发布说明与保留的 Piglet 开发记录并列展示；
+> 历史条目不能作为当前 Farrow 字节的支持承诺。
