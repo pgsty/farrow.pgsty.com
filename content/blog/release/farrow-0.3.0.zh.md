@@ -3,13 +3,13 @@ title: "Farrow 0.3.0：显式 Catalog 与可操作的就绪诊断"
 linkTitle: Farrow 0.3.0
 description: 显式镜像 Catalog 更新、逐节点 Bootstrap 诊断、发行版原生 Guest 网卡名与更小的 CLI。
 date: 2026-09-02
-weight: 1
+weight: 2
 categories: [发布]
 tags: [Farrow 0.3.0, QEMU, Catalog, 就绪, 发布]
 icon: fa-solid fa-rocket
 ---
 
-Farrow 0.3.0 是当前公开的 pre-1.0 发布。它移除隐式 Catalog 刷新，把 Guest Bootstrap
+Farrow 0.3.0 是被 0.4.0 取代的公开 pre-1.0 发布。它移除隐式 Catalog 刷新，把 Guest Bootstrap
 失败变成可操作的逐节点结果，并在不改变 Pigsty Inventory 与固定 IP Deployment 模型的
 前提下简化 CLI。
 

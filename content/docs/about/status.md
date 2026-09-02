@@ -11,10 +11,10 @@ and the public site are separate gates. Install instructions are in the
 [Quick Start](../../start/tutorial/#install).
 
 The current public release is
-[`v0.3.0`](https://github.com/pgsty/farrow/releases/tag/v0.3.0). Its source and
-package gates passed at commit `da6d02426da93c677c94c67fec4eb4fcecf4766a`;
+[`v0.4.0`](https://github.com/pgsty/farrow/releases/tag/v0.4.0). Its source and
+package gates passed at commit `8ecb8476c7dbc934d8cbbee935ac53884d00fcdb`;
 the native-host rows below remain the latest dated VM evidence rather than
-being implicitly promoted to 0.3.0.
+being implicitly promoted to 0.4.0.
 
 ## Summary
 
@@ -48,6 +48,15 @@ custody must be formalized before 1.0.
 
 Each entry belongs to the exact checkpoint exercised that day. Later source or
 documentation edits do not inherit native proof without another replay.
+
+### Farrow 0.4.0 release — 2026-09-02
+
+The exact tag commit passed `make check` and the release workflow's archive,
+DEB/RPM, SBOM, checksum, installer, Homebrew-formula, and package-parity gates.
+`up` now runs `setup` itself on an unprepared terminal host, `vm_disks[].fs`
+defaults to `auto`, readiness failures carry the guest's last error line, and
+every command shares one output style. The first-run path was not replayed on a
+fresh host; no new native VM replay is claimed here.
 
 ### Farrow 0.3.0 release — 2026-09-02
 

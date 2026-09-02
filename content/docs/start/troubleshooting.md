@@ -89,8 +89,9 @@ bootstrap stage:
 | `private-network` | the fixed-IP interface never came up; check `farrow network status` |
 | `ready` | the ready marker could not be written |
 
-`guest bootstrap failed during data-disks (exit status 1)` names the failing
-stage; `guest did not become ready within 3m0s: <last ssh error>` means the
+`guest bootstrap failed during data-disks: xfs requested but mkfs.xfs is
+unavailable` names the failing stage and the guest's last error line (older
+markers without a detail show `(exit status N)` instead); `guest did not become ready within 3m0s: <last ssh error>` means the
 guest never answered. Read the guest console and QEMU output, then check the
 recorded state:
 

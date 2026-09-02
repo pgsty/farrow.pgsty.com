@@ -79,12 +79,12 @@ vm_disks:
     persistent: false
 ```
 
-`path` is the disk identity and mount point. `fs` is `auto`, `xfs`, or `ext4`;
-omitting it retains the released `xfs` default. An explicitly selected `auto`
-disk uses XFS when `mkfs.xfs` is available and otherwise uses ext4. Explicit
-`xfs` and `ext4` never fall back, and an existing filesystem is preserved.
-`persistent: true` survives normal destroy. Use `vm_disks: []` for no extra
-disk.
+`path` is the disk identity and mount point. `fs` is `auto` (the default), `xfs`,
+or `ext4`. A blank `auto` disk is formatted XFS when the guest has `mkfs.xfs`
+and ext4 otherwise, which matches what the Vagrant flow did. Explicit `xfs` and
+`ext4` never fall back, and an existing filesystem is always preserved.
+`persistent: true` keeps the disk across an ordinary destroy; `vm_disks: []`
+means no extra disk.
 
 ## Shares
 

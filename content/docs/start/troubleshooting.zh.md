@@ -80,7 +80,8 @@ Debian/Ubuntu 使用 `root:<调用者可用组> 4750`。桌面系统通过 ACL �
 | `private-network` | 固定 IP 网卡未能启用；检查 `farrow network status` |
 | `ready` | 无法写入 ready 标记 |
 
-`guest bootstrap failed during data-disks (exit status 1)` 指出失败阶段；
+`guest bootstrap failed during data-disks: xfs requested but mkfs.xfs is unavailable`
+指出失败阶段与 guest 里最后一行错误（没有 detail 的旧标记只显示 `(exit status N)`）；
 `guest did not become ready within 3m0s: <last ssh error>` 表示 Guest 始终没有应答。
 先看 Guest 串口与 QEMU 输出，再检查记录的状态：
 

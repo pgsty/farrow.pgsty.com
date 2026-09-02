@@ -9,9 +9,9 @@ aliases: [/docs/project/, /docs/project/status/, /docs/project/roadmap/, /docs/p
 Farrow 仍是 pre-1.0。源码测试、带日期的真机重放、软件包、发布、CI 与线上站点是不同门禁。
 安装方法见[快速上手](../../start/tutorial/#安装)。
 
-当前公开版本为 [`v0.3.0`](https://github.com/pgsty/farrow/releases/tag/v0.3.0)。其源码与
-Package 门禁在 Commit `da6d02426da93c677c94c67fec4eb4fcecf4766a` 通过；下表真机记录
-仍是最新的带日期 VM 证据，不会被自动提升为 0.3.0 证据。
+当前公开版本为 [`v0.4.0`](https://github.com/pgsty/farrow/releases/tag/v0.4.0)。其源码与
+Package 门禁在 Commit `8ecb8476c7dbc934d8cbbee935ac53884d00fcdb` 通过；下表真机记录
+仍是最新的带日期 VM 证据，不会被自动提升为 0.4.0 证据。
 
 ## 概览
 
@@ -42,6 +42,13 @@ Package 门禁在 Commit `da6d02426da93c677c94c67fec4eb4fcecf4766a` 通过；下
 ## 验证历史
 
 每条记录只属于当天真正执行过的准确 Checkpoint；后续源码或文档修改不会自动继承真机证明。
+
+### Farrow 0.4.0 发布：2026-09-02
+
+精确 Tag Commit 通过 `make check`，以及发布工作流的 Archive、DEB/RPM、SBOM、Checksum、
+Installer、Homebrew Formula 与 Package 一致性门禁。`up` 在未准备好的终端宿主机上会自己
+执行 `setup`，`vm_disks[].fs` 默认为 `auto`，就绪失败携带 Guest 最后一行错误，全部命令
+共享一套输出风格。首次运行路径未在全新宿主机上重放；本节不声称新增真机 VM 重放。
 
 ### Farrow 0.3.0 发布：2026-09-02
 

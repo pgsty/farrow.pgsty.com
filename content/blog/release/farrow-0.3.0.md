@@ -3,13 +3,13 @@ title: "Farrow 0.3.0: explicit catalogs and actionable readiness"
 linkTitle: Farrow 0.3.0
 description: Explicit image-catalog updates, per-node bootstrap diagnostics, native guest interface names, and a smaller CLI.
 date: 2026-09-02
-weight: 1
+weight: 2
 categories: [Release]
 tags: [Farrow 0.3.0, QEMU, Catalog, Readiness, Release]
 icon: fa-solid fa-rocket
 ---
 
-Farrow 0.3.0 is the current public pre-1.0 release. It removes implicit
+Farrow 0.3.0 was the public pre-1.0 release superseded by 0.4.0. It removes implicit
 Catalog refreshes, turns guest bootstrap failures into actionable per-node
 results, and simplifies the CLI without changing the Pigsty Inventory or
 fixed-IP deployment model.
