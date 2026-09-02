@@ -7,8 +7,9 @@ icon: fa-solid fa-box-archive
 
 正常使用不需要先执行镜像命令：`farrow up` 默认按本机架构解析 `d13:stable`，并拉取
 最终对应的不可变版本。
-Farrow 首次使用时尝试刷新一次 Catalog，随后七天内复用可信本地快照。自动刷新失败会回退到
-缓存或内置元数据；`farrow update` 可立即强制检查。
+Farrow 一直使用已安装构建内置的 Catalog，直到你运行 `farrow update`：它会获取、校验并
+激活仓库当前的 Catalog；没有任何自动刷新。恢复时可用 `image sync` 显式激活精确 URL
+或文件。
 
 ## 选择镜像
 
@@ -58,8 +59,9 @@ farrow up
 ```
 
 `FARROW_REPO` 也可以是绝对本地目录。显式本地或 HTTPS 仓库可使用未签名 Catalog；HTTP
-仓库必须提供可信密钥签名。文件大小、SHA-256 与 qcow2 结构始终校验。仓库不可达会阻止
-缺失工件下载，但 Catalog 刷新故障不会阻断已经能解析的缓存镜像。
+仓库必须提供可信密钥签名。文件大小、SHA-256 与 qcow2 结构始终校验。只有需要下载工件时
+仓库不可达才有影响；`farrow update` 获取配置仓库的 Catalog，`image sync` 则获取或读取
+用户明确给出的源。
 
 ## 构建静态仓库
 

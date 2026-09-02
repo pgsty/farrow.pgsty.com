@@ -23,20 +23,11 @@ Generated output is disposable:
 ## Build and source gates
 
 ```bash
-make build
-make module-check
-make shell-check
-make test
-make race
-make vet
-make staticcheck
-make vuln
-make cross-check
-make image-pipeline-test
-make license-check
+make check
 ```
 
-`make check` combines these gates. A source gate is not native VM evidence;
+`make check` runs every source gate; the Makefile is the authoritative list of
+what that includes. A source gate is not native VM evidence;
 macOS HVF, Linux KVM/networking, package consumption, release publication, and
 the public render remain separate gates.
 

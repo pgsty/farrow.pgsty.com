@@ -7,9 +7,10 @@ icon: fa-solid fa-box-archive
 
 Normal use needs no image command first: `farrow up` resolves `d13:stable` for
 the native host architecture and pulls the resulting immutable version.
-Farrow attempts one Catalog refresh on first use, then reuses the trusted local
-snapshot for seven days. Automatic refresh failure falls back to cached or
-embedded metadata; `farrow update` forces an immediate check.
+Farrow uses the Catalog embedded in the installed build until you run
+`farrow update`, which fetches, verifies, and activates the repository's current
+Catalog. Nothing refreshes it automatically; `image sync` explicitly activates
+an exact URL or file for recovery.
 
 ## Choose an image
 
@@ -64,8 +65,9 @@ farrow up
 `FARROW_REPO` may also be an absolute local directory. Explicit local and HTTPS
 repositories may use an unsigned Catalog; HTTP repositories require a Catalog
 signed by a trusted key. Artifact size, SHA-256, and qcow2 structure are always
-verified. An unavailable repository prevents a missing artifact download, but a
-Catalog-refresh outage does not block already resolvable cached images.
+verified. An unavailable repository only matters when an artifact must be
+downloaded. `farrow update` fetches the configured repository's Catalog;
+`image sync` fetches or reads the exact source supplied by the user.
 
 ## Build a static repository
 

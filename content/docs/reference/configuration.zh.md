@@ -11,8 +11,6 @@ aliases: [/docs/concepts/project-model/]
 依次查找：显式 `-f`、当前目录的 `farrow.yml`、`farrow.yaml`、`pigsty.yml`、
 `pigsty.yaml`。所有文件名都使用同一种 Pigsty 兼容 YAML Inventory。
 
-旧的顶层 `version:`/`nodes:` 格式会直接报迁移提示。
-
 `plan`、`up`、`reload`、`recreate` 找不到文件时，如果 deployment 已存在，会回退到
 已应用规格；`validate` 不会回退。配置必须是最大 4 MiB 的普通非符号链接文件。
 
@@ -94,6 +92,9 @@ vm_shares:
 
 所有托管主机必须位于同一个 RFC1918 `/24`：`.1` 属于宿主，`.2`–`.8` 保留，节点使用
 `.9`–`.254`。
+
+Guest 内部，固定 IP 网卡就是承载 Inventory 地址的那块网卡（`ip -br addr`）；其名称不是
+Farrow 契约。
 
 ## 漂移
 

@@ -13,7 +13,6 @@ farrow status
 farrow ssh meta
 farrow exec node-1 -- hostname
 farrow logs meta --source serial
-farrow ss                         # manually refresh the SSH aliases if needed
 ```
 
 Applied state is under `~/.farrow`; these commands work from any directory.
@@ -21,7 +20,8 @@ Status includes the persisted Guest architecture and accelerator, so TCG is
 never an invisible fallback.
 `farrow up` rebuilds the default SSH aliases from the complete applied
 deployment after the selected VMs are started, so a scoped `up` never drops
-unselected peers and plain `ssh meta` works without a separate `farrow ss` step.
+unselected peers and plain `ssh meta` just works; `farrow ssh-config --install`
+rewrites it by hand if you ever need to.
 `plan`, `up`, `reload`, and `recreate` prefer `-f`, then a discovered
 Inventory, then the applied spec when no file exists. `validate` always needs
 a file.
@@ -35,8 +35,8 @@ farrow restart node-1
 farrow reload -f farrow.yml       # stop, re-read config, converge
 ```
 
-`start` only powers on already-created VMs and does not refresh SSH aliases.
-`restart` uses applied state. `reload` reads the Inventory again and follows
+`start` powers on stopped VMs and re-checks readiness of running ones; it does
+not refresh the SSH client configuration. `restart` uses applied state. `reload` reads the Inventory again and follows
 the complete `up` path after stopping.
 
 ## Change the deployment
@@ -44,15 +44,18 @@ the complete `up` path after stopping.
 ```bash
 farrow plan
 farrow up                         # create/start selected nodes and install SSH aliases
-farrow recreate node-1 --force    # applies a changed VM definition
+farrow recreate node-1            # applies a changed VM definition
 ```
+
+`recreate` and `destroy` ask you to type the confirmation word on a terminal;
+pass `--force` only in scripts.
 
 Inventory changes fall into three visible fields:
 
 | Field | Meaning | Action |
 |---|---|---|
 | `create` | desired node has no state | `farrow up` |
-| `recreate` | VM definition changed | `farrow recreate <node> --force` |
+| `recreate` | VM definition changed | `farrow recreate <node>` |
 | `missing` | stateful node left the file | restore it, or destroy it explicitly |
 
 Deleting YAML never deletes a VM. Unconsumed Pigsty changes produce
@@ -63,10 +66,10 @@ fragment as well.
 ## Destroy
 
 ```bash
-farrow destroy node-3 --force
-farrow destroy --force
-farrow destroy --force --delete-persistent
-farrow destroy --force --purge
+farrow destroy node-3
+farrow destroy
+farrow destroy --delete-persistent
+farrow destroy --purge
 ```
 
 `--delete-persistent` and `--purge` are valid only for whole-deployment

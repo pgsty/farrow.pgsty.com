@@ -13,12 +13,13 @@ farrow network status --json
 farrow status --json
 ```
 
-## 找不到配置
+## 找不到 Inventory
 
 第一次部署时，在 `farrow.yml`/`pigsty.yml` 所在目录运行 `plan`、`up`、`validate`，
-或传入 `-f /path/to/file`。状态存在后，`plan`、`up`、`reload`、`recreate` 可回退到
-已应用规格；status、start、stop、SSH 与 destroy 始终使用已应用状态。如果 `status`
-也打印同样消息，所选 `FARROW_HOME` 中没有已应用状态。
+传入 `-f /path/to/file`，或运行 `farrow init` 生成一份。状态存在后，`plan`、`up`、
+`reload`、`recreate` 可回退到已应用规格；status、start、stop、SSH 与 destroy 始终使用
+已应用状态。如果 `status` 报告 `no deployment state found`，说明所选 `FARROW_HOME`
+从未运行过 `up`。
 
 ## setup 需要 sudo
 
@@ -43,8 +44,8 @@ farrow network status --json --verbose
 farrow network uninstall
 ```
 
-确认只包含 Farrow 自有路径后再加 `--yes`。Linux bridge smoke 失败会自动按 manifest
-回滚；只有出现 `automatic rollback failed` 才表示必须人工检查。
+确认只包含 Farrow 自有路径后再加 `--yes`。Linux bridge smoke 失败会自动回滚安装；
+只有出现 `automatic rollback failed` 才表示必须人工检查。
 
 ## Linux bridge helper 失败
 
@@ -59,8 +60,39 @@ Debian/Ubuntu 使用 `root:<调用者可用组> 4750`。桌面系统通过 ACL �
 
 ## plan 报 recreate 或 missing
 
-`recreate` 需要 `farrow recreate <node> --force`。`missing` 只是报告：恢复主机条目，
-或运行 `farrow destroy <node> --force`。
+`recreate` 表示节点定义已改变：先用 `farrow plan` 查看，再运行 `farrow recreate <node>`。
+终端上该命令会要求输入 `recreate` 确认，`--force` 仅用于脚本。`missing` 只是报告：
+恢复主机条目，或运行 `farrow destroy <node>`。
+
+## 节点未就绪
+
+`up`、`start`、`recreate` 会等待每个 Guest 完成 Bootstrap。若有节点失败，命令以 5 退出，
+并报告 `N of M node(s) failed: <node> (<stage>: <error>)`。阶段为 `prepare`、`start`、
+`readiness`、`stop`；`readiness` 失败会指出 Guest 自身的 Bootstrap 阶段：
+
+| Bootstrap 阶段 | 通常意味着 |
+|---|---|
+| `identity`、`hosts` | 镜像或其 cloud-init 未按预期运行 |
+| `management-network` | 宿主没有出网能力，或需要代理 |
+| `data-disks` | 磁盘定义有误，或镜像缺少所请求的 `mkfs` |
+| `shares` | 共享目录无法挂载 |
+| `control-ssh` | 控制节点 SSH 密钥无法安装 |
+| `private-network` | 固定 IP 网卡未能启用；检查 `farrow network status` |
+| `ready` | 无法写入 ready 标记 |
+
+`guest bootstrap failed during data-disks (exit status 1)` 指出失败阶段；
+`guest did not become ready within 3m0s: <last ssh error>` 表示 Guest 始终没有应答。
+先看 Guest 串口与 QEMU 输出，再检查记录的状态：
+
+```bash
+farrow logs <node>                  # 串口控制台
+farrow logs <node> --source qemu    # QEMU 诊断
+farrow status
+```
+
+在 `prepare` 阶段失败的节点从未加入 deployment。给 `up` 或 `reload` 加上
+`--rollback` 可在同一次运行中清除它们的残留产物，结构化输出会在 `rolled_back` 中列出。
+`--no-wait` 跳过就绪等待，QEMU 运行后即返回。
 
 ## SSH 失败
 

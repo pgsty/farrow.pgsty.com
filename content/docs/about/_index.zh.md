@@ -1,7 +1,7 @@
 ---
 title: 关于 Farrow
 linkTitle: 关于
-description: 简化后的产品模型、实现边界、真机证据、当前限制与发布门禁。
+description: 产品模型、实现边界、真机证据、当前限制与发布门禁。
 weight: 30
 icon: fa-solid fa-circle-info
 cascade:

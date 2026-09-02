@@ -13,13 +13,13 @@ farrow status
 farrow ssh meta
 farrow exec node-1 -- hostname
 farrow logs meta --source serial
-farrow ss                         # 必要时手工刷新 SSH 别名
 ```
 
 应用状态位于 `~/.farrow`，这些命令可在任意目录执行。
 Status 会显示持久化的 Guest 架构与加速器，因此 TCG 永远不是不可见回退。
 `farrow up` 会在选中 VM 启动后，根据完整 applied deployment 重建默认 SSH 别名；因此
-局部 `up` 不会删除未选中节点，无需再执行 `farrow ss`，即可直接运行 `ssh meta`。
+局部 `up` 不会删除未选中节点，可直接运行 `ssh meta`；如需手工重写，使用
+`farrow ssh-config --install`。
 `plan`、`up`、`reload`、`recreate` 依次优先使用 `-f`、当前目录发现的 Inventory，
 两者都没有时才回退到已应用规格；`validate` 始终需要文件。
 
@@ -32,7 +32,8 @@ farrow restart node-1
 farrow reload -f farrow.yml       # 停止、重新读配置、收敛
 ```
 
-`start` 只启动已创建 VM，不刷新 SSH 别名；`restart` 使用已应用状态；`reload` 停止后
+`start` 启动已停止的 VM 并复查运行中 VM 的就绪状态，不刷新 SSH 客户端配置；`restart`
+使用已应用状态；`reload` 停止后
 重新读取 Inventory，并执行完整的 `up` 路径。
 
 ## 变更 deployment
@@ -40,13 +41,15 @@ farrow reload -f farrow.yml       # 停止、重新读配置、收敛
 ```bash
 farrow plan
 farrow up                         # 创建/启动选中节点，并安装 SSH 别名
-farrow recreate node-1 --force    # 应用某个节点的 VM 定义变化
+farrow recreate node-1            # 应用某个节点的 VM 定义变化
 ```
+
+`recreate` 与 `destroy` 在终端上会要求输入确认词；只在脚本中传 `--force`。
 
 | 字段 | 含义 | 操作 |
 |---|---|---|
 | `create` | 配置有、状态无 | `farrow up` |
-| `recreate` | VM 定义改变 | `farrow recreate <node> --force` |
+| `recreate` | VM 定义改变 | `farrow recreate <node>` |
 | `missing` | 状态有、配置无 | 恢复配置，或显式 destroy |
 
 删除 YAML 永远不会删除 VM。未消费的 Pigsty 变更得到 `action:none`；命名与
@@ -56,10 +59,10 @@ fragment。
 ## 销毁
 
 ```bash
-farrow destroy node-3 --force
-farrow destroy --force
-farrow destroy --force --delete-persistent
-farrow destroy --force --purge
+farrow destroy node-3
+farrow destroy
+farrow destroy --delete-persistent
+farrow destroy --purge
 ```
 
 `--delete-persistent` 与 `--purge` 只适用于整体销毁，不能和节点选择器一起使用。

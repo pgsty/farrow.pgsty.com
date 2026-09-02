@@ -3,13 +3,13 @@ title: "Farrow 0.2.0：选点收敛与发布完整性"
 linkTitle: Farrow 0.2.0
 description: VPN 感知网络预检、真正的选点扩容、基于 committed state 的集成、CI 多平台构件与 0.1.0 升级边界。
 date: 2026-09-01
-weight: 1
+weight: 2
 categories: [发布]
 tags: [Farrow 0.2.0, QEMU, macOS, Linux, 发布, 供应链]
 icon: fa-solid fa-rocket
 ---
 
-Farrow 0.2.0 是当前公开的 pre-1.0 发布。它保留 0.1.0 引入的 Pigsty Inventory 与
+Farrow 0.2.0 是被 0.3.0 取代的公开 pre-1.0 发布。它保留 0.1.0 引入的 Pigsty Inventory 与
 磁盘 Deployment 格式，同时修复最终真机重放中发现的网络与选点收敛边界。
 
 ## 主要变化
@@ -56,5 +56,4 @@ farrow doctor
 0.1.0 Deployment State 可直接读取。保留 VM 在线时运行一次 `farrow status`，可收敛
 任何发布前进程出生身份；现有 Guest 在重建时采用新的 `/etc/hosts` 标记。
 
-Farrow 尚未达到 1.0，因此 GitHub 会把 0.2.0 标为 Pre-release；它仍是已经公开发布的
-当前版本。
+Farrow 尚未达到 1.0，因此 GitHub 会把 0.2.0 标为 Pre-release。

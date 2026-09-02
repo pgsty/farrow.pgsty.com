@@ -1,7 +1,7 @@
 ---
 title: About Farrow
 linkTitle: About
-description: The simplified product model, implementation boundaries, native evidence, current limits, and release gates.
+description: The product model, implementation boundaries, native evidence, current limits, and release gates.
 weight: 30
 icon: fa-solid fa-circle-info
 cascade:

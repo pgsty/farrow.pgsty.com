@@ -21,20 +21,10 @@ Demo 目录、生成二进制与 Release 输出树都不是源码输入，不应
 ## 构建与源码门禁
 
 ```bash
-make build
-make module-check
-make shell-check
-make test
-make race
-make vet
-make staticcheck
-make vuln
-make cross-check
-make image-pipeline-test
-make license-check
+make check
 ```
 
-`make check` 汇总这些门禁。源码绿色不等于真机验证；macOS HVF、Linux KVM/网络、软件包
+`make check` 运行全部源码门禁，准确清单以 Makefile 为准。源码绿色不等于真机验证；macOS HVF、Linux KVM/网络、软件包
 消费、Release 发布与线上渲染仍是不同门禁。
 
 ## Release 与软件包契约

@@ -7,8 +7,30 @@ icon: fa-solid fa-play
 aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /docs/start/pigsty/, /docs/features/]
 ---
 
-本文假设一套配套 Farrow 安装已经位于 `PATH`。正式软件包可用性见
-[当前状态](../../about/status/)；开发与源码审查可使用[从源码构建](../source-build/)。
+## 安装
+
+Farrow 仍是 pre-1.0。每个 Release 都附带用户态 Installer、Homebrew Formula 与 DEB/RPM
+软件包。先从 [Farrow 0.3.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.3.0)
+下载资产，再任选一种路径：
+
+```bash
+# 从 Release 安装：用户态、无需 sudo、校验 Checksum
+curl -fLO https://github.com/pgsty/farrow/releases/download/v0.3.0/install.sh
+chmod +x install.sh
+FARROW_VERSION=0.3.0 ./install.sh
+
+# Homebrew Formula（作为 Release 资产发布）
+brew install --formula ./farrow.rb
+
+# Debian/Ubuntu 与 RHEL 系软件包同样是 Release 资产
+sudo apt install ./farrow_0.3.0_linux_amd64.deb
+sudo dnf install ./farrow_0.3.0_linux_amd64.rpm
+```
+
+GitHub 不会通过 `/releases/latest` 暴露 pre-1.0 预发布版本，因此安装器需要
+`FARROW_VERSION=0.3.0`。开发与源码审查可使用[从源码构建](../source-build/)。
+
+## 启动第一个实验环境
 
 在一个空目录中，Farrow 的正常运行路径只有两条命令：
 

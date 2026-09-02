@@ -17,7 +17,7 @@ Choose the shortest path for your task:
 - **[Start](start/)** — boot the first lab with two commands, then operate and troubleshoot it.
 - **[Reference](reference/)** — exact Inventory fields, commands, flags,
   output, and exit codes.
-- **[About](about/)** — simplified design, native validation, limits, and
+- **[About](about/)** — design, native validation, limits, and
   release gates.
 
 New users should follow the [Quick Start](start/tutorial/). The complete normal

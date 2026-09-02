@@ -7,9 +7,32 @@ icon: fa-solid fa-play
 aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /docs/start/pigsty/, /docs/features/]
 ---
 
-This guide assumes a matching Farrow installation is already on `PATH`. Check
-[Status](../../about/status/) for formal-package availability, or use
-[Build from Source](../source-build/) for development and source review.
+## Install
+
+Farrow is pre-1.0. Every release ships a user-scoped installer, a Homebrew
+formula, and DEB/RPM packages as release assets. Download them from the
+[Farrow 0.3.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.3.0),
+then pick one path:
+
+```bash
+# From a release: user-scoped, no sudo, checksum-verified
+curl -fLO https://github.com/pgsty/farrow/releases/download/v0.3.0/install.sh
+chmod +x install.sh
+FARROW_VERSION=0.3.0 ./install.sh
+
+# Homebrew formula (shipped as a release asset)
+brew install --formula ./farrow.rb
+
+# Debian/Ubuntu and RHEL-family packages are release assets too
+sudo apt install ./farrow_0.3.0_linux_amd64.deb
+sudo dnf install ./farrow_0.3.0_linux_amd64.rpm
+```
+
+GitHub does not expose pre-1.0 prereleases through `/releases/latest`, so the
+installer needs `FARROW_VERSION=0.3.0`. Use [Build from Source](../source-build/)
+for development and source review.
+
+## Boot the first lab
 
 In an empty directory, the normal runtime path is only two commands:
 

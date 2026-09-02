@@ -46,19 +46,16 @@ Catalog 状态只表达支持策略，不是启动开关：`supported` 表示已
 
 拉取时 Farrow 会：
 
-1. 为整条命令打开同一个可信本地 Catalog 快照；
-2. 若该仓库从未成功检查，或上次成功检查已满七天，则只探测一次 `catalog.json` 与相邻
-   `.minisig`；自动探测失败后退避一小时，并继续使用缓存或内置 Catalog；
-3. 验证必需的签名，或将用户显式选择的本地/HTTPS 仓库记录为未签名，然后原子激活新元数据；
-4. 解析 `image[:channel]` 或 `image@version-prefix`，缺省为 `d13:stable`；独立
+1. 为整条命令读取一次当前本地 Catalog：即本次构建内置的 Catalog，或最近一次
+   `farrow update`/`image sync` 激活的 Catalog；
+2. 解析 `image[:channel]` 或 `image@version-prefix`，缺省为 `d13:stable`；独立
    `image pull` 使用本机架构，生命周期解析遵循 `vm_arch`；
-5. 只有尺寸、SHA-256、qcow2 结构全部匹配时才复用本地文件；
-6. 否则下载仓库工件，仓库缺失时回退到 Catalog 中不可变的 HTTPS Upstream URL。
+3. 只有尺寸、SHA-256、qcow2 结构全部匹配时才复用本地文件；
+4. 否则下载仓库工件，仓库缺失时回退到 Catalog 中不可变的 HTTPS Upstream URL。
 
 Release 构建在 `--repo`、`FARROW_REPO` 之后使用 `https://repo.pigsty.cc/farrow`。
-只要可信缓存或内置 Catalog 能满足请求，自动刷新失败就不会阻断命令；缺失镜像仍需要可达的
-工件仓库或不可变 Upstream URL。`farrow update` 会绕过七天有效期与失败退避；与自动刷新
-不同，显式更新失败会直接报错。
+Farrow 不会自动刷新 Catalog，因此只有必须下载镜像时命令才需要仓库可达。运行
+`farrow update` 可获取、校验并激活仓库当前的 Catalog；更新失败会直接报错。
 
 ## 运行时策略
 
@@ -92,21 +89,21 @@ Base。
 farrow update
 farrow image sync https://repo.example/farrow/catalog.json
 farrow image sync --allow-downgrade /absolute/repo/catalog.json
-farrow image reset-manifest
+farrow image reset
 ```
 
-`reset-manifest` 恢复二进制内置的 Bootstrap Catalog，但不会清除防回滚 High-water Mark。
+`image reset` 恢复二进制内置的 Catalog，但不会清除防回滚 High-water Mark；
+`reset-manifest` 作为兼容别名保留。
 
-`farrow update` 刷新当前配置仓库；`image sync` 仍是激活精确 URL/本地文件及显式降级的高级
-恢复路径。不可变版本 Catalog 不会为了记录缓存新鲜度而被 `touch`，每个仓库的新鲜度是独立
-本地状态。成功的 `update`、`image sync` 或已经落盘的 `reset-manifest` 会把该仓库记为已检查，
-因此七天内自动刷新不会覆盖这次显式选择；尚未保存过状态的仓库执行 reset 后仍会进行首次刷新。
+`farrow update` 立即检查仓库并激活更新的 Catalog。Farrow 不会自动刷新 Catalog；每个版本
+内嵌的 Catalog 会一直使用到你运行 update。`image sync` 是指定精确 URL 或文件（含降级）的
+恢复路径。
 
 按仓库恢复时要显式传入同一个根目录：
 
 ```bash
 farrow image sync --repo /srv/farrow --allow-downgrade /srv/farrow/catalog.json
-farrow image reset-manifest --repo /srv/farrow
+farrow image reset --repo /srv/farrow
 ```
 
 `--repo` 决定要操作的独立 High-water 槽；省略时依次使用 `FARROW_REPO` 和编译期默认值。
@@ -128,7 +125,8 @@ farrow/
 Upstream。`source_user` 表示发行版原始镜像内置的登录账号（例如 `rocky`）；离线归一化
 会用它清理并锁定该上游账号，随后把它保留为导入溯源。它不会替换 deployment SSH 用户
 （默认 `dba`）。该文件不保存任何生成的摘要或大小；`catalog.json` 保持同一逻辑树，
-但为每个 Variant 物化文件名、SHA-256、工件大小和虚拟大小。
+但为每个 Variant 物化文件名、SHA-256、工件大小和虚拟大小。`repo.yaml` 是 `schema: 1`；
+生成的 `catalog.json` 则是 Farrow 内嵌并签名的 Schema-3 Catalog。
 
 ```yaml
 schema: 1
@@ -167,9 +165,8 @@ d13:stable + native
 ## 本地布局与导入
 
 镜像位于 `FARROW_HOME/images`（默认 `~/.farrow/images`）：各 Family 目录保存下载工件，
-`manifests/` 为每个仓库独立保存 Catalog High-water 状态，`local/` 与
-`local-images.json` 保存导入镜像。已经没有旧的
-`~/.farrow/cache` 或按摘要组织的 `sha256/` 层级。
+`manifests/` 保存当前激活的 Catalog 与每个仓库独立的 High-water 状态，`local/` 与
+`local-images.json` 保存导入镜像。
 
 ```bash
 farrow image import --sha256 <digest> /path/to/base.qcow2

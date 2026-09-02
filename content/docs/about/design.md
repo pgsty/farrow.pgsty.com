@@ -1,6 +1,6 @@
 ---
 title: Design
-description: Farrow's simplified one-deployment architecture, networking, state, safety boundaries, and review conclusion.
+description: Farrow's one-deployment architecture, networking, state, and safety boundaries.
 weight: 10
 icon: fa-solid fa-compass-drafting
 aliases: [/docs/concepts/, /docs/concepts/networking/, /docs/concepts/storage/, /docs/concepts/safety/, /docs/architecture/, /docs/architecture/overview/, /docs/architecture/networking/, /docs/architecture/security/]
@@ -48,7 +48,7 @@ activation-safety scan proves existing units cannot claim a real host link.
 
 On Debian, the helper is temporarily and reversibly scoped to a group the
 caller actually belongs to. A real unprivileged QEMU bridge smoke must pass
-before setup accepts the network; failure triggers manifest-bounded rollback.
+before setup accepts the network; failure rolls the install back automatically.
 
 ## Safety boundary
 
@@ -56,14 +56,3 @@ QEMU and all guest artifacts run as the caller. Root is limited to host
 network setup and the optional hosts publisher. Destruction requires matching
 ownership, containment, node identity, QMP/process identity, and an allowlist
 of artifacts. Ambiguity stops the operation.
-
-## Review conclusion
-
-The pivot away from projects and leases is correct for a one-lab product and
-greatly reduces cognitive and state complexity. Native review was still
-essential: the first implementation had cross-layer gaps in control-node
-keys, sudo policy, Debian helper access, NetworkManager verification, runtime
-preflight, result messages, and failed-install cleanup. Those paths were fixed
-and replayed on macOS and Linux before this documentation was simplified. A
-later adversarial review also caught destructive preflight ordering and signed
-Catalog-baseline upgrade bugs before EL7/EL8 compatibility was committed.

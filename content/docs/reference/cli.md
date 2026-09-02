@@ -19,8 +19,8 @@ farrow setup --help
 farrow image pull --help
 ```
 
-In text mode, bare `farrow` and namespaces such as `farrow image` display
-contextual help and exit successfully. In JSON/YAML mode a bare namespace is a
+Bare `farrow` prints its help and exits 2; a bare namespace such as
+`farrow image` does the same. In JSON/YAML mode a bare namespace is a
 structured usage error; explicit `--help` always renders human help.
 
 ## Commands
@@ -29,30 +29,32 @@ structured usage error; explicit `--help` always renders human help.
 |---|---|
 | Prepare | `setup`, `init`, `validate`, `doctor` |
 | Lifecycle | `plan`, `up`, `start`, `stop`, `restart`, `reload`, `recreate`, `status`, `destroy` |
-| Access | `ssh`, `exec`, `logs`, `provision`, `ssh-config`, `ss`, `hosts` |
-| Images | `update`, `image list/info/pull/import/sync/prune/reset-manifest`, `repo scan/build/verify` |
+| Access | `ssh`, `exec`, `logs`, `provision`, `ssh-config`, `hosts install/uninstall` |
+| Images | `update`, `image list/info/pull/import/sync/prune/reset`, `repo scan/build/verify` |
 | Host network | `network status/install/uninstall` |
 | Misc | `version`, `completion` |
+
+No command refreshes the Catalog implicitly. `update` fetches the configured
+repository's Catalog, verifies it, and activates it; `image sync` is the
+explicit recovery path for an exact URL or file. Ordinary commands use the
+active local Catalog. Neither operation updates the Farrow executable.
 
 Frequently used commands have scoped aliases:
 
 | Command | Aliases | Command | Aliases |
 |---|---|---|---|
-| `setup` | `s` | `init` | `i` |
-| `validate` | `v` | `plan` | `pl` |
-| `recreate` | `rc` | `status` | `st` |
-| `destroy` | `de` | `provision` | `p` |
-| `ssh-config` | `sc` | `hosts` | `h` |
-| `image` | `images`, `im` | `doctor` | `dt` |
-| `network` | `n`, `net` | `exec` / `logs` | `ex` / `l` |
-| `version` | `ver` | `completion` | `cp` |
+| `setup` | `s` | `validate` | `v` |
+| `plan` | `pl` | `recreate` | `rc` |
+| `status` | `st` | `destroy` | `de` |
+| `ssh-config` | `sc` | `image` | `images`, `im` |
+| `doctor` | `dt` | `network` | `n`, `net` |
+| `exec` / `logs` | `ex` / `l` | `version` | `ver` |
 
-`up`, `ssh`, and `ss` are already short. `start`, `stop`, `restart`, and
-`reload` deliberately have no advertised aliases; the old `halt` entry remains
-as a hidden deprecated compatibility command. Inside a namespace, `hosts` and
+`up`, `ssh`, `init`, `start`, `stop`, `restart`, `reload`, `provision`,
+`hosts`, and `completion` have no aliases. Inside a namespace, `hosts` and
 `network` use `i`/`u` for install/uninstall; `network status` uses `st`; and
 `image` maps `list=ls`, `info=in`, `pull=p`, `prune=pr`, `sync=sy`,
-and `import=i`. Safety-sensitive `reset-manifest` stays unabridged.
+and `import=i`. `image reset` keeps `reset-manifest` as a compatibility alias.
 
 Commands using applied state work from any directory. Configuration selection
 is command-scoped; `-f` is deliberately not a global flag:
@@ -60,10 +62,10 @@ is command-scoped; `-f` is deliberately not a global flag:
 | Commands | Desired-state source |
 |---|---|
 | `setup [template]` | explicit `-f`, otherwise discovery, otherwise generate `meta`; template and `-f` are exclusive |
-| `init [template]` | generate a new inventory; read no desired state; `-f/--force` explicitly replaces the output |
+| `init [template]` | generate a new inventory; read no desired state; `--force` explicitly replaces the output |
 | `validate` | explicit `-f`, then discovery; never applied state |
 | `plan`, `up`, `reload`, `recreate` | explicit `-f`, then discovery, then the applied resolved specification |
-| other lifecycle/access commands | no desired-state inventory; use applied or marker-owned state as applicable |
+| other lifecycle/access commands | no desired-state inventory; they use applied state |
 
 ## Important flags
 
@@ -77,15 +79,17 @@ is command-scoped; `-f` is deliberately not a global flag:
 | `-m`, `--mode` | select `host` or `shared` where the command exposes the macOS network mode |
 | `-d`, `--dry-run` | show a setup/image plan without changing state |
 | `-y`, `--yes` | apply a displayed host/setup/image plan |
-| `-f`, `--force` (`init`, `destroy`) | overwrite generated output or skip destroy confirmation |
-| `--force` (`recreate`) | skip recreate confirmation; long-only because `-f` selects the Inventory |
-| `-n`, `--no-wait` | return after QMP/process identity without guest readiness |
+| `--force` (`init`, `destroy`, `recreate`) | overwrite generated output or skip the typed confirmation; long-only because `-f` selects the Inventory |
+| `-n`, `--no-wait` | return once QEMU is running, without waiting for the guest to boot |
+| `--rollback` (`up`, `reload`) | remove the prepare artifacts of nodes that failed to prepare in this run |
 | `--delete-persistent` | during whole destroy, also delete retained data disks; invalid with node selectors |
 | `--purge` | whole-deployment disposal: delete disks, keys, and deployment state; keep images |
 
-Rare or safety-widening controls such as `--allow-downgrade`, `--sudo`,
-`--delete-persistent`, and `--purge` intentionally remain long-only. Across the
-CLI, `-d` therefore consistently means a dry run.
+Rare or safety-widening controls such as `--force`, `--rollback`, `--remove`,
+`--allow-downgrade`, `--sudo`, `--delete-persistent`, and `--purge` are
+long-only. On commands that read an Inventory, `-f` always selects a file;
+`logs -f` retains the conventional `--follow`. `-n` always means `--no-wait`,
+and `-d` always means a dry run.
 
 If a failing command has not already emitted a richer typed result, structured
 mode writes one object containing `error` and `message` before returning the
@@ -94,14 +98,26 @@ by a second JSON/YAML document.
 
 `plan` is read-only and returns success even when its action is `recreate` or
 `blocked-removal`; automation must inspect the action and `create`, `recreate`,
-and `missing` fields. `up` creates additions, starts selected stopped nodes, and
-regenerates the default marker-owned SSH configuration from the complete
-applied deployment. `recreate` performs the same full refresh; node destroy
-removes stale entries, and whole destroy removes the default integration.
-`start` only powers on already-created nodes. Destructive drift still returns a
-conflict instead of being applied implicitly. If VM lifecycle succeeds but SSH
-reconciliation fails, structured output reports the VM status as a partial
-`ssh_config` failure and exits 7.
+and `missing` fields. `up` creates missing nodes, starts stopped ones,
+re-checks readiness of running ones, and rewrites the SSH client configuration
+Farrow installed from the complete applied deployment. `recreate` performs the
+same full refresh; node destroy removes stale entries, and whole destroy
+removes that configuration. `start` powers on stopped nodes and re-checks
+readiness of running ones; it does not touch the SSH client configuration.
+Destructive drift returns a conflict that names the next commands:
+`farrow plan`, then `farrow recreate <node>` or `farrow destroy <node>`. On a
+terminal those commands ask you to type the confirmation word; `--force` is for
+scripts. If VM lifecycle succeeds but the SSH client configuration cannot be
+written, structured output reports the VM status as a partial `ssh_config`
+failure and exits 5.
+
+A multi-node operation in which some nodes failed exits 5 and reports
+`N of M node(s) failed: <node> (<stage>: <error>); ...`. Stages are `prepare`,
+`start`, `readiness`, and `stop`; a `readiness` failure adds
+`run \`farrow logs <node>\` for the guest console`. Structured output carries
+`failures[]` with `node`, `stage`, and `error`, plus `rolled_back` when
+`--rollback` removed the prepare artifacts of nodes that never committed. See
+[A node did not become ready](../../start/troubleshooting/#a-node-did-not-become-ready).
 
 `status` reports the persisted `guest_arch` and `accelerator` for each node.
 TCG selection is therefore explicit in both text and structured output.
@@ -127,9 +143,10 @@ specification.
 | 2 | usage or invalid configuration |
 | 3 | missing host capability |
 | 4 | state conflict or explicit convergence required |
-| 5 | partial multi-node completion |
+| 5 | partial completion across nodes or post-lifecycle integration |
 | 6 | resource conflict |
 | 7 | integrity or ownership failure |
+| 130 | interrupted (SIGINT/SIGTERM) |
 
 `ssh` and `exec` pass through the remote program's exit code, except SSH's
 reserved transport-failure code 255, which Farrow maps to runtime failure 1.

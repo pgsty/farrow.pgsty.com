@@ -3,13 +3,13 @@ title: "Farrow 0.2.0: selected convergence and release integrity"
 linkTitle: Farrow 0.2.0
 description: VPN-aware network preflight, truly selected scale-out, committed-state integrations, signed multi-platform artifacts, and the 0.1.0 upgrade boundary.
 date: 2026-09-01
-weight: 1
+weight: 2
 categories: [Release]
 tags: [Farrow 0.2.0, QEMU, macOS, Linux, Release, Supply Chain]
 icon: fa-solid fa-rocket
 ---
 
-Farrow 0.2.0 is the current public pre-1.0 release. It keeps the Pigsty
+Farrow 0.2.0 was the public pre-1.0 release superseded by 0.3.0. It keeps the Pigsty
 inventory and on-disk deployment format introduced by 0.1.0 while fixing the
 network and selected-convergence boundaries found during the final native
 replay.
@@ -65,5 +65,4 @@ farrow doctor
 VMs are live to converge any pre-release process-birth identity. Existing
 guests adopt the new `/etc/hosts` marker when recreated.
 
-Because Farrow is still below 1.0, GitHub labels 0.2.0 as a pre-release even
-though it is the published current release.
+Because Farrow is still below 1.0, GitHub labels 0.2.0 as a pre-release.

@@ -51,26 +51,21 @@ Non-`supported` entries remain runnable and print a warning.
 
 For a pull, Farrow:
 
-1. opens one trusted local Catalog snapshot for the complete command;
-2. if that repository has never been checked successfully, or its successful
-   check is at least seven days old, probes `catalog.json` and its adjacent
-   `.minisig` once; a failed automatic probe backs off for one hour and keeps
-   using the cached or embedded Catalog;
-3. verifies a required signature, or records the explicitly selected local or
-   HTTPS repository as unsigned, before atomically activating new metadata;
-4. resolves `image[:channel]` or `image@version-prefix`, defaulting to
+1. reads the active local Catalog once for the complete command: the Catalog
+   embedded in this build, or the one last activated by `farrow update` or
+   `image sync`;
+2. resolves `image[:channel]` or `image@version-prefix`, defaulting to
    `d13:stable`; standalone `image pull` uses the native architecture, while
    lifecycle resolution honors `vm_arch`;
-5. reuses a local file only after size, SHA-256, and qcow2 checks pass;
-6. otherwise downloads the repository artifact, with the Catalog's immutable
+3. reuses a local file only after size, SHA-256, and qcow2 checks pass;
+4. otherwise downloads the repository artifact, with the Catalog's immutable
    HTTPS upstream URL as fallback.
 
 Released builds use `https://repo.pigsty.cc/farrow` after `--repo` and
-`FARROW_REPO`. Automatic Catalog-refresh failure never blocks a command that the
-trusted cached or embedded Catalog can satisfy. A missing image still requires a
-reachable artifact repository or immutable upstream URL. Run `farrow update` to
-bypass both the seven-day lifetime and failure backoff; unlike automatic refresh,
-an explicit update reports failure directly.
+`FARROW_REPO`. Farrow never refreshes the Catalog on its own, so a command only
+needs the repository when it has to download an image. Run `farrow update` to
+fetch, verify, and activate the repository's current Catalog; a failed update is
+an error.
 
 ## Runtime policy
 
@@ -109,26 +104,22 @@ modify the base.
 farrow update
 farrow image sync https://repo.example/farrow/catalog.json
 farrow image sync --allow-downgrade /absolute/repo/catalog.json
-farrow image reset-manifest
+farrow image reset
 ```
 
-`reset-manifest` restores the embedded bootstrap Catalog but keeps the
-anti-rollback high-water mark.
+`image reset` restores the embedded Catalog but keeps the anti-rollback
+high-water mark; `reset-manifest` remains as a compatibility alias.
 
-`farrow update` refreshes the configured repository. `image sync` remains the
-advanced recovery path for activating an exact URL or local file, including an
-explicit downgrade. Immutable versioned Catalog files are never touched merely
-to record cache freshness; repository-scoped freshness is separate local state.
-A successful `update`, `image sync`, or persisted `reset-manifest` records the
-repository as checked, so automatic refresh will not replace that explicit
-choice for seven days. Resetting a repository that has never stored state leaves
-it due for its first refresh.
+`farrow update` checks the repository now and activates a newer Catalog. Farrow
+never refreshes the Catalog on its own; the Catalog embedded in each release is
+used until you update. `image sync` is the recovery path for an exact URL or
+file, including a downgrade.
 
 For repository-scoped recovery, pass the same root explicitly:
 
 ```bash
 farrow image sync --repo /srv/farrow --allow-downgrade /srv/farrow/catalog.json
-farrow image reset-manifest --repo /srv/farrow
+farrow image reset --repo /srv/farrow
 ```
 
 `--repo` selects the independent high-water slot. If omitted, `FARROW_REPO`,
@@ -155,6 +146,8 @@ upstream account, then retains it as import provenance. It does not replace the
 deployment SSH user (`dba` by default). The file contains no generated
 checksum or size fields. `catalog.json` uses the same logical tree but
 materializes each variant's file, SHA-256, artifact size, and virtual size.
+`repo.yaml` is `schema: 1`; the generated `catalog.json` is the schema-3
+Catalog that Farrow embeds and signs.
 
 ```yaml
 schema: 1
@@ -198,10 +191,9 @@ and the Catalog last.
 ## Local layout and imports
 
 Images live under `FARROW_HOME/images` (default `~/.farrow/images`): family
-directories contain downloaded artifacts, `manifests/` stores Catalog state
-with an independent high-water entry per repository,
-and `local/` plus `local-images.json` hold imports. There is no old
-`~/.farrow/cache` or content-addressed `sha256/` hierarchy.
+directories contain downloaded artifacts, `manifests/` stores the active
+Catalog with an independent high-water entry per repository, and `local/` plus
+`local-images.json` hold imports.
 
 ```bash
 farrow image import --sha256 <digest> /path/to/base.qcow2

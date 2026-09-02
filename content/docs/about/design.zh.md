@@ -1,6 +1,6 @@
 ---
 title: 设计
-description: Farrow 简化后的单 deployment 架构、网络、状态、安全边界与评审结论。
+description: Farrow 的单 deployment 架构、网络、状态与安全边界。
 weight: 10
 icon: fa-solid fa-compass-drafting
 aliases: [/docs/concepts/, /docs/concepts/networking/, /docs/concepts/storage/, /docs/concepts/safety/, /docs/architecture/, /docs/architecture/overview/, /docs/architecture/networking/, /docs/architecture/security/]
@@ -40,17 +40,9 @@ systemd-networkd，并通过发行版 bridge helper 接入。若 networkd 尚未
 Activation-safety 扫描证明现有 Unit 不会接管真实宿主链路后才启动。
 
 Debian helper 会临时、可逆地限制给调用者真实加入的组。setup 必须通过一次非特权
-QEMU bridge smoke；失败后按 manifest 自动回滚。
+QEMU bridge smoke；失败后自动回滚安装。
 
 ## 安全边界
 
 QEMU 与所有 Guest 工件都以调用者身份运行。root 仅用于宿主网络与可选 hosts publisher。
 销毁必须同时匹配属主、路径包含、节点身份、QMP/进程身份与工件白名单；任何歧义都会停止。
-
-## 评审结论
-
-对单实验室产品而言，删除 project 与 lease 的 pivot 是正确的，显著降低了认知与状态
-复杂度。但真机审查仍不可省略：第一版在控制节点密钥、sudo 策略、Debian helper 权限、
-NetworkManager 验证、运行时 preflight、结果消息与失败清理上存在跨层断裂。这些路径已修复，
-并在 macOS 与 Linux 真机重放后才重写本文档。后续对抗审查又在 EL7/EL8 提交前发现并
-修复了破坏前预检顺序与签名 Catalog 基线升级问题。

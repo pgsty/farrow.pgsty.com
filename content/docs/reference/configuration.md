@@ -12,9 +12,6 @@ Configuration lookup order is explicit `-f`, then `farrow.yml`,
 `farrow.yaml`, `pigsty.yml`, and `pigsty.yaml` in the current directory. Every
 name uses the same Pigsty-compatible YAML Inventory format.
 
-The retired top-level `version:`/`nodes:` format is rejected with migration
-guidance.
-
 For `plan`, `up`, `reload`, and `recreate`, absence of a file falls back to
 the applied spec when a deployment exists. `validate` has no fallback. A
 configuration must be a regular non-symlink file no larger than 4 MiB.
@@ -108,6 +105,9 @@ Node name order: `nodename`, then `<pg_cluster>-<pg_seq>`, then
 
 All managed hosts must be in one RFC1918 `/24`: `.1` is the host, `.2`–`.8`
 are reserved, and nodes use `.9`–`.254`.
+
+Inside the guest the fixed-IP interface is the one carrying the inventory
+address (`ip -br addr`); its name is not a Farrow contract.
 
 ## Drift
 
