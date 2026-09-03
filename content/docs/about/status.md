@@ -11,10 +11,10 @@ and the public site are separate gates. Install instructions are in the
 [Quick Start](../../start/tutorial/#install).
 
 The current public release is
-[`v0.4.0`](https://github.com/pgsty/farrow/releases/tag/v0.4.0). Its source and
-package gates passed at commit `8ecb8476c7dbc934d8cbbee935ac53884d00fcdb`;
+[`v0.5.0`](https://github.com/pgsty/farrow/releases/tag/v0.5.0). Its source and
+package gates passed at commit `fc85b65ff6a24b0933b56ae1179be9ada2ba91b1`;
 the native-host rows below remain the latest dated VM evidence rather than
-being implicitly promoted to 0.4.0.
+being implicitly promoted to 0.5.0.
 
 ## Summary
 
@@ -48,6 +48,23 @@ custody must be formalized before 1.0.
 
 Each entry belongs to the exact checkpoint exercised that day. Later source or
 documentation edits do not inherit native proof without another replay.
+
+### Farrow 0.5.0 release — 2026-09-03
+
+Exact commit `fc85b65ff6a24b0933b56ae1179be9ada2ba91b1` passed both main-branch
+workflows before tagging: the complete Go 1.27.1 source gate and the independent
+GoReleaser snapshot/package path. The exact tag workflow then repeated the
+source/toolchain checks, built and verified four platform archives, four native
+Linux packages, eight SPDX documents, the Homebrew formula, installer,
+`release.json`, and the 19-entry checksum manifest before creating the
+20-asset pre-release.
+
+0.5.0 adds no-confirmation whole-deployment `purge`/`rm`, makes the global
+`repo.pigsty.io` default and China `--mirror` explicit, removes hidden Catalog
+upstream fallback, and adds the digest-pinned eight-target Debian/Rocky official
+image candidate builder. The builder results remain unsigned `testing`
+candidates; no image Catalog or native VM lifecycle result is promoted by this
+application release.
 
 ### Farrow 0.4.0 release — 2026-09-02
 

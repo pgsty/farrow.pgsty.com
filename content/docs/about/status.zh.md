@@ -9,9 +9,9 @@ aliases: [/docs/project/, /docs/project/status/, /docs/project/roadmap/, /docs/p
 Farrow 仍是 pre-1.0。源码测试、带日期的真机重放、软件包、发布、CI 与线上站点是不同门禁。
 安装方法见[快速上手](../../start/tutorial/#安装)。
 
-当前公开版本为 [`v0.4.0`](https://github.com/pgsty/farrow/releases/tag/v0.4.0)。其源码与
-Package 门禁在 Commit `8ecb8476c7dbc934d8cbbee935ac53884d00fcdb` 通过；下表真机记录
-仍是最新的带日期 VM 证据，不会被自动提升为 0.4.0 证据。
+当前公开版本为 [`v0.5.0`](https://github.com/pgsty/farrow/releases/tag/v0.5.0)。其源码与
+Package 门禁在 Commit `fc85b65ff6a24b0933b56ae1179be9ada2ba91b1` 通过；下表真机记录
+仍是最新的带日期 VM 证据，不会被自动提升为 0.5.0 证据。
 
 ## 概览
 
@@ -42,6 +42,19 @@ Package 门禁在 Commit `8ecb8476c7dbc934d8cbbee935ac53884d00fcdb` 通过；下
 ## 验证历史
 
 每条记录只属于当天真正执行过的准确 Checkpoint；后续源码或文档修改不会自动继承真机证明。
+
+### Farrow 0.5.0 发布：2026-09-03
+
+准确 Commit `fc85b65ff6a24b0933b56ae1179be9ada2ba91b1` 在打 Tag 前同时通过主干的完整
+Go 1.27.1 源码门禁与独立 GoReleaser Snapshot/Package 路径。准确 Tag 工作流随后再次执行
+源码/工具链检查，构建并验证四个平台 Archive、四份 Linux 原生 Package、八份 SPDX、
+Homebrew Formula、Installer、`release.json` 与 19 项 Checksum Manifest，最后创建包含
+20 个资产的 Pre-release。
+
+0.5.0 加入无需确认的整套 Deployment `purge`/`rm`，明确全球 `repo.pigsty.io` 默认仓库与
+中国 `--mirror`，移除隐藏的 Catalog Upstream 回退，并加入摘要锁定的 Debian/Rocky 八目标
+官方镜像 Candidate Builder。Builder 结果仍是未签名的 `testing` Candidate；本次应用发布
+不会提升任何镜像 Catalog 或真机 VM 生命周期结果。
 
 ### Farrow 0.4.0 发布：2026-09-02
 

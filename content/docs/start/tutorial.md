@@ -11,25 +11,25 @@ aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /do
 
 Farrow is pre-1.0. Every release ships a user-scoped installer, a Homebrew
 formula, and DEB/RPM packages as release assets. Download them from the
-[Farrow 0.4.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.4.0),
+[Farrow 0.5.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.5.0),
 then pick one path:
 
 ```bash
 # From a release: user-scoped, no sudo, checksum-verified
-curl -fLO https://github.com/pgsty/farrow/releases/download/v0.4.0/install.sh
+curl -fLO https://github.com/pgsty/farrow/releases/download/v0.5.0/install.sh
 chmod +x install.sh
-FARROW_VERSION=0.4.0 ./install.sh
+FARROW_VERSION=0.5.0 ./install.sh
 
 # Homebrew formula (shipped as a release asset)
 brew install --formula ./farrow.rb
 
 # Debian/Ubuntu and RHEL-family packages are release assets too
-sudo apt install ./farrow_0.4.0_linux_amd64.deb
-sudo dnf install ./farrow_0.4.0_linux_amd64.rpm
+sudo apt install ./farrow_0.5.0_linux_amd64.deb
+sudo dnf install ./farrow_0.5.0_linux_amd64.rpm
 ```
 
 GitHub does not expose pre-1.0 prereleases through `/releases/latest`, so the
-installer needs `FARROW_VERSION=0.4.0`. Use [Build from Source](../source-build/)
+installer needs `FARROW_VERSION=0.5.0`. Use [Build from Source](../source-build/)
 for development and source review.
 
 ## Boot the first lab

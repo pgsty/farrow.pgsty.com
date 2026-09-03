@@ -11,7 +11,8 @@ pre-1.0; see [Status](../../about/status/) for public-package availability.
 
 ## Build
 
-You need Go 1.27.x, Git, Make, and standard build tools. From a source checkout:
+The current tree pins Go 1.27.1. You also need Git, Make, and standard build
+tools. From a source checkout:
 
 ```bash
 cd /path/to/farrow

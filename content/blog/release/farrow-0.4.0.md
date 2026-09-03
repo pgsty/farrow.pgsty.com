@@ -9,7 +9,7 @@ tags: [Farrow 0.4.0, QEMU, UX, Release]
 icon: fa-solid fa-rocket
 ---
 
-Farrow 0.4.0 is the current public pre-1.0 release. It makes the first run one
+Farrow 0.4.0 was the public pre-1.0 release superseded by 0.5.0. It makes the first run one
 command, fixes the default data disk on Debian and Ubuntu images, and gives every
 command the same output style. The Pigsty Inventory format, the fixed-IP
 deployment model, the state layout, and the embedded Catalog revision

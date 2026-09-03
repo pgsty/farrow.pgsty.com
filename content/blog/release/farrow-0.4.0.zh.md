@@ -9,7 +9,7 @@ tags: [Farrow 0.4.0, QEMU, 体验, 发布]
 icon: fa-solid fa-rocket
 ---
 
-Farrow 0.4.0 是当前公开的 pre-1.0 发布。它把首次运行压缩为一条命令，修复了 Debian 与
+Farrow 0.4.0 是被 0.5.0 取代的公开 pre-1.0 发布。它把首次运行压缩为一条命令，修复了 Debian 与
 Ubuntu 镜像上的默认数据盘，并让全部命令使用同一套输出风格。Pigsty Inventory 格式、
 固定 IP Deployment 模型、状态布局与内嵌 Catalog revision `2026082903` 均未变化。
 
