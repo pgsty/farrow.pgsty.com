@@ -51,11 +51,13 @@ Catalog 状态只表达支持策略，不是启动开关：`supported` 表示已
 2. 解析 `image[:channel]` 或 `image@version-prefix`，缺省为 `d13:stable`；独立
    `image pull` 使用本机架构，生命周期解析遵循 `vm_arch`；
 3. 只有尺寸、SHA-256、qcow2 结构全部匹配时才复用本地文件；
-4. 否则下载仓库工件，仓库缺失时回退到 Catalog 中不可变的 HTTPS Upstream URL。
+4. 否则只从选定仓库下载 Catalog 指定的准确工件；不可变 Upstream URL 是溯源，不是回退源。
 
-Release 构建在 `--repo`、`FARROW_REPO` 之后使用 `https://repo.pigsty.cc/farrow`。
-Farrow 不会自动刷新 Catalog，因此只有必须下载镜像时命令才需要仓库可达。运行
-`farrow update` 可获取、校验并激活仓库当前的 Catalog；更新失败会直接报错。
+Release 构建默认使用 `https://repo.pigsty.io/farrow`；仅有长参数的 `--mirror` 选择
+`https://repo.pigsty.cc/farrow`。优先级依次为 `--repo`、`--mirror`、`FARROW_REPO`、
+全球默认仓库，两个官方根都保持规范的签名 Catalog 信任。Farrow 不会自动刷新 Catalog，
+因此只有必须下载镜像时命令才需要仓库可达。运行 `farrow update` 可获取、校验并激活选定
+仓库当前的 Catalog；更新失败或工件缺失都会直接报错。
 
 ## 运行时策略
 
@@ -68,6 +70,7 @@ EL7 刻意仅支持 Linux/amd64 原生运行。Linux setup 只安装宿主原生
 先安装对应 System Emulator 与 UEFI 固件，`plan`、`up`、`recreate` 才会继续。
 
 ```bash
+farrow image pull d13 --mirror
 farrow image pull d13 --repo https://mirror.example/farrow
 FARROW_REPO=/absolute/local/repository farrow up
 ```
@@ -106,7 +109,8 @@ farrow image sync --repo /srv/farrow --allow-downgrade /srv/farrow/catalog.json
 farrow image reset --repo /srv/farrow
 ```
 
-`--repo` 决定要操作的独立 High-water 槽；省略时依次使用 `FARROW_REPO` 和编译期默认值。
+`--repo` 决定要操作的独立 High-water 槽；省略时依次考虑 `--mirror`、`FARROW_REPO`
+与全球编译期默认值。
 
 ## 静态仓库格式
 
@@ -121,8 +125,9 @@ farrow/
     └── <image>-<version>-<arch>.qcow2
 ```
 
-`repo.yaml` 保存人工意图：默认值、别名、Channel、精确版本、架构、启动模式、状态和可选
-Upstream。`source_user` 表示发行版原始镜像内置的登录账号（例如 `rocky`）；离线归一化
+`repo.yaml` 保存人工意图：默认值、别名、Channel、精确版本、架构、启动模式、状态和可选、
+只用于溯源的 Upstream URL。`source_user` 表示发行版原始镜像内置的登录账号（例如
+`rocky`）；离线归一化
 会用它清理并锁定该上游账号，随后把它保留为导入溯源。它不会替换 deployment SSH 用户
 （默认 `dba`）。该文件不保存任何生成的摘要或大小；`catalog.json` 保持同一逻辑树，
 但为每个 Variant 物化文件名、SHA-256、工件大小和虚拟大小。`repo.yaml` 是 `schema: 1`；
@@ -185,7 +190,7 @@ farrow image prune --yes
 ```
 
 Prune 会先列出准确的未引用镜像与遗留 Staging 文件。已应用 deployment 引用的镜像永远
-不是候选；`destroy`（包括 `destroy --purge`）后镜像仍保留缓存。
+不是候选；`destroy`、`destroy --purge` 与 `purge` 后镜像仍保留缓存。
 
 使用 `go run ./tools/catalogexport /absolute/new/catalog.json` 可逐字节导出编译期
 Schema-3 Catalog。

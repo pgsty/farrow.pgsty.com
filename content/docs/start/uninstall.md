@@ -17,11 +17,13 @@ farrow st
 Delete nodes, persistent disks, keys, and deployment state:
 
 ```bash
-farrow destroy --purge
+farrow purge
 ```
 
-An interactive terminal asks you to type `destroy`. Scripts and CI must add
-`--force` explicitly. The image cache and host network remain.
+This whole-deployment command asks for no confirmation and is also available as
+`farrow rm`. The image cache and host network remain. Use the granular,
+confirmed `farrow destroy` command instead when preserving persistent disks or
+removing selected nodes.
 
 ## 2. Remove optional integrations
 

@@ -58,14 +58,16 @@ For a pull, Farrow:
    `d13:stable`; standalone `image pull` uses the native architecture, while
    lifecycle resolution honors `vm_arch`;
 3. reuses a local file only after size, SHA-256, and qcow2 checks pass;
-4. otherwise downloads the repository artifact, with the Catalog's immutable
-   HTTPS upstream URL as fallback.
+4. otherwise downloads the exact Catalog-named artifact from the selected
+   repository; an immutable upstream URL is provenance, not a fallback.
 
-Released builds use `https://repo.pigsty.cc/farrow` after `--repo` and
-`FARROW_REPO`. Farrow never refreshes the Catalog on its own, so a command only
-needs the repository when it has to download an image. Run `farrow update` to
-fetch, verify, and activate the repository's current Catalog; a failed update is
-an error.
+Released builds use `https://repo.pigsty.io/farrow` by default. Long-only
+`--mirror` selects `https://repo.pigsty.cc/farrow`; precedence is `--repo`,
+`--mirror`, `FARROW_REPO`, then the global default. Both official roots retain
+canonical signed-Catalog trust. Farrow never refreshes the Catalog on its own,
+so a command only needs the repository when it has to download an image. Run
+`farrow update` to fetch, verify, and activate the selected repository's current
+Catalog; a failed update or missing artifact is an error.
 
 ## Runtime policy
 
@@ -80,6 +82,7 @@ the native QEMU family; foreign architectures require the matching system
 emulator and UEFI firmware before `plan`, `up`, or `recreate` can proceed.
 
 ```bash
+farrow image pull d13 --mirror
 farrow image pull d13 --repo https://mirror.example/farrow
 FARROW_REPO=/absolute/local/repository farrow up
 ```
@@ -122,8 +125,8 @@ farrow image sync --repo /srv/farrow --allow-downgrade /srv/farrow/catalog.json
 farrow image reset --repo /srv/farrow
 ```
 
-`--repo` selects the independent high-water slot. If omitted, `FARROW_REPO`,
-then the compiled default, is used.
+`--repo` selects the independent high-water slot. If omitted, `--mirror`,
+`FARROW_REPO`, then the global compiled default determine the repository.
 
 ## Static repository format
 
@@ -139,7 +142,8 @@ farrow/
 ```
 
 `repo.yaml` stores author intent: defaults, aliases, channels, exact versions,
-architectures, boot mode, status, and optional upstream URLs. `source_user`
+architectures, boot mode, status, and optional provenance-only upstream URLs.
+`source_user`
 names the login account originally baked into the distribution image (for
 example `rocky`); offline normalization uses it to sanitize and lock that
 upstream account, then retains it as import provenance. It does not replace the
@@ -214,7 +218,7 @@ farrow image prune --yes
 
 Prune lists exact unreferenced images and stale staging files before deletion.
 An image referenced by applied deployment state is never a candidate. Images
-remain cached after `destroy`, including `destroy --purge`.
+remain cached after `destroy`, `destroy --purge`, and `purge`.
 
 The compiled schema-3 Catalog can be exported byte-for-byte with
 `go run ./tools/catalogexport /absolute/new/catalog.json`. A public Catalog at

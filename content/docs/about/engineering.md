@@ -48,11 +48,18 @@ and its `origin` remote because GoReleaser records repository identity.
 
 ## Image normalization
 
-`packaging/image-pipeline/` accepts an explicit local qcow2 source; it never
-downloads or uploads. It copies and hashes the source, forces qcow2 parsing,
-rejects backing/external/encrypted/unknown features, runs `qemu-img check`, and
-can perform a no-network offline Guest mutation in an explicit QEMU sandbox.
-UID/GID 88 collisions are rejected rather than rewritten ambiguously.
+The low-level `packaging/image-pipeline/build.sh` accepts an explicit local
+qcow2 source and never downloads or uploads. It copies and hashes the source,
+forces qcow2 parsing, rejects backing/external/encrypted/unknown features, runs
+`qemu-img check`, and can perform a no-network offline Guest mutation in an
+explicit QEMU sandbox. UID/GID 88 collisions are rejected rather than rewritten
+ambiguously.
+
+`build-official.py` adds a fixed digest-pinned wrapper for Debian 12/13 and
+Rocky Linux 8/9 on amd64/arm64. It may fetch only the locked source and offline
+package inputs, then emits unsigned `testing` candidates and can assemble a
+separate candidate repository. Native smoke, repeat-build comparison,
+production signing, upload, and Catalog activation remain later gates.
 
 Catalog bytes are exported with:
 

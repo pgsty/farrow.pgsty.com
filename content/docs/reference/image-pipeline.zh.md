@@ -5,8 +5,9 @@ weight: 40
 icon: fa-solid fa-shield-halved
 ---
 
-`packaging/image-pipeline/` 接受一份已下载的不可变 qcow2 与独立获得的 SHA-256。它绝不
-下载、上传、修改 Farrow 运行时/网络状态、读取签名密钥，也不会把镜像标成 `supported`。
+底层 `packaging/image-pipeline/build.sh` 接受一份已下载的不可变 qcow2 与独立获得的
+SHA-256。它绝不下载、上传、修改 Farrow 运行时/网络状态、读取签名密钥，也不会把镜像
+标成 `supported`。
 
 ## 模式
 
@@ -16,6 +17,31 @@ icon: fa-solid fa-shield-halved
   `virt-cat`。它拒绝无关 UID/GID 88 占用，归一化锁定的 `dba`/`admin` 身份，关闭密码与
   Root SSH，清理密钥/历史/Host Identity/cloud-init Cache，恢复定向 SELinux Label，
   并回读确定性 Marker。
+
+## 官方 Candidate 矩阵
+
+`build-official.py` 在同一离线边界上封装固定的八目标矩阵：Debian 12/13 与 Rocky Linux
+8/9，各自覆盖 amd64、arm64。每份上游 qcow2、RPM/DEB 输入、Release 名称、Digest 与
+Source Epoch 都锁定在 `official-v1.json`。
+
+```bash
+./packaging/image-pipeline/build-official.py --list
+
+./packaging/image-pipeline/build-official.py \
+  --source-cache /absolute/source-cache \
+  --package-cache /absolute/package-cache \
+  --output /absolute/existing-output-root \
+  --target d13/arm64 --fetch
+```
+
+不加 `--fetch` 时，全部锁定输入必须已经位于两个 Canonical Cache 目录；加上后，Wrapper
+也只下载固定 HTTPS URL，并在调用离线归一化前拒绝任何 Digest 不匹配。Debian 12/13
+安装锁定的 XFS 用户态闭包；Rocky Linux 8 安装锁定的 Python/SELinux 闭包；Rocky Linux 9
+不需要额外软件包输入。
+
+每份结果仍是未签名的 `testing` Candidate。把八个 Bundle Root 全部传给
+`--assemble-from` 会创建新的候选静态仓库，并运行 `farrow repo build` 与 `verify`；这仍不
+包含真机 Smoke、签名、上传或 Catalog 发布。
 
 ```bash
 SOURCE_DATE_EPOCH=1787486400

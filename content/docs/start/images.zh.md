@@ -44,9 +44,12 @@ Stable Channel，则改用 `vm_image: el9:stable`。
 
 ## 使用镜像站
 
-为单条命令指定仓库：
+Release 构建默认使用 `https://repo.pigsty.io/farrow`。单条命令可通过仅有长参数的
+`--mirror` 选择中国官方仓库，也可以用 `--repo` 指定自定义根：
 
 ```bash
+farrow image pull d13 --mirror
+farrow up --mirror
 farrow image pull d13 --repo https://mirror.example/farrow
 farrow up --repo https://mirror.example/farrow
 ```
@@ -58,10 +61,14 @@ export FARROW_REPO=https://mirror.example/farrow
 farrow up
 ```
 
+选择优先级依次为 `--repo`、`--mirror`、`FARROW_REPO`、全球默认仓库。`--mirror`
+解析为 `https://repo.pigsty.cc/farrow`，两个官方根都保持规范的签名 Catalog 信任。
 `FARROW_REPO` 也可以是绝对本地目录。显式本地或 HTTPS 仓库可使用未签名 Catalog；HTTP
-仓库必须提供可信密钥签名。文件大小、SHA-256 与 qcow2 结构始终校验。只有需要下载工件时
-仓库不可达才有影响；`farrow update` 获取配置仓库的 Catalog，`image sync` 则获取或读取
-用户明确给出的源。
+仓库必须提供可信密钥签名。文件大小、SHA-256 与 qcow2 结构始终校验。
+
+只有需要下载工件时仓库不可达才有影响。Catalog Upstream URL 只用于溯源，不是隐藏回退；
+选定仓库缺失工件时会直接报错。`farrow update` 获取该仓库的 Catalog，`image sync` 则获取
+或读取用户明确给出的准确源。
 
 ## 构建静态仓库
 

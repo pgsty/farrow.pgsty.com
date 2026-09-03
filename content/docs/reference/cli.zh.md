@@ -27,7 +27,7 @@ JSON/YAML 模式下，空命名空间返回结构化用法错误。显式 `--hel
 | 范围 | 命令 |
 |---|---|
 | 准备 | `setup`、`init`、`validate`、`doctor` |
-| 生命周期 | `plan`、`up`、`start`、`stop`、`restart`、`reload`、`recreate`、`status`、`destroy` |
+| 生命周期 | `plan`、`up`、`start`、`stop`、`restart`、`reload`、`recreate`、`status`、`destroy`、`purge` |
 | 访问 | `ssh`、`exec`、`logs`、`provision`、`ssh-config`、`hosts install/uninstall` |
 | 镜像 | `update`、`image list/info/pull/import/sync/prune/reset`、`repo scan/build/verify` |
 | 宿主网络 | `network status/install/uninstall` |
@@ -47,9 +47,11 @@ JSON/YAML 模式下，空命名空间返回结构化用法错误。显式 `--hel
 | `ssh-config` | `sc` | `image` | `images`、`im` |
 | `doctor` | `dt` | `network` | `n`、`net` |
 | `exec` / `logs` | `ex` / `l` | `version` | `ver` |
+| `purge` | `rm` |  |  |
 
 `up`、`ssh`、`init`、`start`、`stop`、`restart`、`reload`、`provision`、`hosts`、
-`completion` 没有别名。命名空间内部，`hosts` 与 `network` 的 install/uninstall 使用
+`completion` 没有别名。`purge` 使用 `rm` 作为明确的整套 Deployment 处置别名。
+命名空间内部，`hosts` 与 `network` 的 install/uninstall 使用
 `i`/`u`，`network status` 使用 `st`；`image` 使用 `list=ls`、`info=in`、`pull=p`、
 `prune=pr`、`sync=sy`、`import=i`。`image reset` 保留 `reset-manifest` 作为兼容别名。
 
@@ -71,7 +73,8 @@ JSON/YAML 模式下，空命名空间返回结构化用法错误。显式 `--hel
 | `-v`、`--verbose` | stderr 有界诊断 |
 | `-c`、`--cidr` | 为 `init`/`setup` 生成模板或宿主网络检查/安装选择 RFC1918 `/24` |
 | `-f`、`--file` | 为读取期望状态的命令选择 Inventory |
-| `-r`、`--repo` | 为需要解析下载的命令选择镜像/制品仓库 |
+| `-r`、`--repo` | 选择镜像/制品仓库；覆盖 `--mirror` 与 `FARROW_REPO` |
+| `--mirror` | 为 setup、Catalog 与需要解析镜像的生命周期命令选择中国官方仓库 |
 | `-m`、`--mode` | 在提供该参数的命令中选择 macOS `host`/`shared` 网络模式 |
 | `-d`、`--dry-run` | 只展示 setup/image 计划，不改变状态 |
 | `-y`、`--yes` | 应用已展示的宿主/setup/image 计划 |
@@ -81,10 +84,15 @@ JSON/YAML 模式下，空命名空间返回结构化用法错误。显式 `--hel
 | `--delete-persistent` | 整体销毁时也删持久盘；不能与节点选择器一起使用 |
 | `--purge` | 整体处置：删除磁盘、密钥与 deployment 状态，保留镜像 |
 
-`--force`、`--rollback`、`--remove`、`--allow-downgrade`、`--sudo`、
+`--mirror`、`--force`、`--rollback`、`--remove`、`--allow-downgrade`、`--sudo`、
 `--delete-persistent`、`--purge` 等低频或扩大风险边界的参数只保留长版本。读取
 Inventory 的命令中 `-f` 始终选择文件；`logs -f` 保留惯用的 `--follow`。
 `-n` 始终表示 `--no-wait`，`-d` 始终表示 Dry-run。
+
+`farrow purge`（别名 `farrow rm`）是不经确认的
+`farrow destroy --force --purge` 快捷路径。它不接受节点或 Inventory，删除整套 Deployment、
+持久盘、密钥、状态和默认 SSH Fragment，保留镜像与宿主网络。没有 Deployment 时幂等成功；
+缺少状态文件绝不会授权按路径删除无法证明身份的遗留节点工件。
 
 如果失败命令尚未输出更丰富的类型化结果，结构化模式会先输出一份包含 `error` 与
 `message` 的对象，再返回约定的非零退出码；已经携带失败状态的结果后面绝不会追加第二份

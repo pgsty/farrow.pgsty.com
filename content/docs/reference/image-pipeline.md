@@ -5,9 +5,10 @@ weight: 40
 icon: fa-solid fa-shield-halved
 ---
 
-`packaging/image-pipeline/` accepts one already-downloaded immutable qcow2 and
-an independently obtained SHA-256. It never downloads, uploads, touches Farrow
-runtime/network state, reads signing keys, or marks an image `supported`.
+The low-level `packaging/image-pipeline/build.sh` accepts one already-downloaded
+immutable qcow2 and an independently obtained SHA-256. It never downloads,
+uploads, touches Farrow runtime/network state, reads signing keys, or marks an
+image `supported`.
 
 ## Modes
 
@@ -19,6 +20,34 @@ runtime/network state, reads signing keys, or marks an image `supported`.
   normalizes the locked `dba`/`admin` identity, disables password/root SSH,
   removes keys/history/host identity/cloud-init cache, restores targeted SELinux
   labels, and reads back a deterministic marker.
+
+## Official candidate matrix
+
+`build-official.py` wraps the same offline boundary for a fixed eight-target
+matrix: Debian 12/13 and Rocky Linux 8/9, each on amd64 and arm64. Every
+upstream qcow2, RPM/DEB input, release name, digest, and source epoch is pinned
+in `official-v1.json`.
+
+```bash
+./packaging/image-pipeline/build-official.py --list
+
+./packaging/image-pipeline/build-official.py \
+  --source-cache /absolute/source-cache \
+  --package-cache /absolute/package-cache \
+  --output /absolute/existing-output-root \
+  --target d13/arm64 --fetch
+```
+
+Without `--fetch`, every locked input must already exist in the two canonical
+cache directories. With it, the wrapper downloads only the pinned HTTPS URLs
+and rejects any digest mismatch before invoking offline normalization. Debian
+12/13 install the locked XFS userspace closure; Rocky Linux 8 installs the
+locked Python/SELinux closure, and Rocky Linux 9 needs no extra package input.
+
+Each result remains an unsigned `testing` candidate. Supplying all eight bundle
+roots to `--assemble-from` creates a new candidate static repository and runs
+`farrow repo build` plus `verify`; this still does not perform native smoke,
+signing, upload, or Catalog publication.
 
 ```bash
 SOURCE_DATE_EPOCH=1787486400

@@ -28,7 +28,7 @@ structured usage error; explicit `--help` always renders human help.
 | Area | Commands |
 |---|---|
 | Prepare | `setup`, `init`, `validate`, `doctor` |
-| Lifecycle | `plan`, `up`, `start`, `stop`, `restart`, `reload`, `recreate`, `status`, `destroy` |
+| Lifecycle | `plan`, `up`, `start`, `stop`, `restart`, `reload`, `recreate`, `status`, `destroy`, `purge` |
 | Access | `ssh`, `exec`, `logs`, `provision`, `ssh-config`, `hosts install/uninstall` |
 | Images | `update`, `image list/info/pull/import/sync/prune/reset`, `repo scan/build/verify` |
 | Host network | `network status/install/uninstall` |
@@ -49,9 +49,11 @@ Frequently used commands have scoped aliases:
 | `ssh-config` | `sc` | `image` | `images`, `im` |
 | `doctor` | `dt` | `network` | `n`, `net` |
 | `exec` / `logs` | `ex` / `l` | `version` | `ver` |
+| `purge` | `rm` |  |  |
 
 `up`, `ssh`, `init`, `start`, `stop`, `restart`, `reload`, `provision`,
-`hosts`, and `completion` have no aliases. Inside a namespace, `hosts` and
+`hosts`, and `completion` have no aliases. `purge` uses `rm` as its explicit
+whole-deployment disposal alias. Inside a namespace, `hosts` and
 `network` use `i`/`u` for install/uninstall; `network status` uses `st`; and
 `image` maps `list=ls`, `info=in`, `pull=p`, `prune=pr`, `sync=sy`,
 and `import=i`. `image reset` keeps `reset-manifest` as a compatibility alias.
@@ -75,7 +77,8 @@ is command-scoped; `-f` is deliberately not a global flag:
 | `-v`, `--verbose` | bounded diagnostics on stderr |
 | `-c`, `--cidr` | select the RFC1918 `/24` for generated `init`/`setup` templates or host-network inspection/install |
 | `-f`, `--file` | select an Inventory for commands that read desired state |
-| `-r`, `--repo` | choose an image/artifact repository for commands that resolve downloads |
+| `-r`, `--repo` | choose an image/artifact repository; overrides `--mirror` and `FARROW_REPO` |
+| `--mirror` | use the China official repository for setup, Catalog, and image-resolving lifecycle commands |
 | `-m`, `--mode` | select `host` or `shared` where the command exposes the macOS network mode |
 | `-d`, `--dry-run` | show a setup/image plan without changing state |
 | `-y`, `--yes` | apply a displayed host/setup/image plan |
@@ -85,11 +88,19 @@ is command-scoped; `-f` is deliberately not a global flag:
 | `--delete-persistent` | during whole destroy, also delete retained data disks; invalid with node selectors |
 | `--purge` | whole-deployment disposal: delete disks, keys, and deployment state; keep images |
 
-Rare or safety-widening controls such as `--force`, `--rollback`, `--remove`,
-`--allow-downgrade`, `--sudo`, `--delete-persistent`, and `--purge` are
+Rare, selection, or safety-widening controls such as `--mirror`, `--force`,
+`--rollback`, `--remove`, `--allow-downgrade`, `--sudo`,
+`--delete-persistent`, and `--purge` are
 long-only. On commands that read an Inventory, `-f` always selects a file;
 `logs -f` retains the conventional `--follow`. `-n` always means `--no-wait`,
 and `-d` always means a dry run.
+
+`farrow purge` (alias `farrow rm`) is the no-confirmation shortcut for
+`farrow destroy --force --purge`. It accepts no nodes or Inventory, removes the
+complete deployment plus persistent disks, keys, state, and the default SSH
+fragment, and keeps images and the host network. With no deployment it succeeds
+without changing the image cache. Missing state never authorizes deletion of
+residual node artifacts whose identity cannot be proven.
 
 If a failing command has not already emitted a richer typed result, structured
 mode writes one object containing `error` and `message` before returning the

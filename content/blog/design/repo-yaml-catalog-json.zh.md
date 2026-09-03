@@ -53,7 +53,7 @@ images:
 ## `catalog.json`：仓库能够证明什么
 
 `catalog.json` 把策略落实到本地仓库。每个 Variant 都包含准确文件名、字节数、SHA-256、
-qcow2 Virtual Size、Boot Contract、Source User 与 Immutable Upstream Fallback。
+qcow2 Virtual Size、Boot Contract、Source User 与 Immutable Upstream Provenance。
 
 这些字段来自扫描 Artifact，而不是从 YAML 复制。Build 会强制解析 qcow2，拒绝 Backing File、
 External Data、Encryption 与未知 Incompatible Feature，执行结构检查后才原子替换 Catalog。
@@ -110,9 +110,10 @@ Base Image 变为只读，Node Root Disk 使用 Overlay，因此普通 VM 写入
 Image Catalog Key 授权镜像策略；Release Signing 证明 Farrow 应用工件与 Checksum Manifest。
 两组 Key 刻意独立：有权发布 VM Image 不应自动获得发布 Farrow Binary 的权限，反之亦然。
 
-普通 Public Build 也不会把私有开发 Mirror 编译成默认值，而是从 Embedded Catalog 及其
-Immutable HTTPS Upstream 开始。只有 Public Mirror 本身已经上线，它才可以成为 Compiled
-Default。源码配置、生成 Catalog、上传 Artifact、签名与公开可用性仍是彼此独立的发布门禁。
+普通 Public Build 默认使用 `https://repo.pigsty.io/farrow`，并通过 `--mirror` 显式选择
+`https://repo.pigsty.cc/farrow`；`--repo` 仍是自定义覆盖。仓库一旦选定，它就是唯一工件源；
+Embedded Catalog 的 Upstream URL 继续提供溯源，但绝不会变成隐藏回退。源码配置、生成
+Catalog、上传 Artifact、签名与公开可用性仍是彼此独立的发布门禁。
 
 更大的设计原则是：策略应当便于人类审查，而关于已发布字节的事实必须可生成、可复现，并能
 被独立验证。

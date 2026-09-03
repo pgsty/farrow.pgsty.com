@@ -42,10 +42,15 @@ GoReleaser 会记录仓库身份。
 
 ## 镜像归一化
 
-`packaging/image-pipeline/` 只接受显式本地 qcow2，不下载也不上传。它复制并哈希源文件，
-强制 qcow2 解析，拒绝 Backing/External/Encryption/未知 Feature，运行 `qemu-img check`，
-并可在显式 QEMU Sandbox 中做无网络 Offline Guest Mutation。UID/GID 88 冲突会拒绝，
-不会含糊改写。
+底层 `packaging/image-pipeline/build.sh` 只接受显式本地 qcow2，不下载也不上传。它复制并
+哈希源文件，强制 qcow2 解析，拒绝 Backing/External/Encryption/未知 Feature，运行
+`qemu-img check`，并可在显式 QEMU Sandbox 中做无网络 Offline Guest Mutation。
+UID/GID 88 冲突会拒绝，不会含糊改写。
+
+`build-official.py` 为 Debian 12/13、Rocky Linux 8/9 的 amd64/arm64 目标增加固定、
+摘要锁定的 Wrapper。它只允许获取锁定的源镜像与离线软件包输入，输出未签名的 `testing`
+Candidate，并可组装独立候选仓库。真机 Smoke、双构建比较、生产签名、上传与 Catalog
+激活仍是后续门禁。
 
 Catalog 逐字节导出命令：
 

@@ -48,9 +48,13 @@ never rebuilt implicitly. A definition change requires an explicit
 
 ## Use a mirror
 
-Select a repository for one command:
+Released builds use `https://repo.pigsty.io/farrow` by default. Select the
+official China repository for one command with long-only `--mirror`, or name a
+custom root with `--repo`:
 
 ```bash
+farrow image pull d13 --mirror
+farrow up --mirror
 farrow image pull d13 --repo https://mirror.example/farrow
 farrow up --repo https://mirror.example/farrow
 ```
@@ -62,12 +66,18 @@ export FARROW_REPO=https://mirror.example/farrow
 farrow up
 ```
 
-`FARROW_REPO` may also be an absolute local directory. Explicit local and HTTPS
-repositories may use an unsigned Catalog; HTTP repositories require a Catalog
-signed by a trusted key. Artifact size, SHA-256, and qcow2 structure are always
-verified. An unavailable repository only matters when an artifact must be
-downloaded. `farrow update` fetches the configured repository's Catalog;
-`image sync` fetches or reads the exact source supplied by the user.
+Selection precedence is `--repo`, `--mirror`, `FARROW_REPO`, then the global
+default. `--mirror` resolves to `https://repo.pigsty.cc/farrow` and both
+official roots retain canonical signed-Catalog trust. `FARROW_REPO` may also be
+an absolute local directory. Explicit local and HTTPS repositories may use an
+unsigned Catalog; HTTP repositories require a Catalog signed by a trusted key.
+Artifact size, SHA-256, and qcow2 structure are always verified.
+
+An unavailable repository only matters when an artifact must be downloaded.
+Catalog upstream URLs are provenance, not a hidden fallback: a missing artifact
+in the selected repository is an error. `farrow update` fetches that
+repository's Catalog; `image sync` fetches or reads the exact source supplied
+by the user.
 
 ## Build a static repository
 

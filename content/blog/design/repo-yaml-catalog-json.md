@@ -60,7 +60,7 @@ moved, a version was deprecated, or a provenance statement changed.
 
 `catalog.json` materializes policy against the local repository. For every
 variant it records the exact filename, byte count, SHA-256, qcow2 virtual size,
-boot contract, source user, and immutable upstream fallback.
+boot contract, source user, and immutable upstream provenance.
 
 Those fields come from scanning the artifact, not from copying values out of
 the YAML. Build forces qcow2 parsing, rejects backing files, external data,
@@ -135,10 +135,11 @@ application artifacts and checksum manifest. The two key sets are intentionally
 independent: permission to publish a VM image must not imply permission to ship
 a new Farrow binary, or vice versa.
 
-Ordinary public builds also compile no private development mirror as a default.
-They begin with the embedded Catalog and its immutable HTTPS upstream URLs. A
-public mirror can become a compiled default only after the mirror itself is
-live. Source configuration, generated Catalog, uploaded artifacts, signing,
+Ordinary public builds default to `https://repo.pigsty.io/farrow` and expose
+`--mirror` for `https://repo.pigsty.cc/farrow`; `--repo` remains the explicit
+custom override. Once selected, that repository is the only artifact source.
+Embedded Catalog upstream URLs retain provenance but never become a hidden
+fallback. Source configuration, generated Catalog, uploaded artifacts, signing,
 and public availability remain separate release gates.
 
 That is the larger design principle: policy should be pleasant to review, but

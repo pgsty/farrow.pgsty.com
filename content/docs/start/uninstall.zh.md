@@ -16,10 +16,11 @@ farrow st
 彻底删除节点、持久盘、密钥与 deployment 状态：
 
 ```bash
-farrow destroy --purge
+farrow purge
 ```
 
-交互终端会要求输入 `destroy`。脚本或 CI 必须显式添加 `--force`。镜像缓存与宿主网络仍然保留。
+这条整套处置命令无需确认，也可以写作 `farrow rm`；镜像缓存与宿主网络仍然保留。若要保留
+持久盘或只删除选中节点，继续使用粒度更细且带确认的 `farrow destroy`。
 
 ## 2. 移除可选集成
 
