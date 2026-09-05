@@ -29,8 +29,9 @@ The production target is `https://farrow.pgsty.com/` and its build is warning-
 strict. Pages settings and DNS must authorize that domain before publication.
 
 The source-controlled `wrangler.toml` defines the Pages project, output
-directory, and `HUGO_VERSION=0.165.0` for both Production and Preview. Keep this
-pin: Cloudflare's default Hugo can be older than the minimum required by Oink;
+directory, `HUGO_VERSION=0.165.0`, and `GO_VERSION=1.27.1` for both Production
+and Preview. Keep Go aligned with `go.mod` so Pages installs it before Hugo
+resolves modules. Cloudflare's default Hugo can be older than Oink requires;
 `HUGO_SERVER` is not a recognized version selector.
 
 ## Content policy
