@@ -5,7 +5,7 @@ weight: 40
 icon: fa-solid fa-box-archive
 ---
 
-Normal use needs no image command first: `farrow up` resolves `d13:stable` for
+Normal use needs no image command first: `farrow up` resolves `u24:stable` for
 the native host architecture and pulls the resulting immutable version.
 Farrow uses the Catalog embedded in the installed build until you run
 `farrow update`, which fetches, verifies, and activates the repository's current
@@ -18,8 +18,8 @@ Inspect the available aliases:
 
 ```bash
 farrow image list
-farrow image info d13
-farrow image info d13:stable
+farrow image info u24
+farrow image info u24:stable
 ```
 
 Built-in families are `el7`, `el8`, `el9`, `el10`, `d12`, `d13`, `u22`,
@@ -53,9 +53,9 @@ official China repository for one command with long-only `--mirror`, or name a
 custom root with `--repo`:
 
 ```bash
-farrow image pull d13 --mirror
+farrow image pull u24 --mirror
 farrow up --mirror
-farrow image pull d13 --repo https://mirror.example/farrow
+farrow image pull u24 --repo https://mirror.example/farrow
 farrow up --repo https://mirror.example/farrow
 ```
 

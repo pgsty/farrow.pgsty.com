@@ -19,7 +19,7 @@ trusted.
 
 The embedded Catalog contains 9 families and 27 artifacts: `el7` is
 amd64-only; every other family has amd64 and arm64 artifacts. EL9 includes
-9.3, 9.6, 9.7, and 9.8; EL10 includes 10.0, 10.1, and 10.2. `d13:stable` on
+9.3, 9.6, 9.7, and 9.8; EL10 includes 10.0, 10.1, and 10.2. `u24:stable` (Ubuntu 24.04) on
 the native architecture is the default request.
 
 | Alias | Distribution | Architectures | Boot | Status |
@@ -55,7 +55,7 @@ For a pull, Farrow:
    embedded in this build, or the one last activated by `farrow update` or
    `image sync`;
 2. resolves `image[:channel]` or `image@version-prefix`, defaulting to
-   `d13:stable`; standalone `image pull` uses the native architecture, while
+   `u24:stable`; standalone `image pull` uses the native architecture, while
    lifecycle resolution honors `vm_arch`;
 3. reuses a local file only after size, SHA-256, and qcow2 checks pass;
 4. otherwise downloads the exact Catalog-named artifact from the selected
@@ -156,10 +156,10 @@ Catalog that Farrow embeds and signs.
 ```yaml
 schema: 1
 revision: 1
-defaults: { image: d13, channel: stable, arch: native, boot: uefi }
+defaults: { image: u24, channel: stable, arch: native, boot: uefi }
 images:
-  d13:
-    aliases: [debian13, trixie, debian]
+  u24:
+    aliases: [ubuntu24, noble, ubuntu]
     channels: { stable: "1" }
     versions:
       "1":

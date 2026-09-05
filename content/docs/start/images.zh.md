@@ -5,7 +5,7 @@ weight: 40
 icon: fa-solid fa-box-archive
 ---
 
-正常使用不需要先执行镜像命令：`farrow up` 默认按本机架构解析 `d13:stable`，并拉取
+正常使用不需要先执行镜像命令：`farrow up` 默认按本机架构解析 `u24:stable`，并拉取
 最终对应的不可变版本。
 Farrow 一直使用已安装构建内置的 Catalog，直到你运行 `farrow update`：它会获取、校验并
 激活仓库当前的 Catalog；没有任何自动刷新。恢复时可用 `image sync` 显式激活精确 URL
@@ -17,8 +17,8 @@ Farrow 一直使用已安装构建内置的 Catalog，直到你运行 `farrow up
 
 ```bash
 farrow image list
-farrow image info d13
-farrow image info d13:stable
+farrow image info u24
+farrow image info u24:stable
 ```
 
 内置 Family 包括 `el7`、`el8`、`el9`、`el10`、`d12`、`d13`、`u22`、`u24`、
@@ -48,9 +48,9 @@ Release 构建默认使用 `https://repo.pigsty.io/farrow`。单条命令可通�
 `--mirror` 选择中国官方仓库，也可以用 `--repo` 指定自定义根：
 
 ```bash
-farrow image pull d13 --mirror
+farrow image pull u24 --mirror
 farrow up --mirror
-farrow image pull d13 --repo https://mirror.example/farrow
+farrow image pull u24 --repo https://mirror.example/farrow
 farrow up --repo https://mirror.example/farrow
 ```
 

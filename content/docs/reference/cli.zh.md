@@ -79,7 +79,7 @@ JSON/YAML 模式下，空命名空间返回结构化用法错误。显式 `--hel
 | `-d`、`--dry-run` | 只展示 setup/image 计划，不改变状态 |
 | `-y`、`--yes` | 应用已展示的宿主/setup/image 计划 |
 | `--force`（`init`、`destroy`、`recreate`） | 覆盖生成文件或跳过输入确认词；因为 `-f` 用于选择 Inventory，所以只保留长参数 |
-| `-n`、`--no-wait` | QEMU 运行后即返回，不等待 Guest 启动完成 |
+| `-n`、`--no-wait` | QEMU 运行后即返回，跳过 Guest 就绪检查与 guest 元数据刷新 |
 | `--rollback`（`up`、`reload`） | 清除本次运行中 prepare 失败节点的残留产物 |
 | `--delete-persistent` | 整体销毁时也删持久盘；不能与节点选择器一起使用 |
 | `--purge` | 整体处置：删除磁盘、密钥与 deployment 状态，保留镜像 |
@@ -99,7 +99,9 @@ Inventory 的命令中 `-f` 始终选择文件；`logs -f` 保留惯用的 `--fo
 JSON/YAML 文档。
 
 `plan` 是只读操作，即使 action 为 `recreate` 或 `blocked-removal` 也返回成功；自动化必须
-检查 action 与 `create`、`recreate`、`missing` 字段。`up` 会创建缺失节点、启动已停止
+检查 action 与 `create`、`start`、`recreate`、`missing`、`blocked` 字段。计划只读取
+本地配置和 Catalog，无需先安装 QEMU 或宿主网络；它显示精确镜像、资源总量、变更原因
+和磁盘影响。宿主能力与地址可用性由 `up` 在执行前检查。`up` 会创建缺失节点、启动已停止
 节点、复查运行中节点的就绪状态，并根据完整的 applied deployment 重写 Farrow 安装的
 SSH 客户端配置；`recreate` 同样执行全量刷新，节点级 destroy 删除旧条目，整体 destroy
 移除该配置。`start` 启动已停止节点并复查运行中节点的就绪状态，不触碰 SSH 客户端配置。
@@ -110,19 +112,31 @@ SSH 客户端配置；`recreate` 同样执行全量刷新，节点级 destroy �
 
 多节点操作中若有节点失败，退出码为 5，并报告
 `N of M node(s) failed: <node> (<stage>: <error>); ...`。阶段为 `prepare`、`start`、
-`readiness`、`stop`；`readiness` 失败会追加 `run \`farrow logs <node>\` for the guest
+`readiness`、`stop`、`status`、`guest-metadata`；`readiness` 失败会追加 `run \`farrow logs <node>\` for the guest
 console`。结构化输出携带 `failures[]`（`node`、`stage`、`error`）；当 `--rollback` 清除了
 从未提交节点的 prepare 产物时，还会带上 `rolled_back`。参见
 [节点未就绪](../../start/troubleshooting/#节点未就绪)。
 
-`status` 会为每个节点报告持久化的 `guest_arch` 与 `accelerator`；文本和结构化输出都会
-明确显示 TCG。
+`status` 默认展示节点、状态、IP、精确镜像和 CPU/内存；`--verbose` 展示 SSH 端口、
+架构、加速器与 PID。TCG 在普通文本中也有标记。一个节点异常时，仍保留其他节点的
+状态，并返回 5；结构化输出包含逐节点 `error` 和 `failures[]`。running 表示 VM
+正在运行，不代表本次 status 检查了 guest 就绪状态。
+
+启动命令完成后还会刷新运行中 guest 的 Farrow hosts 和控制节点 SSH 配置；停止中的
+节点在下次启动时更新。`--no-wait` 会跳过 guest 就绪检查和刷新，随后执行 `up` 补齐。
+局部 recreate 若仍受未选节点的配置变化影响，会在停机、删盘前拒绝；按提示一次选择
+需要重建的节点。
+
+控制节点中由 Farrow 管理的 SSH 条目不固定 guest 主机密钥，也不写入 known_hosts，
+因此重建实验节点后可以直接连接。用户自行添加的 SSH 配置会保留。
 
 ## SSH 透传与命令补全
 
 `farrow ssh [node] [--] [command ...]` 打开会话或运行可选命令；
 `farrow exec [node] [--] <command ...>` 必须给出命令并透传退出码。`--` 之前的展示参数
-属于 Farrow，之后的参数属于 OpenSSH 或远端程序。
+属于 Farrow，之后的参数会像普通 SSH 一样以空格连接，再交给远端 shell 解释。
+有 `--` 时，其前面只能是空或一个已知节点。为方便交互使用，也接受省略 `--`：已知
+首参数选节点，否则把整段当成默认节点上的命令，并显示 warning。脚本中建议明确写 `--`。
 
 加载 `farrow completion bash|zsh|fish|powershell` 可获得命令与作用域准确的参数补全，
 同时补全命令别名、模板、镜像别名、枚举参数，以及从期望/已应用规格只读解析出的节点名。
@@ -141,5 +155,5 @@ console`。结构化输出携带 `failures[]`（`node`、`stage`、`error`）；
 | 7 | 完整性或属主失败 |
 | 130 | 被中断（SIGINT/SIGTERM） |
 
-`ssh` 与 `exec` 会透传远端程序退出码；但 SSH 保留的传输失败码 255 会被 Farrow 映射为
-运行时失败 1。
+`ssh` 与 `exec` 原样透传 SSH 子进程退出码，包括 255；255 可能是 SSH 连接失败，
+也可能是远端命令返回该值。文本、JSON 与进程退出码保持一致。

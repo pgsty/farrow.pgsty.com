@@ -109,7 +109,10 @@ by a second JSON/YAML document.
 
 `plan` is read-only and returns success even when its action is `recreate` or
 `blocked-removal`; automation must inspect the action and `create`, `recreate`,
-and `missing` fields. `up` creates missing nodes, starts stopped ones,
+`start`, `missing`, and `blocked` fields. Plans only read local configuration
+and catalog data, so QEMU and host networking need not be installed. They show
+exact images, total resources, change reasons, and disk effects. `up` checks
+host capabilities and address availability before applying changes. `up` creates missing nodes, starts stopped ones,
 re-checks readiness of running ones, and rewrites the SSH client configuration
 Farrow installed from the complete applied deployment. `recreate` performs the
 same full refresh; node destroy removes stale entries, and whole destroy
@@ -124,21 +127,38 @@ failure and exits 5.
 
 A multi-node operation in which some nodes failed exits 5 and reports
 `N of M node(s) failed: <node> (<stage>: <error>); ...`. Stages are `prepare`,
-`start`, `readiness`, and `stop`; a `readiness` failure adds
+`start`, `readiness`, `stop`, `status`, and `guest-metadata`; a `readiness` failure adds
 `run \`farrow logs <node>\` for the guest console`. Structured output carries
 `failures[]` with `node`, `stage`, and `error`, plus `rolled_back` when
 `--rollback` removed the prepare artifacts of nodes that never committed. See
 [A node did not become ready](../../start/troubleshooting/#a-node-did-not-become-ready).
 
-`status` reports the persisted `guest_arch` and `accelerator` for each node.
-TCG selection is therefore explicit in both text and structured output.
+`status` shows node, state, IP, exact image, and CPU/memory. Use `--verbose` for
+SSH ports, architecture, accelerator, and PID. TCG is marked in ordinary text
+as well. One degraded node does not hide its peers; status exits 5 and retains
+per-node errors and `failures[]`. Running means the VM process is running;
+status does not claim to have checked guest readiness.
+
+Starting commands also refresh Farrow hosts and control-node SSH entries in
+running guests. Stopped guests catch up when started. `--no-wait` skips guest
+readiness and that refresh; a later `up` completes both. Selected recreate
+refuses remaining peer drift before stopping or deleting disks; select the
+required nodes together as directed.
+
+The control guest's Farrow-managed SSH entries accept replacement host keys
+without recording them in known_hosts, so recreated lab nodes remain reachable.
+User-added SSH entries are preserved.
 
 ## SSH passthrough and completion
 
 `farrow ssh [node] [--] [command ...]` opens a session or runs an optional
 command. `farrow exec [node] [--] <command ...>` requires a command and passes
 through its exit status. Presentation flags before `--` belong to Farrow;
-arguments after `--` belong to OpenSSH or the remote program.
+arguments after `--` are joined with spaces and interpreted by the remote
+shell, like plain SSH. Before `--`, only zero or one known node is accepted.
+For convenience, omitting `--` uses a known first argument as the node, or
+runs all arguments as a command on the default node with a warning. Use an
+explicit `--` in scripts.
 
 Load `farrow completion bash|zsh|fish|powershell` for command and scoped-flag
 completion. It also provides command aliases, templates, image aliases, closed
@@ -159,5 +179,6 @@ specification.
 | 7 | integrity or ownership failure |
 | 130 | interrupted (SIGINT/SIGTERM) |
 
-`ssh` and `exec` pass through the remote program's exit code, except SSH's
-reserved transport-failure code 255, which Farrow maps to runtime failure 1.
+`ssh` and `exec` pass through the SSH child exit code unchanged, including
+255. That value may indicate an SSH connection failure or a remote command
+returning 255; text, JSON, and process exit status agree.

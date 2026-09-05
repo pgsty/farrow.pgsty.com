@@ -16,7 +16,8 @@ farrow logs meta --source serial
 ```
 
 应用状态位于 `~/.farrow`，这些命令可在任意目录执行。
-Status 会显示持久化的 Guest 架构与加速器，因此 TCG 永远不是不可见回退。
+Status 默认显示镜像和资源；`--verbose` 显示架构、加速器、SSH 端口和 PID，
+TCG 在普通输出中也明确标记。异常节点不会隐藏其他节点的状态。
 `farrow up` 会在选中 VM 启动后，根据完整 applied deployment 重建默认 SSH 别名；因此
 局部 `up` 不会删除未选中节点，可直接运行 `ssh meta`；如需手工重写，使用
 `farrow ssh-config --install`。
@@ -33,8 +34,11 @@ farrow reload -f farrow.yml       # 停止、重新读配置、收敛
 ```
 
 `start` 启动已停止的 VM 并复查运行中 VM 的就绪状态，不刷新 SSH 客户端配置；`restart`
-使用已应用状态；`reload` 停止后
-重新读取 Inventory，并执行完整的 `up` 路径。
+使用已应用状态；`reload` 先读取 Inventory、检查配置变化与启动依赖，再停止选中节点
+并执行完整的 `up` 路径。
+
+`up`、`start`、`restart`、`reload`、`recreate` 还会刷新运行中 guest 的 Farrow hosts
+和控制节点 SSH 条目。`--no-wait` 跳过就绪检查与 guest 刷新，后续运行 `up` 补齐。
 
 ## 变更 deployment
 
@@ -44,7 +48,11 @@ farrow up                         # 创建/启动选中节点，并安装 SSH �
 farrow recreate node-1            # 应用某个节点的 VM 定义变化
 ```
 
-`recreate` 与 `destroy` 在终端上会要求输入确认词；只在脚本中传 `--force`。
+`plan` 无需先准备宿主，展示镜像、资源总量、变更原因与磁盘影响。CPU/内存等定义
+变化仍通过 recreate 应用，会替换根盘与非持久数据盘，持久盘保留。若多个节点同时
+变化，局部重建受未选节点影响时会提前拒绝，并列出所需节点。
+
+`recreate` 与 `destroy` 在终端上展示磁盘范围并要求输入确认词；脚本可传 `--force`。
 
 | 字段 | 含义 | 操作 |
 |---|---|---|

@@ -17,7 +17,7 @@ Farrow 使用物化的静态 Catalog 与不可变 qcow2 工件。官方与 HTTP 
 
 内置 Catalog 包含 9 个 Family、27 个工件：`el7` 只有 amd64，其余 Family 均有
 amd64 与 arm64。EL9 包含 9.3、9.6、9.7、9.8；EL10 包含 10.0、10.1、10.2。
-默认请求为本机架构的 `d13:stable`。
+默认请求为本机架构的 `u24:stable`（Ubuntu 24.04）。
 
 | 别名 | 发行版 | 架构 | 启动 | 状态 |
 |---|---|---|---|---|
@@ -48,7 +48,7 @@ Catalog 状态只表达支持策略，不是启动开关：`supported` 表示已
 
 1. 为整条命令读取一次当前本地 Catalog：即本次构建内置的 Catalog，或最近一次
    `farrow update`/`image sync` 激活的 Catalog；
-2. 解析 `image[:channel]` 或 `image@version-prefix`，缺省为 `d13:stable`；独立
+2. 解析 `image[:channel]` 或 `image@version-prefix`，缺省为 `u24:stable`；独立
    `image pull` 使用本机架构，生命周期解析遵循 `vm_arch`；
 3. 只有尺寸、SHA-256、qcow2 结构全部匹配时才复用本地文件；
 4. 否则只从选定仓库下载 Catalog 指定的准确工件；不可变 Upstream URL 是溯源，不是回退源。
@@ -136,10 +136,10 @@ farrow/
 ```yaml
 schema: 1
 revision: 1
-defaults: { image: d13, channel: stable, arch: native, boot: uefi }
+defaults: { image: u24, channel: stable, arch: native, boot: uefi }
 images:
-  d13:
-    aliases: [debian13, trixie, debian]
+  u24:
+    aliases: [ubuntu24, noble, ubuntu]
     channels: { stable: "1" }
     versions:
       "1":

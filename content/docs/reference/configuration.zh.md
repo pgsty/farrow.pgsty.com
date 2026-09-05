@@ -31,7 +31,7 @@ Farrow 读取主机 IP、`nodename`、`admin_ip`、`pg_cluster`、`pg_seq`、
 | 变量 | 默认值 | 含义 |
 |---|---|---|
 | `vm_skip` | `false` | 不虚拟化这台真实/外部主机 |
-| `vm_image` | `d13` | 镜像 Family、Channel 引用或 `image@version` Selector |
+| `vm_image` | `u24` | 镜像 Family、Channel 引用或 `image@version` Selector |
 | `vm_version` | 未设置 | 匹配 `9`、`9.7` 等数值前缀的最新版本 |
 | `vm_arch` | `native` | 部署级 Guest 架构：`native`、`amd64` 或 `arm64` |
 | `vm_cpu` | `2` | vCPU 数量 |

@@ -148,15 +148,14 @@ Start it:
 farrow up
 ```
 
-The first run resolves, downloads, and verifies the default `d13:stable` image, then waits for
-guest readiness. This is example output from macOS arm64; the spec hash, PID,
-and accelerator vary by inventory and host:
+The first run resolves, downloads, and verifies the default `u24:stable` image, then waits for
+guest readiness. This example shows the default resources; use `--verbose`
+for SSH ports, architecture, and process IDs:
 
 ```text
-spec hash:   edda3b54e04e00c76de036ea9ea5b6ea90c53abd245dee8aa7a0335999ba0a65
-meta             running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.10  ssh=127.0.0.1:2222 pid=16254
+NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
+meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
 created and started 1 node(s)
-ssh config:  /Users/you/.ssh/farrow_config (action=install changed=true)
 ```
 
 Open the VM:
@@ -192,17 +191,16 @@ Run the same command again:
 farrow up
 ```
 
-Farrow creates only the three additions and leaves the running `meta` node
-untouched:
+Farrow creates only the three additions, keeps `meta` running, and refreshes
+the Farrow hosts and control-node SSH entries in running guests:
 
 ```text
-spec hash:   d61dfc499f32206e56936d83b38246f8c9ca4740b4579ac9aed2e29907441b38
-meta             running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.10  ssh=127.0.0.1:2222 pid=16254
-node-1           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.11  ssh=127.0.0.1:2223 pid=16774
-node-2           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.12  ssh=127.0.0.1:2224 pid=16772
-node-3           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.13  ssh=127.0.0.1:2225 pid=16773
+NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
+meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
+node-1     running  10.10.10.11   u24@20260801.0.0     2    4.0 GiB
+node-2     running  10.10.10.12   u24@20260801.0.0     2    4.0 GiB
+node-3     running  10.10.10.13   u24@20260801.0.0     2    4.0 GiB
 created and started 3 node(s)
-ssh config:  /Users/you/.ssh/farrow_config (action=install changed=true)
 ```
 
 Use `st`, the alias of `status`, at any time:
@@ -212,12 +210,11 @@ farrow st
 ```
 
 ```text
-spec hash:   d61dfc499f32206e56936d83b38246f8c9ca4740b4579ac9aed2e29907441b38
-meta             running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.10  ssh=127.0.0.1:2222 pid=16254
-node-1           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.11  ssh=127.0.0.1:2223 pid=16774
-node-2           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.12  ssh=127.0.0.1:2224 pid=16772
-node-3           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.13  ssh=127.0.0.1:2225 pid=16773
-deployment status
+NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
+meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
+node-1     running  10.10.10.11   u24@20260801.0.0     2    4.0 GiB
+node-2     running  10.10.10.12   u24@20260801.0.0     2    4.0 GiB
+node-3     running  10.10.10.13   u24@20260801.0.0     2    4.0 GiB
 ```
 
 Destroy the whole deployment when finished:

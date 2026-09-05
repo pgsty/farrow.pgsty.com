@@ -16,8 +16,9 @@ farrow logs meta --source serial
 ```
 
 Applied state is under `~/.farrow`; these commands work from any directory.
-Status includes the persisted Guest architecture and accelerator, so TCG is
-never an invisible fallback.
+Status shows images and resources; `--verbose` adds architecture, accelerator,
+SSH ports, and PID. TCG is marked in ordinary output, and a degraded node does
+not hide its peers.
 `farrow up` rebuilds the default SSH aliases from the complete applied
 deployment after the selected VMs are started, so a scoped `up` never drops
 unselected peers and plain `ssh meta` just works; `farrow ssh-config --install`
@@ -36,8 +37,12 @@ farrow reload -f farrow.yml       # stop, re-read config, converge
 ```
 
 `start` powers on stopped VMs and re-checks readiness of running ones; it does
-not refresh the SSH client configuration. `restart` uses applied state. `reload` reads the Inventory again and follows
-the complete `up` path after stopping.
+not refresh the SSH client configuration. `restart` uses applied state. `reload` reads the Inventory and checks drift and startup dependencies before
+stopping selected nodes and following the full `up` path.
+
+Starting commands also refresh Farrow hosts and control-node SSH entries in
+running guests. `--no-wait` skips readiness and this refresh; run `up` later
+to finish them.
 
 ## Change the deployment
 
@@ -50,7 +55,13 @@ farrow recreate node-1            # applies a changed VM definition
 `recreate` and `destroy` ask you to type the confirmation word on a terminal;
 pass `--force` only in scripts.
 
-Inventory changes fall into three visible fields:
+`plan` works before host setup and shows images, total resources, change reasons,
+and disk effects. CPU/memory changes still require recreate: root and ephemeral
+data disks are replaced, while persistent disks are kept. A selected recreate
+blocked by unselected peer changes refuses before deletion and names the nodes
+that need attention.
+
+Inventory changes appear in these fields:
 
 | Field | Meaning | Action |
 |---|---|---|

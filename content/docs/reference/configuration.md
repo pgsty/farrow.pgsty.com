@@ -37,7 +37,7 @@ values are errors.
 | Variable | Default | Meaning |
 |---|---|---|
 | `vm_skip` | `false` | do not virtualize this real/external host |
-| `vm_image` | `d13` | image family, channel reference, or `image@version` selector |
+| `vm_image` | `u24` | image family, channel reference, or `image@version` selector |
 | `vm_version` | unset | newest numeric version matching this prefix, such as `9` or `9.7` |
 | `vm_arch` | `native` | deployment-wide Guest architecture: `native`, `amd64`, or `arm64` |
 | `vm_cpu` | `2` | vCPU count |

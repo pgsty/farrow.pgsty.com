@@ -137,14 +137,13 @@ all:
 farrow up
 ```
 
-第一次运行会自动解析、下载并校验默认的 `d13:stable` 镜像，然后等待 Guest 就绪。下面是 macOS arm64 上的
-输出示例；spec hash、PID 与加速器会随配置和宿主变化：
+第一次运行会自动解析、下载并校验默认的 `u24:stable` 镜像，然后等待 Guest 就绪。下面是 macOS arm64 上的
+输出示例；镜像版本和资源随配置变化，`--verbose` 可查看 SSH 端口、架构和 PID：
 
 ```text
-spec hash:   edda3b54e04e00c76de036ea9ea5b6ea90c53abd245dee8aa7a0335999ba0a65
-meta             running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.10  ssh=127.0.0.1:2222 pid=16254
+NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
+meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
 created and started 1 node(s)
-ssh config:  /Users/you/.ssh/farrow_config (action=install changed=true)
 ```
 
 现在可以进入虚拟机：
@@ -180,16 +179,16 @@ all:
 farrow up
 ```
 
-Farrow 只创建新增的三台节点，不会重启正在运行的 `meta`：
+Farrow 只创建新增的三台节点，不会重启正在运行的 `meta`，并刷新运行中 guest 的
+Farrow hosts 与控制节点 SSH 配置：
 
 ```text
-spec hash:   d61dfc499f32206e56936d83b38246f8c9ca4740b4579ac9aed2e29907441b38
-meta             running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.10  ssh=127.0.0.1:2222 pid=16254
-node-1           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.11  ssh=127.0.0.1:2223 pid=16774
-node-2           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.12  ssh=127.0.0.1:2224 pid=16772
-node-3           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.13  ssh=127.0.0.1:2225 pid=16773
+NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
+meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
+node-1     running  10.10.10.11   u24@20260801.0.0     2    4.0 GiB
+node-2     running  10.10.10.12   u24@20260801.0.0     2    4.0 GiB
+node-3     running  10.10.10.13   u24@20260801.0.0     2    4.0 GiB
 created and started 3 node(s)
-ssh config:  /Users/you/.ssh/farrow_config (action=install changed=true)
 ```
 
 随时用 `st`（`status` 的别名）查看状态：
@@ -199,12 +198,11 @@ farrow st
 ```
 
 ```text
-spec hash:   d61dfc499f32206e56936d83b38246f8c9ca4740b4579ac9aed2e29907441b38
-meta             running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.10  ssh=127.0.0.1:2222 pid=16254
-node-1           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.11  ssh=127.0.0.1:2223 pid=16774
-node-2           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.12  ssh=127.0.0.1:2224 pid=16772
-node-3           running  runtime=running  arch=arm64  accel=hvf  address=10.10.10.13  ssh=127.0.0.1:2225 pid=16773
-deployment status
+NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
+meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
+node-1     running  10.10.10.11   u24@20260801.0.0     2    4.0 GiB
+node-2     running  10.10.10.12   u24@20260801.0.0     2    4.0 GiB
+node-3     running  10.10.10.13   u24@20260801.0.0     2    4.0 GiB
 ```
 
 最后销毁整套 deployment：
