@@ -50,6 +50,11 @@ values are errors.
 An empty host entry is a complete VM. A deployment contains 1–20 managed
 hosts; `vm_cpu` accepts 1–256 and memory must be at least 512 MiB.
 
+Farrow 0.6.0 changes the omitted `vm_image` default from Debian 13 to Ubuntu
+24.04. To keep an existing Debian lab, set `vm_image: d13` under `all.vars`.
+Upgrading the executable does not replace VM disks; inspect `farrow plan`
+before applying the inventory again.
+
 `vm_version` keeps short version intent separate from the image family:
 
 ```yaml

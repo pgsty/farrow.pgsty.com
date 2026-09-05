@@ -11,20 +11,23 @@ and the public site are separate gates. Install instructions are in the
 [Quick Start](../../start/tutorial/#install).
 
 The current public release is
-[`v0.5.0`](https://github.com/pgsty/farrow/releases/tag/v0.5.0). Its source and
-package gates passed at commit `fc85b65ff6a24b0933b56ae1179be9ada2ba91b1`;
-the native-host rows below remain the latest dated VM evidence rather than
-being implicitly promoted to 0.5.0.
+[`v0.6.0`](https://github.com/pgsty/farrow/releases/tag/v0.6.0). It defaults to
+Ubuntu 24.04 and improves plans, status, and lab lifecycle operations. See the
+[release notes](../../../blog/release/farrow-0.6.0/) for upgrade instructions.
+The latest native replay below used an isolated macOS arm64/HVF U24 lab;
+Linux-host and other outstanding results retain their original dates.
 
 ## Summary
 
 | Host | Path | Last verified | Result |
 |---|---|---|---|
+| macOS arm64 | HVF, Ubuntu 24.04.4 guests | 2026-09-05 (0.6.0 lifecycle changes) | create, scale-out, peer SSH, stop/start, reload, recreate, partial status, and scale-in passed |
 | macOS 26.6.2 arm64 | HVF, QEMU 11.1, socket_vmnet | 2026-09-01 (`v0.2.0`) | selected create/SSH/stop/start, incremental cached create, whole status, whole destroy passed |
 | macOS 26.6.2 arm64 | HVF, QEMU 11.1, socket_vmnet | 2026-08-27 | one node and additive four nodes passed |
 | Ubuntu 26.04 amd64 (`mx`) | KVM, QEMU 10.2.1, NetworkManager | 2026-09-01 (`v0.2.0`) | audited an existing four-node deployment as live and reached its control guest |
 | Ubuntu 26.04 amd64 (`mx`) | KVM, QEMU 10.2.1, NetworkManager | 2026-08-27 | setup, one node, additive four nodes, and uninstall passed |
 | macOS arm64 | HVF host, TCG compatibility rule, Rocky Linux 8.10 arm64 | 2026-08-28 | boot, stop/start, readiness in 44.2 s passed |
+| Published Catalog `2026090501` | 9 families, 27 qcow2 artifacts | 2026-09-05 | artifact verification, embedded/public byte equality, and signed update through both official endpoints passed |
 | Published Catalog `2026082903` | 9 families, 27 signed qcow2 artifacts | 2026-08-29 | full SHA-256 sweep and clean-client `d13:stable` pull passed |
 
 ## Still open
@@ -48,6 +51,39 @@ custody must be formalized before 1.0.
 
 Each entry belongs to the exact checkpoint exercised that day. Later source or
 documentation edits do not inherit native proof without another replay.
+
+### Farrow 0.6.0 release — 2026-09-05
+
+The lifecycle and UX changes passed two adversarial Claude Code Fable 5.1
+reviews at xhigh effort; release metadata and the CI test fixture received
+follow-up approvals. Release commit `057774e3a13477782a2ae07bd71127d03c0f1ae7`
+passed the complete Go 1.27.1 [source CI](https://github.com/pgsty/farrow/actions/runs/33959205857).
+The latest packaging changes passed the independent
+[snapshot and package checks](https://github.com/pgsty/farrow/actions/runs/33958857302)
+at `13d9d70`. The [tag workflow](https://github.com/pgsty/farrow/actions/runs/33959431603)
+repeated source checks and verified four platform archives, four Linux
+packages, eight SPDX documents, the installer, Homebrew formula, release
+metadata, and all 19 checksummed payloads before creating the 20-asset release.
+The release is public. All asset digests match the checksum manifest. An
+isolated macOS arm64 installation upgraded from public 0.5.0 to public 0.6.0;
+both installed executables match the verified release archive. The released
+binary also passed `init` and a fresh U24 `plan`.
+
+An isolated macOS arm64/HVF U24 lab passed initial boot, expansion without
+restarting the control node, control-to-peer SSH, stop/start, normal reload,
+selected recreation, scale-in, and guest-name refresh. Invalid-image reload
+and conflicting selected recreation stopped before disrupting the existing
+VMs. Partial status kept the healthy peer visible, and SSH exit 255 passed
+through. Effective OpenSSH configuration tests covered the final guest SSH
+scope correction. The test lab was removed after validation.
+
+Published Catalog `2026090501` defaults to `u24:stable` and incorporates the
+Debian/Rocky image updates already published in Catalog `2026090302`. All 27
+artifacts passed repository byte verification. Both official endpoints now
+serve the exact embedded catalog and its production signature; isolated
+clients completed `farrow update` against each endpoint.
+This application release builds no new guest images. Linux-host VM lifecycle,
+host reboot, and a complete Pigsty installation were not replayed for 0.6.0.
 
 ### Farrow 0.5.0 release — 2026-09-03
 
@@ -106,8 +142,8 @@ authoring metadata, checksums, and image bytes with a read-only Nginx worker.
 
 ### Schema-3 Catalog closure — 2026-08-29
 
-Catalog revision `2026082903` is the current source and development-repository
-checkpoint: 9 families and 27 architecture-specific artifacts. The embedded
+Catalog revision `2026082903` was the source and development-repository
+checkpoint on that date: 9 families and 27 architecture-specific artifacts. The embedded
 Catalog and published `catalog.json` have the same SHA-256
 `571b1ff9c7d4d42355df3392ea62a339471c2d01d868669a7625fac8b93f245d`;
 the published `repo.yaml` also matches the source-controlled authoring file.

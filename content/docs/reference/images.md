@@ -38,7 +38,7 @@ farrow image list
 farrow image info d13
 farrow image info d13:stable
 farrow image info el9@9.7
-farrow image pull d13@20260810.2566.0
+farrow image pull d13@20260810.2566.1
 farrow image pull d13 --arch arm64
 farrow update
 ```
@@ -181,8 +181,8 @@ numerically newest version (`el9@9.7` selects the newest 9.7 build, while
 
 ```text
 d13:stable + native
-  -> d13@20260810.2566.0 + arm64
-  -> images/d13-20260810.2566.0-arm64.qcow2
+  -> d13@20260810.2566.1 + arm64
+  -> images/d13-20260810.2566.1-arm64.qcow2
 ```
 
 `farrow repo scan` is read-only. `build` performs strict YAML validation,

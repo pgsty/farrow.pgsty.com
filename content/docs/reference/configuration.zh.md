@@ -44,6 +44,10 @@ Farrow 读取主机 IP、`nodename`、`admin_ip`、`pg_cluster`、`pg_seq`、
 空主机条目就是一台完整 VM。每套 deployment 支持 1–20 台托管主机；`vm_cpu` 范围
 1–256，内存至少 512 MiB。
 
+Farrow 0.6.0 将省略 `vm_image` 时的默认值从 Debian 13 改为 Ubuntu 24.04。
+旧环境若要继续使用 Debian，请在 `all.vars` 中写明 `vm_image: d13`。升级程序不会自动
+替换 VM 磁盘；再次应用配置前先查看 `farrow plan`。
+
 `vm_version` 将简短的版本意图与镜像 Family 分开：
 
 ```yaml

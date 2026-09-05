@@ -3,13 +3,13 @@ title: "Farrow 0.5.0：显式处置、显式仓库、可复现镜像"
 linkTitle: Farrow 0.5.0
 description: 无需确认的整套实验室处置、全球与中国仓库显式选择、无隐藏工件回退，以及八目标官方镜像候选流水线。
 date: 2026-09-03
-weight: 1
+weight: 2
 categories: [发布]
 tags: [Farrow 0.5.0, QEMU, 镜像, 供应链, 发布]
 icon: fa-solid fa-rocket
 ---
 
-Farrow 0.5.0 是当前公开的 pre-1.0 发布。它为一次性实验室加入明确处置命令，让仓库地域
+Farrow 0.5.0 是被 0.6.0 取代的公开 pre-1.0 发布。它为一次性实验室加入明确处置命令，让仓库地域
 成为操作者的显式选择，并提供可复现的下一代官方 Guest 镜像准备路径。Pigsty Inventory
 契约、Deployment 状态格式与内嵌 Catalog revision `2026082903` 均未变化。
 

@@ -9,19 +9,22 @@ aliases: [/docs/project/, /docs/project/status/, /docs/project/roadmap/, /docs/p
 Farrow 仍是 pre-1.0。源码测试、带日期的真机重放、软件包、发布、CI 与线上站点是不同门禁。
 安装方法见[快速上手](../../start/tutorial/#安装)。
 
-当前公开版本为 [`v0.5.0`](https://github.com/pgsty/farrow/releases/tag/v0.5.0)。其源码与
-Package 门禁在 Commit `fc85b65ff6a24b0933b56ae1179be9ada2ba91b1` 通过；下表真机记录
-仍是最新的带日期 VM 证据，不会被自动提升为 0.5.0 证据。
+当前公开版本为 [`v0.6.0`](https://github.com/pgsty/farrow/releases/tag/v0.6.0)，
+默认使用 Ubuntu 24.04，改进计划、状态和日常生命周期操作。
+升级方法见[发布说明](../../../blog/release/farrow-0.6.0/)。最新真机重放使用隔离的
+macOS arm64/HVF U24 环境；Linux 宿主等其他验证仍保留各自的原始日期。
 
 ## 概览
 
 | 宿主 | 路径 | 最后验证 | 结果 |
 |---|---|---|---|
+| macOS arm64 | HVF、Ubuntu 24.04.4 Guest | 2026-09-05（0.6.0 生命周期修改） | 创建、扩容、同伴 SSH、stop/start、reload、recreate、部分状态与缩容通过 |
 | macOS 26.6.2 arm64 | HVF、QEMU 11.1、socket_vmnet | 2026-09-01（`v0.2.0`） | 选点创建/SSH/stop/start、增量创建已缓存镜像、whole status、whole destroy 通过 |
 | macOS 26.6.2 arm64 | HVF、QEMU 11.1、socket_vmnet | 2026-08-27 | 单节点与增量四节点通过 |
 | Ubuntu 26.04 amd64（`mx`） | KVM、QEMU 10.2.1、NetworkManager | 2026-09-01（`v0.2.0`） | 审计现存四节点 deployment 为存活并进入控制 Guest |
 | Ubuntu 26.04 amd64（`mx`） | KVM、QEMU 10.2.1、NetworkManager | 2026-08-27 | setup、单节点、增量四节点与卸载通过 |
 | macOS arm64 | HVF 宿主、TCG 兼容规则、Rocky Linux 8.10 arm64 | 2026-08-28 | 启动、stop/start、44.2 秒达到 readiness 通过 |
+| 已发布 Catalog `2026090501` | 9 个 Family、27 个 qcow2 工件 | 2026-09-05 | 工件校验、内置/公开字节一致，以及两个官方入口的签名更新通过 |
 | 已发布 Catalog `2026082903` | 9 个 Family、27 个已签名 qcow2 工件 | 2026-08-29 | 全量 SHA-256 校验与干净客户端拉取 `d13:stable` 通过 |
 
 ## 仍未完成
@@ -42,6 +45,31 @@ Package 门禁在 Commit `fc85b65ff6a24b0933b56ae1179be9ada2ba91b1` 通过；下
 ## 验证历史
 
 每条记录只属于当天真正执行过的准确 Checkpoint；后续源码或文档修改不会自动继承真机证明。
+
+### Farrow 0.6.0 发布：2026-09-05
+
+生命周期与 UX 修改通过 Claude Code Fable 5.1 / xhigh 两轮对抗性审查；发布元数据与 CI
+测试夹具修复也分别获得了后续批准。发布提交 `057774e3a13477782a2ae07bd71127d03c0f1ae7`
+通过完整的 Go 1.27.1 [源码 CI](https://github.com/pgsty/farrow/actions/runs/33959205857)，
+最新打包改动在 `13d9d70` 通过独立的
+[Snapshot 与软件包检查](https://github.com/pgsty/farrow/actions/runs/33958857302)。
+[Tag 工作流](https://github.com/pgsty/farrow/actions/runs/33959431603) 重复源码检查，
+验证四平台归档、四份 Linux 软件包、八份 SPDX、安装器、Homebrew Formula、发布元数据
+及全部 19 项校验和，生成包含 20 个资产的 Release。
+Release 已公开，全部资产摘要与校验清单一致。隔离的 macOS arm64 安装目录通过公开下载
+路径从 0.5.0 升级到 0.6.0，两个已安装程序均与校验后的发布归档字节一致；发布二进制
+还通过了 `init` 和新建 U24 环境的 `plan` 验证。
+
+隔离的 macOS arm64/HVF U24 环境通过了首次启动、不重启控制节点的扩容、控制节点到
+同伴的 SSH、stop/start、正常 reload、局部重建、缩容和 Guest 名称刷新。无效镜像 reload
+与存在配置冲突的局部重建均在影响现有 VM 前停止；部分状态损坏仍能展示健康节点，SSH 的
+255 退出码原样透传。最终的 Guest SSH 作用域修复经真实 OpenSSH 有效配置测试验证。
+验证结束后已移除测试环境。
+
+已发布 Catalog `2026090501` 默认使用 `u24:stable`，并纳入 Catalog `2026090302` 中已经
+公开的 Debian/Rocky 镜像更新。27 个工件全部通过仓库字节校验，两个官方入口提供与内置
+目录完全一致的内容及生产签名，隔离客户端分别完成了 `farrow update`。本次应用发布没有构建新 Guest 镜像；没有重新执行 Linux
+宿主 VM 生命周期、宿主重启或完整 Pigsty 安装。
 
 ### Farrow 0.5.0 发布：2026-09-03
 
@@ -90,7 +118,7 @@ Checksum 与镜像，并已将 Nginx Worker 收敛为只读权限。
 
 ### Schema-3 Catalog 收口：2026-08-29
 
-Catalog Revision `2026082903` 是当前源码与开发仓库检查点：9 个 Family、27 个分架构工件。
+Catalog Revision `2026082903` 是当天的源码与开发仓库检查点：9 个 Family、27 个分架构工件。
 内置 Catalog 与已发布 `catalog.json` 的 SHA-256 同为
 `571b1ff9c7d4d42355df3392ea62a339471c2d01d868669a7625fac8b93f245d`；
 已发布 `repo.yaml` 也与源码维护文件完全一致。全新 HTTP 与 HTTPS 客户端均接受了生产公钥

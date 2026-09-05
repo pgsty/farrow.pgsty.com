@@ -3,13 +3,13 @@ title: "Farrow 0.5.0: explicit disposal, explicit repositories, reproducible ima
 linkTitle: Farrow 0.5.0
 description: A no-confirmation whole-lab purge, explicit global and China repository selection, no hidden artifact fallback, and an eight-target official-image candidate pipeline.
 date: 2026-09-03
-weight: 1
+weight: 2
 categories: [Release]
 tags: [Farrow 0.5.0, QEMU, Images, Supply Chain, Release]
 icon: fa-solid fa-rocket
 ---
 
-Farrow 0.5.0 is the current public pre-1.0 release. It adds an explicit command
+Farrow 0.5.0 was the public pre-1.0 release superseded by 0.6.0. It adds an explicit command
 for disposable labs, makes repository geography an operator choice, and adds a
 reproducible path for preparing the next official guest images. The Pigsty
 Inventory contract, deployment state format, and embedded Catalog revision
