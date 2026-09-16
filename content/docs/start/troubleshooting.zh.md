@@ -66,24 +66,8 @@ Debian/Ubuntu 使用 `root:<调用者可用组> 4750`。桌面系统通过 ACL �
 
 ## 节点未就绪
 
-`up`、`start`、`recreate` 会等待每个 Guest 完成 Bootstrap。若有节点失败，命令以 5 退出，
-并报告 `N of M node(s) failed: <node> (<stage>: <error>)`。阶段为 `prepare`、`start`、
-`readiness`、`stop`；`readiness` 失败会指出 Guest 自身的 Bootstrap 阶段：
-
-| Bootstrap 阶段 | 通常意味着 |
-|---|---|
-| `identity`、`hosts` | 镜像或其 cloud-init 未按预期运行 |
-| `management-network` | 宿主没有出网能力，或需要代理 |
-| `data-disks` | 磁盘定义有误，或镜像缺少所请求的 `mkfs` |
-| `shares` | 共享目录无法挂载 |
-| `control-ssh` | 控制节点 SSH 密钥无法安装 |
-| `private-network` | 固定 IP 网卡未能启用；检查 `farrow network status` |
-| `ready` | 无法写入 ready 标记 |
-
-`guest bootstrap failed during data-disks: xfs requested but mkfs.xfs is unavailable`
-指出失败阶段与 guest 里最后一行错误（没有 detail 的旧标记只显示 `(exit status N)`）；
-`guest did not become ready within 3m0s: <last ssh error>` 表示 Guest 始终没有应答。
-先看 Guest 串口与 QEMU 输出，再检查记录的状态：
+就绪要求管理 SSH 可用且客机实例身份一致。节点无法创建、启动或连接时，命令会指出
+节点和失败阶段，并以 5 退出。先查看日志：
 
 ```bash
 farrow logs <node>                  # 串口控制台
@@ -91,9 +75,25 @@ farrow logs <node> --source qemu    # QEMU 诊断
 farrow status
 ```
 
-在 `prepare` 阶段失败的节点从未加入 deployment。给 `up` 或 `reload` 加上
-`--rollback` 可在同一次运行中清除它们的残留产物，结构化输出会在 `rolled_back` 中列出。
-`--no-wait` 跳过就绪等待，QEMU 运行后即返回。
+数据盘、共享目录、主机名、guest hosts、控制节点 SSH 与私网分别初始化，一项失败不会
+阻止管理 SSH 或其他步骤。客机可用时返回 0，并列出具体限制；JSON/YAML 通过
+`nodes[].warnings` 暴露这些问题。访问互联网不是就绪的前提。
+
+| 功能限制 | 下一步 |
+|---|---|
+| 数据盘不可用 | 处理设备暂缺、探测、工具、挂载占用或 I/O 问题，再执行 `up` |
+| 共享目录只读 | 修正宿主权限，再执行 `up` 重试可写挂载 |
+| Guest hosts 或控制节点 SSH 未完成 | 执行 `up` 刷新托管文件 |
+| 私网网卡不可用 | 检查 `farrow network status` 后再次 `up`；管理 SSH 仍可能可用 |
+
+修正原因后重复 `up`：它会重试未完成步骤、原位更新旧客机脚本、跳过健康步骤，不重启
+运行中的 VM。无法识别或确认损坏的测试数据文件系统会自动清空重建，**包括持久盘**，
+结果会报告旧数据已丢弃。探测失败、忙碌挂载和 I/O 故障不会触发格式化。详见
+[数据盘说明](../../reference/configuration/#数据盘)。
+
+重复 `up` 也可清理能够确认归属的中断准备残留。`--rollback` 在同一次运行中清除 prepare
+失败的产物，并在 `rolled_back` 中列出。`--no-wait` 在 QEMU 运行后即返回，跳过就绪检查、
+客机恢复与元数据刷新；后续执行 `up` 补齐。
 
 ## SSH 失败
 

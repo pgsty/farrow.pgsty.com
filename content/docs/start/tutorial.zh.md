@@ -1,7 +1,7 @@
 ---
 title: 快速上手
 linkTitle: 快速上手
-description: 用 setup 与 up 启动单节点 Farrow，再通过同一份配置增量扩容。
+description: 用 up 启动单节点 Farrow，用 ssh 进入，再通过同一份配置增量扩容。
 weight: 10
 icon: fa-solid fa-play
 aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /docs/start/pigsty/, /docs/features/]
@@ -10,43 +10,45 @@ aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /do
 ## 安装
 
 Farrow 仍是 pre-1.0。每个 Release 都附带用户态 Installer、Homebrew Formula 与 DEB/RPM
-软件包。先从 [Farrow 0.6.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.6.0)
+软件包。先从 [Farrow 0.7.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.7.0)
 下载资产，再任选一种路径：
 
 ```bash
 # 从 Release 安装：用户态、无需 sudo、校验 Checksum
-curl -fLO https://github.com/pgsty/farrow/releases/download/v0.6.0/install.sh
+curl -fLO https://github.com/pgsty/farrow/releases/download/v0.7.0/install.sh
 chmod +x install.sh
-FARROW_VERSION=0.6.0 ./install.sh
+FARROW_VERSION=0.7.0 ./install.sh
 
 # Homebrew Formula（作为 Release 资产发布）
 brew install --formula ./farrow.rb
 
 # Debian/Ubuntu 与 RHEL 系软件包同样是 Release 资产
-sudo apt install ./farrow_0.6.0_linux_amd64.deb
-sudo dnf install ./farrow_0.6.0_linux_amd64.rpm
+sudo apt install ./farrow_0.7.0_linux_amd64.deb
+sudo dnf install ./farrow_0.7.0_linux_amd64.rpm
 ```
 
 GitHub 不会通过 `/releases/latest` 暴露 pre-1.0 预发布版本，因此安装器需要
-`FARROW_VERSION=0.6.0`。开发与源码审查可使用[从源码构建](../source-build/)。
+`FARROW_VERSION=0.7.0`。开发与源码审查可使用[从源码构建](../source-build/)。
 
 ## 启动第一个实验环境
 
-在一个空目录中，Farrow 的正常运行路径只有两条命令（在终端里，宿主机尚未准备好时
-`farrow up` 会自己先执行 `farrow setup`，所以只敲 `farrow up` 也可以）：
+在终端的空目录中，启动环境，然后进入虚拟机：
 
 ```bash
 mkdir -p ~/farrow-lab && cd ~/farrow-lab
-farrow setup
 farrow up
+farrow ssh
 ```
 
-`setup` 准备宿主环境，并在没有配置时生成默认的单节点 `farrow.yml`；`up` 自动拉取镜像、
-启动虚拟机并同步默认 SSH 别名。下面把这两条命令展开说明。
+交互式 `up` 在需要时生成默认单节点 `farrow.yml`，提示准备缺少的宿主依赖，拉取镜像并
+启动虚拟机。耗时任务显示进度，完成后给出简短结果和连接命令。中断或部分功能未完成时，
+再次执行 `up` 即可继续。
 
-## 1. 准备宿主
+脚本中应先用 `init` 生成配置、用 `setup --yes` 准备宿主。下面说明可选的准备与配置步骤。
 
-直接运行：
+## 1. 显式准备宿主（可选）
+
+希望提前查看安装计划或单独准备宿主时，运行：
 
 ```bash
 farrow setup
@@ -137,13 +139,12 @@ all:
 farrow up
 ```
 
-第一次运行会自动解析、下载并校验默认的 `u24:stable` 镜像，然后等待 Guest 就绪。下面是 macOS arm64 上的
-输出示例；镜像版本和资源随配置变化，`--verbose` 可查看 SSH 端口、架构和 PID：
+第一次运行会自动解析、下载并校验默认的 `u24:stable` 镜像，然后等待管理 SSH 就绪。
+健康的单节点环境只输出简短结果：
 
 ```text
-NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
-meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
-created and started 1 node(s)
+  ✓  1 node ready
+connect:   farrow ssh meta
 ```
 
 现在可以进入虚拟机：
@@ -155,6 +156,10 @@ farrow ssh meta
 > [!TIP]
 > `up` 会自动处理镜像。只有需要切换发行版、使用镜像站或管理缓存时，才需要阅读
 > [镜像仓库](../images/)。
+
+可选功能受限时会列出具体问题，仍可进入可用的虚拟机。数据盘按可丢弃的测试存储处理：
+`up` 可能清空重建不可用的文件系统，包括持久盘。存放数据前请阅读
+[数据盘说明](../../reference/configuration/#数据盘)。
 
 ## 3. 扩容与日常操作
 
@@ -183,12 +188,8 @@ Farrow 只创建新增的三台节点，不会重启正在运行的 `meta`，并
 Farrow hosts 与控制节点 SSH 配置：
 
 ```text
-NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
-meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
-node-1     running  10.10.10.11   u24@20260801.0.0     2    4.0 GiB
-node-2     running  10.10.10.12   u24@20260801.0.0     2    4.0 GiB
-node-3     running  10.10.10.13   u24@20260801.0.0     2    4.0 GiB
-created and started 3 node(s)
+  ✓  4 nodes ready
+connect:   farrow ssh meta
 ```
 
 随时用 `st`（`status` 的别名）查看状态：

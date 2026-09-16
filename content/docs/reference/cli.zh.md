@@ -18,7 +18,8 @@ farrow setup --help
 farrow image pull --help
 ```
 
-直接运行 `farrow` 会打印帮助并以 2 退出；`farrow image` 这样的裸命名空间同理。
+直接运行 `farrow` 会显示简短欢迎信息和下一步命令，并以 2 退出；`farrow image` 这样的
+裸命名空间打印帮助并以 2 退出。
 JSON/YAML 模式下，空命名空间返回结构化用法错误。显式 `--help` 始终输出供人阅读的
 帮助文本。
 
@@ -65,6 +66,9 @@ JSON/YAML 模式下，空命名空间返回结构化用法错误。显式 `--hel
 | `plan`、`up`、`reload`、`recreate` | 显式 `-f`，再发现配置，最后回退到已应用规格 |
 | 其他生命周期/访问命令 | 不读取期望配置；使用已应用状态 |
 
+空目录中的交互式 `up` 可生成默认配置并准备缺少的宿主依赖。脚本应显式运行 `init`
+和 `setup --yes`。
+
 ## 关键参数
 
 | 参数 | 含义 |
@@ -79,7 +83,7 @@ JSON/YAML 模式下，空命名空间返回结构化用法错误。显式 `--hel
 | `-d`、`--dry-run` | 只展示 setup/image 计划，不改变状态 |
 | `-y`、`--yes` | 应用已展示的宿主/setup/image 计划 |
 | `--force`（`init`、`destroy`、`recreate`） | 覆盖生成文件或跳过输入确认词；因为 `-f` 用于选择 Inventory，所以只保留长参数 |
-| `-n`、`--no-wait` | QEMU 运行后即返回，跳过 Guest 就绪检查与 guest 元数据刷新 |
+| `-n`、`--no-wait` | QEMU 运行后即返回，跳过 Guest 就绪检查、恢复与元数据刷新 |
 | `--rollback`（`up`、`reload`） | 清除本次运行中 prepare 失败节点的残留产物 |
 | `--delete-persistent` | 整体销毁时也删持久盘；不能与节点选择器一起使用 |
 | `--purge` | 整体处置：删除磁盘、密钥与 deployment 状态，保留镜像 |
@@ -104,15 +108,19 @@ JSON/YAML 文档。
 和磁盘影响。宿主能力与地址可用性由 `up` 在执行前检查。`up` 会创建缺失节点、启动已停止
 节点、复查运行中节点的就绪状态，并根据完整的 applied deployment 重写 Farrow 安装的
 SSH 客户端配置；`recreate` 同样执行全量刷新，节点级 destroy 删除旧条目，整体 destroy
-移除该配置。`start` 启动已停止节点并复查运行中节点的就绪状态，不触碰 SSH 客户端配置。
+移除该配置。`start` 启动已停止节点并复查运行中节点的就绪状态，`start` 与 `restart` 也会刷新 SSH 别名。
 破坏性 drift 返回冲突，并给出下一步命令：先 `farrow plan`，再 `farrow recreate <node>`
 或 `farrow destroy <node>`；终端上这两条命令会要求输入确认词，`--force` 仅用于脚本。
-如果 VM 生命周期成功但 SSH 客户端配置无法写入，结构化输出会携带 VM 状态并报告部分
-`ssh_config` 失败，退出码为 5。
+如果 VM 生命周期成功但 SSH 客户端配置无法写入，命令会给出警告并返回成功；
+`farrow ssh` 仍然可用。结构化输出通过 `warnings[]` 报告集成问题。
+
+就绪边界是管理 SSH 可用。可选初始化问题通过 `nodes[].warnings` 报告，已完成的恢复
+操作（包括数据盘重置）写入 `nodes[].repairs`。客机可用但有这些限制时返回 0；重复 `up`
+会重试未完成步骤，无需重启运行中的 VM。要求全部配置功能可用的自动化应检查警告字段。
 
 多节点操作中若有节点失败，退出码为 5，并报告
 `N of M node(s) failed: <node> (<stage>: <error>); ...`。阶段为 `prepare`、`start`、
-`readiness`、`stop`、`status`、`guest-metadata`；`readiness` 失败会追加 `run \`farrow logs <node>\` for the guest
+`readiness`、`guest-setup`、`stop`、`status`；`readiness` 失败会追加 `run \`farrow logs <node>\` for the guest
 console`。结构化输出携带 `failures[]`（`node`、`stage`、`error`）；当 `--rollback` 清除了
 从未提交节点的 prepare 产物时，还会带上 `rolled_back`。参见
 [节点未就绪](../../start/troubleshooting/#节点未就绪)。
@@ -123,7 +131,7 @@ console`。结构化输出携带 `failures[]`（`node`、`stage`、`error`）；
 正在运行，不代表本次 status 检查了 guest 就绪状态。
 
 启动命令完成后还会刷新运行中 guest 的 Farrow hosts 和控制节点 SSH 配置；停止中的
-节点在下次启动时更新。`--no-wait` 会跳过 guest 就绪检查和刷新，随后执行 `up` 补齐。
+节点在下次启动时更新。`--no-wait` 会跳过 guest 就绪检查、恢复和刷新，随后执行 `up` 补齐。
 局部 recreate 若仍受未选节点的配置变化影响，会在停机、删盘前拒绝；按提示一次选择
 需要重建的节点。
 
@@ -134,7 +142,9 @@ console`。结构化输出携带 `failures[]`（`node`、`stage`、`error`）；
 
 `farrow ssh [node] [--] [command ...]` 打开会话或运行可选命令；
 `farrow exec [node] [--] <command ...>` 必须给出命令并透传退出码。`--` 之前的展示参数
-属于 Farrow，之后的参数会像普通 SSH 一样以空格连接，再交给远端 shell 解释。
+属于 Farrow。`ssh` 之后的参数会像普通 SSH 一样以空格连接，再交给远端 shell 解释；
+`exec` 保留多个参数的边界，需要 shell 展开或管道时请显式使用 `sh -c`；
+单个命令字符串仍保留 shell 简写行为。
 有 `--` 时，其前面只能是空或一个已知节点。为方便交互使用，也接受省略 `--`：已知
 首参数选节点，否则把整段当成默认节点上的命令，并显示 warning。脚本中建议明确写 `--`。
 
@@ -145,12 +155,12 @@ console`。结构化输出携带 `failures[]`（`node`、`stage`、`error`）；
 
 | 代码 | 含义 |
 |---:|---|
-| 0 | 成功 |
+| 0 | 成功，包括客机可用但可选功能受限 |
 | 1 | 运行时失败 |
 | 2 | 用法或配置错误 |
 | 3 | 缺少宿主能力 |
 | 4 | 状态冲突或需要显式收敛 |
-| 5 | 节点操作或生命周期后集成部分完成 |
+| 5 | 节点操作部分完成 |
 | 6 | 资源冲突 |
 | 7 | 完整性或属主失败 |
 | 130 | 被中断（SIGINT/SIGTERM） |

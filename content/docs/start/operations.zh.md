@@ -24,6 +24,10 @@ TCG 在普通输出中也明确标记。异常节点不会隐藏其他节点的�
 `plan`、`up`、`reload`、`recreate` 依次优先使用 `-f`、当前目录发现的 Inventory，
 两者都没有时才回退到已应用规格；`validate` 始终需要文件。
 
+再次执行 `up` 会重试未完成的客机初始化、原位更新旧脚本，健康 VM 无需重启。结果会列出
+可选功能限制，JSON/YAML 提供 `nodes[].warnings` 与 `nodes[].repairs`。不可用的测试
+数据文件系统可能被清空重建，包括持久盘，详见[数据盘说明](../../reference/configuration/#数据盘)。
+
 ## 停止与启动
 
 ```bash
@@ -33,12 +37,12 @@ farrow restart node-1
 farrow reload -f farrow.yml       # 停止、重新读配置、收敛
 ```
 
-`start` 启动已停止的 VM 并复查运行中 VM 的就绪状态，不刷新 SSH 客户端配置；`restart`
-使用已应用状态；`reload` 先读取 Inventory、检查配置变化与启动依赖，再停止选中节点
+`start` 启动已停止的 VM 并复查运行中 VM 的就绪状态；`start` 与 `restart` 都使用已应用
+状态，并刷新 SSH 别名，包括重新分配的自动端口。`reload` 先读取 Inventory、检查配置变化与启动依赖，再停止选中节点
 并执行完整的 `up` 路径。
 
 `up`、`start`、`restart`、`reload`、`recreate` 还会刷新运行中 guest 的 Farrow hosts
-和控制节点 SSH 条目。`--no-wait` 跳过就绪检查与 guest 刷新，后续运行 `up` 补齐。
+和控制节点 SSH 条目。`--no-wait` 跳过就绪检查、客机恢复与 guest 刷新，后续运行 `up` 补齐。
 
 ## 变更 deployment
 

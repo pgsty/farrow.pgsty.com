@@ -19,8 +19,8 @@ farrow setup --help
 farrow image pull --help
 ```
 
-Bare `farrow` prints its help and exits 2; a bare namespace such as
-`farrow image` does the same. In JSON/YAML mode a bare namespace is a
+Bare `farrow` prints a short welcome with next commands and exits 2; a bare namespace such as
+`farrow image` prints help and also exits 2. In JSON/YAML mode a bare namespace is a
 structured usage error; explicit `--help` always renders human help.
 
 ## Commands
@@ -69,6 +69,10 @@ is command-scoped; `-f` is deliberately not a global flag:
 | `plan`, `up`, `reload`, `recreate` | explicit `-f`, then discovery, then the applied resolved specification |
 | other lifecycle/access commands | no desired-state inventory; they use applied state |
 
+Interactive `up` in an empty directory can generate the default inventory and
+prepare missing host dependencies. Scripts should run `init` and `setup --yes`
+explicitly.
+
 ## Important flags
 
 | Flag | Meaning |
@@ -83,7 +87,7 @@ is command-scoped; `-f` is deliberately not a global flag:
 | `-d`, `--dry-run` | show a setup/image plan without changing state |
 | `-y`, `--yes` | apply a displayed host/setup/image plan |
 | `--force` (`init`, `destroy`, `recreate`) | overwrite generated output or skip the typed confirmation; long-only because `-f` selects the Inventory |
-| `-n`, `--no-wait` | return once QEMU is running, without waiting for the guest to boot |
+| `-n`, `--no-wait` | return once QEMU is running, without readiness or guest recovery checks |
 | `--rollback` (`up`, `reload`) | remove the prepare artifacts of nodes that failed to prepare in this run |
 | `--delete-persistent` | during whole destroy, also delete retained data disks; invalid with node selectors |
 | `--purge` | whole-deployment disposal: delete disks, keys, and deployment state; keep images |
@@ -117,17 +121,23 @@ re-checks readiness of running ones, and rewrites the SSH client configuration
 Farrow installed from the complete applied deployment. `recreate` performs the
 same full refresh; node destroy removes stale entries, and whole destroy
 removes that configuration. `start` powers on stopped nodes and re-checks
-readiness of running ones; it does not touch the SSH client configuration.
+readiness of running ones; `start` and `restart` also refresh SSH aliases.
 Destructive drift returns a conflict that names the next commands:
 `farrow plan`, then `farrow recreate <node>` or `farrow destroy <node>`. On a
 terminal those commands ask you to type the confirmation word; `--force` is for
 scripts. If VM lifecycle succeeds but the SSH client configuration cannot be
-written, structured output reports the VM status as a partial `ssh_config`
-failure and exits 5.
+written, the command reports a warning and remains successful; `farrow ssh`
+still works. Structured output carries integration warnings in `warnings[]`.
+
+Guest management SSH is the readiness boundary. Optional setup failures are
+reported in `nodes[].warnings`; completed recovery actions, including data resets,
+are in `nodes[].repairs`. A usable guest with these limitations exits 0. Repeat
+`up` to retry unfinished stages without restarting running VMs. Inspect the
+warning fields when automation requires every configured feature.
 
 A multi-node operation in which some nodes failed exits 5 and reports
 `N of M node(s) failed: <node> (<stage>: <error>); ...`. Stages are `prepare`,
-`start`, `readiness`, `stop`, `status`, and `guest-metadata`; a `readiness` failure adds
+`start`, `readiness`, `guest-setup`, `stop`, and `status`; a `readiness` failure adds
 `run \`farrow logs <node>\` for the guest console`. Structured output carries
 `failures[]` with `node`, `stage`, and `error`, plus `rolled_back` when
 `--rollback` removed the prepare artifacts of nodes that never committed. See
@@ -141,7 +151,7 @@ status does not claim to have checked guest readiness.
 
 Starting commands also refresh Farrow hosts and control-node SSH entries in
 running guests. Stopped guests catch up when started. `--no-wait` skips guest
-readiness and that refresh; a later `up` completes both. Selected recreate
+readiness, guest recovery, and that refresh; a later `up` completes them. Selected recreate
 refuses remaining peer drift before stopping or deleting disks; select the
 required nodes together as directed.
 
@@ -154,8 +164,10 @@ User-added SSH entries are preserved.
 `farrow ssh [node] [--] [command ...]` opens a session or runs an optional
 command. `farrow exec [node] [--] <command ...>` requires a command and passes
 through its exit status. Presentation flags before `--` belong to Farrow;
-arguments after `--` are joined with spaces and interpreted by the remote
-shell, like plain SSH. Before `--`, only zero or one known node is accepted.
+`ssh` arguments after `--` are joined with spaces and interpreted by the remote
+shell, like plain SSH. `exec` preserves argument boundaries; explicitly use
+`sh -c` when you need shell expansion or pipelines. A single command string
+retains the shell shorthand. Before `--`, only zero or one known node is accepted.
 For convenience, omitting `--` uses a known first argument as the node, or
 runs all arguments as a command on the default node with a warning. Use an
 explicit `--` in scripts.
@@ -169,12 +181,12 @@ specification.
 
 | Code | Meaning |
 |---:|---|
-| 0 | success |
+| 0 | success, including usable guests with optional limitations |
 | 1 | runtime failure |
 | 2 | usage or invalid configuration |
 | 3 | missing host capability |
 | 4 | state conflict or explicit convergence required |
-| 5 | partial completion across nodes or post-lifecycle integration |
+| 5 | partial completion of node operations |
 | 6 | resource conflict |
 | 7 | integrity or ownership failure |
 | 130 | interrupted (SIGINT/SIGTERM) |

@@ -27,6 +27,12 @@ rewrites it by hand if you ever need to.
 Inventory, then the applied spec when no file exists. `validate` always needs
 a file.
 
+Repeat `up` to retry unfinished guest setup and refresh older guest helpers
+without restarting healthy VMs. Optional limitations appear in the result;
+JSON/YAML expose `nodes[].warnings` and `nodes[].repairs`. Unusable test data
+filesystems may be reset, including persistent disks; see
+[Data disks](../../reference/configuration/#data-disks).
+
 ## Stop and start
 
 ```bash
@@ -36,12 +42,13 @@ farrow restart node-1
 farrow reload -f farrow.yml       # stop, re-read config, converge
 ```
 
-`start` powers on stopped VMs and re-checks readiness of running ones; it does
-not refresh the SSH client configuration. `restart` uses applied state. `reload` reads the Inventory and checks drift and startup dependencies before
+`start` powers on stopped VMs and re-checks readiness of running ones. Both
+`start` and `restart` use applied state and refresh SSH aliases, including any
+reassigned automatic ports. `reload` reads the Inventory and checks drift and startup dependencies before
 stopping selected nodes and following the full `up` path.
 
 Starting commands also refresh Farrow hosts and control-node SSH entries in
-running guests. `--no-wait` skips readiness and this refresh; run `up` later
+running guests. `--no-wait` skips readiness, guest recovery, and this refresh; run `up` later
 to finish them.
 
 ## Change the deployment

@@ -87,9 +87,16 @@ vm_disks:
 `path` is the disk identity and mount point. `fs` is `auto` (the default), `xfs`,
 or `ext4`. A blank `auto` disk is formatted XFS when the guest has `mkfs.xfs`
 and ext4 otherwise, which matches what the Vagrant flow did. Explicit `xfs` and
-`ext4` never fall back, and an existing filesystem is always preserved.
+`ext4` never fall back. Healthy existing filesystems are reused.
 `persistent: true` keeps the disk across an ordinary destroy; `vm_disks: []`
 means no extra disk.
+
+**Data disks are disposable test storage.** `up` resets unrecognized or confirmed
+damaged filesystems to the configured type and reports that old data was
+discarded. This includes persistent disks: persistence controls destroy/recreate,
+not retention of corrupt contents. Probe errors, missing devices, busy mounts,
+and backend I/O failures do not authorize formatting. Root disks and host
+shares are outside this recovery path.
 
 ## Shares
 
@@ -101,7 +108,10 @@ vm_shares:
 ```
 
 Shares must be real, caller-owned, non-overlapping directories. They are for
-trusted development files, not PostgreSQL data.
+trusted development files, not PostgreSQL data. If a requested writable share
+cannot support guest writes, Farrow tries read-only access and reports the
+limitation. Correct permissions and repeat `up` to retry; Farrow does not
+recursively change the ownership of host files.
 
 ## Names and addresses
 
@@ -117,7 +127,7 @@ address (`ip -br addr`); its name is not a Farrow contract.
 ## Drift
 
 Farrow hashes each resolved node. Added hosts are created by `up`; selected
-existing stopped nodes are started; running peers stay untouched. Changed VM
+existing stopped nodes are started; running peers keep their processes while unfinished guest setup is retried. Changed VM
 definitions require per-node recreate; removed hosts are reported but never
 destroyed. Deployment architecture, user, or subnet changes require whole-deployment
 recreation. Changing a field used to derive a node name appears as a missing

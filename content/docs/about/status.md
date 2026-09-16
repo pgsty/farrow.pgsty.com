@@ -11,16 +11,17 @@ and the public site are separate gates. Install instructions are in the
 [Quick Start](../../start/tutorial/#install).
 
 The current public release is
-[`v0.6.0`](https://github.com/pgsty/farrow/releases/tag/v0.6.0). It defaults to
-Ubuntu 24.04 and improves plans, status, and lab lifecycle operations. See the
-[release notes](../../../blog/release/farrow-0.6.0/) for upgrade instructions.
-The latest native replay below used an isolated macOS arm64/HVF U24 lab;
-Linux-host and other outstanding results retain their original dates.
+[`v0.7.0`](https://github.com/pgsty/farrow/releases/tag/v0.7.0). It improves first-run
+setup, progress output, and recovery through `up`. See the
+[release notes](../../../blog/release/farrow-0.7.0/) for upgrade instructions and
+the automatic test-data reset policy. The new recovery replay used an isolated
+Ubuntu amd64/KVM lab; macOS HVF and other results retain their original dates.
 
 ## Summary
 
 | Host | Path | Last verified | Result |
 |---|---|---|---|
+| Ubuntu 26.04 amd64 | KVM, QEMU 10.2.1, Ubuntu 24.04 guest | 2026-09-16 (0.7.0 recovery) | damaged disk resets, failed probes, busy mounts, retained-disk recreation, share recovery, and repeated healthy up passed |
 | macOS arm64 | HVF, Ubuntu 24.04.4 guests | 2026-09-05 (0.6.0 lifecycle changes) | create, scale-out, peer SSH, stop/start, reload, recreate, partial status, and scale-in passed |
 | macOS 26.6.2 arm64 | HVF, QEMU 11.1, socket_vmnet | 2026-09-01 (`v0.2.0`) | selected create/SSH/stop/start, incremental cached create, whole status, whole destroy passed |
 | macOS 26.6.2 arm64 | HVF, QEMU 11.1, socket_vmnet | 2026-08-27 | one node and additive four nodes passed |
@@ -37,7 +38,7 @@ Linux-host and other outstanding results retain their original dates.
 - host reboot persistence;
 - macOS amd64 and Linux arm64 native runs;
 - EL7 through the current native Linux/amd64 lifecycle;
-- current 9p share replay;
+- current macOS 9p share replay;
 - a complete current Pigsty `configure → farrow up → install.yml` run;
 - clean-host published Homebrew/DEB/RPM consumption.
 
@@ -51,6 +52,36 @@ custody must be formalized before 1.0.
 
 Each entry belongs to the exact checkpoint exercised that day. Later source or
 documentation edits do not inherit native proof without another replay.
+
+### Farrow 0.7.0 release — 2026-09-16
+
+Release commit `9c6d4896d93733d1cb60a7e5d8591e9a06659c9d` passed the complete
+[source CI](https://github.com/pgsty/farrow/actions/runs/35118137961) and independent
+[packaging snapshot](https://github.com/pgsty/farrow/actions/runs/35118137990) before
+tagging. The [tag workflow](https://github.com/pgsty/farrow/actions/runs/35119206685)
+repeated the gates and published a draft with 20 assets. After inspection, the
+release was made public; all 20 anonymous downloads returned HTTP 200 and matched
+the inspected bytes, including all 19 checksummed payloads. Public installers on
+macOS arm64 and Ubuntu amd64 installed the exact archive binaries. Download tests
+used the host's configured proxy; m3 reached it through a temporary loopback tunnel.
+
+The Ubuntu amd64/KVM recovery matrix covered corrupt ext4/XFS filesystems,
+retained disks, failed probes, busy mounts, read-only shares, and repeated healthy
+`up` without process replacement. A public 0.6.0 bootstrap failed its egress probe;
+0.7.0 resumed that same VM in 3.3 seconds. Probe failure left existing disk data
+and UUID intact. The old 0.6.0 CLI still completed status, stop, start, and destroy
+after upgrade, including with a cached optional warning. A fresh VM from the
+final 0.7.0 archive booted without warnings and ignored the old VM's cache.
+
+The publicly installed Linux binary also reset a deliberately damaged disposable
+ext4 disk in 3.2 seconds, reported discarded data, and retained the running VM's
+process. Stop, start, and purge then passed.
+
+That interrupted 0.6.0 bootstrap had already deleted its staged control-node SSH
+key. Management access recovered, but missing peer SSH remained an explicit
+`control-ssh` limitation; see the [upgrade notes](../../../blog/release/farrow-0.7.0/).
+This release adds no guest images: Catalog `2026090501` remains unchanged.
+There was no new macOS HVF, host reboot, or complete Pigsty replay.
 
 ### Farrow 0.6.0 release — 2026-09-05
 

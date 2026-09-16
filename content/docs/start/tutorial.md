@@ -1,7 +1,7 @@
 ---
 title: Quick Start
 linkTitle: Quick Start
-description: Boot a one-node Farrow lab with setup and up, then scale it additively from the same inventory.
+description: Start a one-node lab with up, connect with ssh, and scale from the same inventory.
 weight: 10
 icon: fa-solid fa-play
 aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /docs/start/pigsty/, /docs/features/]
@@ -11,46 +11,48 @@ aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /do
 
 Farrow is pre-1.0. Every release ships a user-scoped installer, a Homebrew
 formula, and DEB/RPM packages as release assets. Download them from the
-[Farrow 0.6.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.6.0),
+[Farrow 0.7.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.7.0),
 then pick one path:
 
 ```bash
 # From a release: user-scoped, no sudo, checksum-verified
-curl -fLO https://github.com/pgsty/farrow/releases/download/v0.6.0/install.sh
+curl -fLO https://github.com/pgsty/farrow/releases/download/v0.7.0/install.sh
 chmod +x install.sh
-FARROW_VERSION=0.6.0 ./install.sh
+FARROW_VERSION=0.7.0 ./install.sh
 
 # Homebrew formula (shipped as a release asset)
 brew install --formula ./farrow.rb
 
 # Debian/Ubuntu and RHEL-family packages are release assets too
-sudo apt install ./farrow_0.6.0_linux_amd64.deb
-sudo dnf install ./farrow_0.6.0_linux_amd64.rpm
+sudo apt install ./farrow_0.7.0_linux_amd64.deb
+sudo dnf install ./farrow_0.7.0_linux_amd64.rpm
 ```
 
 GitHub does not expose pre-1.0 prereleases through `/releases/latest`, so the
-installer needs `FARROW_VERSION=0.6.0`. Use [Build from Source](../source-build/)
+installer needs `FARROW_VERSION=0.7.0`. Use [Build from Source](../source-build/)
 for development and source review.
 
 ## Boot the first lab
 
-In an empty directory, the normal runtime path is only two commands (on a
-terminal, `farrow up` runs `farrow setup` itself the first time the host is not
-prepared, so `farrow up` alone also works):
+In an empty directory on a terminal, start the lab and connect:
 
 ```bash
 mkdir -p ~/farrow-lab && cd ~/farrow-lab
-farrow setup
 farrow up
+farrow ssh
 ```
 
-`setup` prepares the host and creates a default one-node `farrow.yml` when no
-inventory exists. `up` pulls the image, starts the VM, and synchronizes the
-default SSH aliases. The rest of this page expands those two commands.
+Interactive `up` creates the default one-node `farrow.yml` when needed, offers
+to prepare missing host dependencies, pulls the image, and starts the VM.
+Long tasks show progress; completion gives a short result and the SSH command.
+Run `up` again to continue interrupted work or retry unfinished guest setup.
 
-## 1. Prepare the host
+For scripts, generate the inventory with `init` and prepare the host with
+`setup --yes` first. The following sections explain the available choices.
 
-Run:
+## 1. Prepare the host explicitly (optional)
+
+To inspect the setup plan or prepare the host before booting, run:
 
 ```bash
 farrow setup
@@ -148,14 +150,12 @@ Start it:
 farrow up
 ```
 
-The first run resolves, downloads, and verifies the default `u24:stable` image, then waits for
-guest readiness. This example shows the default resources; use `--verbose`
-for SSH ports, architecture, and process IDs:
+The first run resolves, downloads, and verifies the default `u24:stable` image,
+then waits for management SSH. A healthy one-node result is compact:
 
 ```text
-NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
-meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
-created and started 1 node(s)
+  ✓  1 node ready
+connect:   farrow ssh meta
 ```
 
 Open the VM:
@@ -167,6 +167,10 @@ farrow ssh meta
 > [!TIP]
 > `up` manages the image automatically. Read [Image Repositories](../images/)
 > only when you need another distribution, a mirror, or cache management.
+
+Optional limitations are listed without hiding a usable guest. Data disks are
+disposable test storage: `up` can reset unusable filesystems, including persistent
+disks. See [Data disks](../../reference/configuration/#data-disks) before storing data.
 
 ## 3. Scale and operate
 
@@ -195,12 +199,8 @@ Farrow creates only the three additions, keeps `meta` running, and refreshes
 the Farrow hosts and control-node SSH entries in running guests:
 
 ```text
-NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
-meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
-node-1     running  10.10.10.11   u24@20260801.0.0     2    4.0 GiB
-node-2     running  10.10.10.12   u24@20260801.0.0     2    4.0 GiB
-node-3     running  10.10.10.13   u24@20260801.0.0     2    4.0 GiB
-created and started 3 node(s)
+  ✓  4 nodes ready
+connect:   farrow ssh meta
 ```
 
 Use `st`, the alias of `status`, at any time:

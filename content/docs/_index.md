@@ -21,7 +21,7 @@ Choose the shortest path for your task:
   release gates.
 
 New users should follow the [Quick Start](start/tutorial/). The complete normal
-path is `farrow setup` and `farrow up`.
+path is `farrow up` to start the lab, then `farrow ssh` to connect.
 
 > [!IMPORTANT]
 > Farrow is pre-1.0. Current source behavior, native validation, packaging,

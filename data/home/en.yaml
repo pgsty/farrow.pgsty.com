@@ -17,11 +17,11 @@ hero:
     Farrow boots a Pigsty-compatible inventory into fixed-IP QEMU virtual
     machines on macOS and Linux. The same file describes the VMs and deploys
     Pigsty; there is no project model or second configuration to reconcile.
-  note: The simplified line was last native-replayed on macOS arm64 and Ubuntu amd64 on 2026-08-27; no public 1.0 package exists yet.
+  note: Farrow 0.7.0 improves startup and recovery. Linux KVM recovery was replayed on 2026-09-16; the latest macOS HVF lifecycle replay is dated 2026-09-05.
   note_icon: fa-solid fa-flask
   image:
-    light: images/farrow-hero-light.svg?v=20260827
-    dark: images/farrow-hero-dark.svg?v=20260827
+    light: images/farrow-hero-light.svg?v=0.7.0
+    dark: images/farrow-hero-dark.svg?v=0.7.0
     alt: One Pigsty inventory becomes one fixed-IP Farrow deployment
   actions:
     - { label: Quick Start, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
@@ -39,7 +39,7 @@ facts:
   columns: 4
   link_label: Details
   items:
-    - { value: 2, label: normal commands, desc: setup + up, url: docs/start/tutorial/ }
+    - { value: 2, label: normal commands, desc: up + ssh, url: docs/start/tutorial/ }
     - { value: 1, label: inventory, desc: farrow.yml or pigsty.yml, url: docs/reference/configuration/ }
     - { value: 1, label: deployment per user, desc: state under ~/.farrow, url: docs/about/design/ }
     - { value: 4, label: nodes replayed, desc: additive scale-out, url: docs/start/tutorial/ }
@@ -51,22 +51,22 @@ entry_points:
   columns: 3
   link_label: Open
   items:
-    - { title: Start, meta: Two-command boot, icon: fa-solid fa-rocket, desc: "Quick Start plus focused operations, troubleshooting, image, build, and cleanup guides.", url: docs/start/ }
+    - { title: Start, meta: Start and connect, icon: fa-solid fa-rocket, desc: "Quick Start plus focused operations, troubleshooting, image, build, and cleanup guides.", url: docs/start/ }
     - { title: Reference, meta: Exact contracts, icon: fa-solid fa-code, desc: "Inventory variables, commands, flags, output, and exit codes.", url: docs/reference/ }
     - { title: About, meta: Design and evidence, icon: fa-solid fa-circle-info, desc: "The simplified model, native test matrix, limits, and release gates.", url: docs/about/ }
-    - { title: Quick Start, meta: One node to four, icon: fa-solid fa-play, desc: "Boot with setup and up, then scale additively from the same inventory.", url: docs/start/tutorial/ }
+    - { title: Quick Start, meta: One node to four, icon: fa-solid fa-play, desc: "Boot with up, connect with ssh, then scale from the same inventory.", url: docs/start/tutorial/ }
     - { title: Configuration, meta: vm_* fields, icon: fa-solid fa-file-code, desc: "Defaults, disks, shares, naming, addressing, and drift.", url: docs/reference/configuration/ }
     - { title: Blog, meta: Design and history, icon: fa-solid fa-newspaper, desc: "Accepted design records, project articles, development snapshots, and release notes.", url: blog/ }
 
 first_command:
   eyebrow: Normal path
-  title: Two commands to prepare and boot
-  text: Run them in an empty directory; setup creates the default one-node inventory.
+  title: Start the lab, then connect
+  text: Run them in an empty directory on a terminal; up creates the default inventory and offers to prepare missing dependencies.
   code: |-
-    farrow setup
     farrow up
+    farrow ssh
   lang: bash
-  note: Add host lines and run up again; new nodes are created, stopped selected nodes start, and running peers stay untouched. Removing a line never destroys a VM.
+  note: Add host lines and run up again; new nodes are created, stopped selected nodes start, and running peers keep their processes while unfinished setup is retried. Removing a line never destroys a VM.
 
 principles:
   eyebrow: Product boundaries

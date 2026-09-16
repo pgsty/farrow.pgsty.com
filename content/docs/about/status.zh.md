@@ -9,15 +9,16 @@ aliases: [/docs/project/, /docs/project/status/, /docs/project/roadmap/, /docs/p
 Farrow 仍是 pre-1.0。源码测试、带日期的真机重放、软件包、发布、CI 与线上站点是不同门禁。
 安装方法见[快速上手](../../start/tutorial/#安装)。
 
-当前公开版本为 [`v0.6.0`](https://github.com/pgsty/farrow/releases/tag/v0.6.0)，
-默认使用 Ubuntu 24.04，改进计划、状态和日常生命周期操作。
-升级方法见[发布说明](../../../blog/release/farrow-0.6.0/)。最新真机重放使用隔离的
-macOS arm64/HVF U24 环境；Linux 宿主等其他验证仍保留各自的原始日期。
+当前公开版本为 [`v0.7.0`](https://github.com/pgsty/farrow/releases/tag/v0.7.0)，
+改进首次启动、进度输出，并统一通过 `up` 恢复故障。升级方法与测试数据自动清盘规则见
+[发布说明](../../../blog/release/farrow-0.7.0/)。新增恢复验证使用隔离的 Ubuntu amd64/KVM
+环境；macOS HVF 与其他验证保留各自的原始日期。
 
 ## 概览
 
 | 宿主 | 路径 | 最后验证 | 结果 |
 |---|---|---|---|
+| Ubuntu 26.04 amd64 | KVM、QEMU 10.2.1、Ubuntu 24.04 Guest | 2026-09-16（0.7.0 恢复） | 损坏盘重置、探测失败、忙碌挂载、保留盘重建、共享目录恢复与重复健康 up 通过 |
 | macOS arm64 | HVF、Ubuntu 24.04.4 Guest | 2026-09-05（0.6.0 生命周期修改） | 创建、扩容、同伴 SSH、stop/start、reload、recreate、部分状态与缩容通过 |
 | macOS 26.6.2 arm64 | HVF、QEMU 11.1、socket_vmnet | 2026-09-01（`v0.2.0`） | 选点创建/SSH/stop/start、增量创建已缓存镜像、whole status、whole destroy 通过 |
 | macOS 26.6.2 arm64 | HVF、QEMU 11.1、socket_vmnet | 2026-08-27 | 单节点与增量四节点通过 |
@@ -34,7 +35,7 @@ macOS arm64/HVF U24 环境；Linux 宿主等其他验证仍保留各自的原始
 - 宿主重启持久性；
 - macOS amd64 与 Linux arm64 真机；
 - 当前 Linux/amd64 原生 EL7 生命周期；
-- 当前 9p share 重放；
+- 当前 macOS 9p share 重放；
 - 完整的 Pigsty `configure → farrow up → install.yml`；
 - 干净宿主上的公开 Homebrew/DEB/RPM 安装。
 
@@ -45,6 +46,30 @@ macOS arm64/HVF U24 环境；Linux 宿主等其他验证仍保留各自的原始
 ## 验证历史
 
 每条记录只属于当天真正执行过的准确 Checkpoint；后续源码或文档修改不会自动继承真机证明。
+
+### Farrow 0.7.0 发布：2026-09-16
+
+发布提交 `9c6d4896d93733d1cb60a7e5d8591e9a06659c9d` 在打 Tag 前通过完整
+[源码 CI](https://github.com/pgsty/farrow/actions/runs/35118137961) 与独立
+[打包 Snapshot](https://github.com/pgsty/farrow/actions/runs/35118137990)。
+[Tag 工作流](https://github.com/pgsty/farrow/actions/runs/35119206685) 重复检查并生成包含
+20 个资产的草稿，检查后公开发布。20 个匿名下载均返回 HTTP 200，字节与检查过的草稿
+一致，19 项载荷全部通过摘要校验。macOS arm64 与 Ubuntu amd64 的公开安装器安装结果
+均与发布归档中的二进制一致。下载验证使用宿主现有代理，m3 通过临时回环隧道访问该代理。
+
+Ubuntu amd64/KVM 故障矩阵覆盖 ext4/XFS 损坏、持久盘、探测失败、忙碌挂载、只读共享
+和重复健康 `up` 保留进程。公开版 0.6.0 因出网探测失败而中断，0.7.0 在 3.3 秒内接续
+同一台 VM；探测失败期间已有盘的数据与 UUID 保持不变。升级后回退 0.6.0，仍能执行
+status、stop、start 与 destroy，包括存在可选警告缓存的情况。最终 0.7.0 归档新建的 VM
+无警告启动，也不会继承旧实例的警告缓存。
+
+公开安装器装出的 Linux 二进制还在 3.2 秒内重置了人为破坏的可丢弃 ext4 数据盘，
+明确报告数据已丢弃，同时保留 VM 运行进程；随后 stop、start 与 purge 均通过。
+
+该 0.6.0 中断现场已经删除了暂存的控制节点 SSH 私钥。管理访问恢复，但节点间 SSH
+仍以 `control-ssh` 限制明确报告，详见[升级说明](../../../blog/release/farrow-0.7.0/)。
+本次未发布新客机镜像，Catalog `2026090501` 不变；未新增 macOS HVF、宿主重启或完整
+Pigsty 安装重放。
 
 ### Farrow 0.6.0 发布：2026-09-05
 

@@ -73,27 +73,9 @@ host entry or run `farrow destroy <node>`.
 
 ## A node did not become ready
 
-`up`, `start`, and `recreate` wait for each guest to finish its bootstrap. When
-some nodes fail, the command exits 5 and reports
-`N of M node(s) failed: <node> (<stage>: <error>)`. Stages are `prepare`,
-`start`, `readiness`, and `stop`. A `readiness` failure names the guest's own
-bootstrap stage:
-
-| Bootstrap stage | Usually means |
-|---|---|
-| `identity`, `hosts` | the image or its cloud-init did not run as expected |
-| `management-network` | the host has no egress, or a proxy is required |
-| `data-disks` | a disk definition is wrong, or the image lacks the requested `mkfs` |
-| `shares` | a shared directory could not be mounted |
-| `control-ssh` | the control-node SSH key could not be installed |
-| `private-network` | the fixed-IP interface never came up; check `farrow network status` |
-| `ready` | the ready marker could not be written |
-
-`guest bootstrap failed during data-disks: xfs requested but mkfs.xfs is
-unavailable` names the failing stage and the guest's last error line (older
-markers without a detail show `(exit status N)` instead); `guest did not become ready within 3m0s: <last ssh error>` means the
-guest never answered. Read the guest console and QEMU output, then check the
-recorded state:
+Management SSH and guest instance identity are required for readiness. If a node
+cannot be created, started, or reached, the operation reports the node and stage
+and exits 5. Read its logs:
 
 ```bash
 farrow logs <node>                  # serial console
@@ -101,10 +83,29 @@ farrow logs <node> --source qemu    # QEMU diagnostics
 farrow status
 ```
 
-Nodes that failed during `prepare` never joined the deployment. Pass
-`--rollback` to `up` or `reload` to remove their leftover artifacts in the
-same run; structured output lists them under `rolled_back`. `--no-wait` skips
-the readiness wait and returns once QEMU is running.
+Data disks, shares, hostnames, guest hosts, control-node SSH, and private-network
+setup run independently. Failure of one does not prevent management SSH or the
+other stages. A usable guest returns 0 with specific limitations; JSON/YAML
+expose them as `nodes[].warnings`. Internet access is not a readiness requirement.
+
+| Limitation | Next action |
+|---|---|
+| Data disk unavailable | Correct a missing device, probe, tool, busy mount, or I/O problem, then run `up` |
+| Shared directory is read-only | Correct host permissions, then run `up` to retry writes |
+| Guest hosts or control-node SSH incomplete | Run `up` to refresh the managed files |
+| Private interface unavailable | Check `farrow network status`, then run `up`; management SSH can still work |
+
+Repeat `up` after fixing the underlying issue. It retries unfinished stages,
+upgrades old guest helpers in place, and skips healthy work without restarting
+running VMs. Unrecognized or confirmed damaged test data filesystems are reset
+automatically, **including persistent disks**; the result reports discarded data.
+Failed probes, busy mounts, and I/O failures do not trigger formatting. See
+[Data disks](../../reference/configuration/#data-disks).
+
+A repeated `up` can also clean recognized leftovers from interrupted preparation.
+`--rollback` removes failed prepare artifacts in the same run and lists them in
+`rolled_back`. `--no-wait` returns once QEMU is running and skips readiness,
+guest recovery, and metadata refresh; a later `up` completes them.
 
 ## SSH fails
 

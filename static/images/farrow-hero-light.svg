@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" aria-labelledby="title desc">
   <title id="title">Farrow runtime architecture</title>
-  <desc id="desc">Farrow setup prepares the lab; Farrow up starts native QEMU virtual machines on macOS and Linux.</desc>
+  <desc id="desc">Farrow up prepares and starts native QEMU virtual machines on macOS and Linux; Farrow ssh connects.</desc>
   <defs>
     <linearGradient id="panel" x1="88" y1="32" x2="670" y2="488" gradientUnits="userSpaceOnUse">
       <stop stop-color="#fff"/>
@@ -15,7 +15,7 @@
   <rect x="56" y="30" width="648" height="458" rx="34" fill="url(#panel)" stroke="#dcc7ce" stroke-width="2" filter="url(#shadow)"/>
   <path d="M116 117h528M116 399h528" stroke="#eadbe0" stroke-width="2"/>
   <circle cx="91" cy="74" r="7" fill="#e86c88"/><circle cx="116" cy="74" r="7" fill="#e2ad52"/><circle cx="141" cy="74" r="7" fill="#68a97f"/>
-  <text x="176" y="82" fill="#5c3341" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" font-weight="700">farrow setup → farrow up</text>
+  <text x="176" y="82" fill="#5c3341" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" font-weight="700">farrow up → farrow ssh</text>
   <rect x="116" y="151" width="528" height="104" rx="22" fill="#fff" stroke="#d9c3ca" stroke-width="2"/>
   <rect x="140" y="175" width="64" height="56" rx="17" fill="url(#brand)"/>
   <circle cx="160" cy="199" r="4" fill="#ffd0da"/><circle cx="184" cy="199" r="4" fill="#ffd0da"/>
