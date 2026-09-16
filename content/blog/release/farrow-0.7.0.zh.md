@@ -59,7 +59,21 @@ Formula。沿用 pre-1.0 规则，在 GitHub 标记为 Pre-release，安装时�
 
 ## 验证范围
 
-完整源码检查覆盖单元与 race 测试、静态检查、四平台编译、安装器与镜像流水线检查和许可证。
-Ubuntu amd64/KVM 隔离环境实际验证了 Ubuntu 24.04 客机的数据盘损坏重置、忙碌挂载、探测失败、
-持久盘重建、共享目录恢复，以及重复 `up` 保留运行进程。macOS 本轮验证为 CLI 冒烟及编译，
-不宣称新增 HVF 客机重放、宿主重启或完整 Pigsty 安装验收。
+发布提交为 `9c6d4896d93733d1cb60a7e5d8591e9a06659c9d`，通过[源码 CI](https://github.com/pgsty/farrow/actions/runs/35118137961)
+与独立[打包 Snapshot](https://github.com/pgsty/farrow/actions/runs/35118137990)后打 Tag。
+[Tag 工作流](https://github.com/pgsty/farrow/actions/runs/35119206685)重复门禁并生成 20 个发布资产：
+19 个带校验和的载荷及校验清单。检查后，20 个资产均可匿名 HTTP 200 下载，并与检查过的字节一致。
+
+公开 macOS arm64 与 Linux amd64 安装器安装的二进制均与归档一致，并报告版本 `0.7.0` 与上述提交。
+Ubuntu 26.04 amd64、KVM/QEMU 10.2.1、Ubuntu 24.04 Guest 隔离环境实际验证了 ext4/XFS 损坏、持久盘、
+探测失败、忙碌挂载、只读共享降级和重复健康 `up` 保留 VM 进程。公开版 0.6.0 因管理出网探测失败而中断，
+0.7.0 在 3.3 秒内接续，探测失败期间已有数据盘和 UUID 保持不变。升级后 0.6.0 二进制仍能执行
+`status`、`stop`、`start` 与 `destroy`。最终 0.7.0 归档新建的 VM 无警告启动；公开安装器还在 3.2 秒内
+重置了人为损坏的可丢弃 ext4 数据盘，明确提示数据丢失，同时保留 VM 进程。
+
+特定的 0.6.0 中断现场可能在安装前删除暂存的控制节点 SSH 私钥。此升级路径中管理 SSH 会恢复，
+但节点间 SSH 会明确显示 `control-ssh` 限制，原位重试不会重新注入私钥；需要节点间 SSH 时，先查看
+`farrow plan` 再重建受影响的控制节点。全新 0.7.0 Guest 会正常安装该密钥。
+
+本版本 macOS 验证包括 CLI 冒烟与交叉编译；不宣称新增 HVF Guest 重放、宿主重启、Linux arm64 或完整
+Pigsty 安装验收。

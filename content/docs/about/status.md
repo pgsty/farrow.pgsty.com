@@ -40,7 +40,9 @@ Ubuntu amd64/KVM lab; macOS HVF and other results retain their original dates.
 - EL7 through the current native Linux/amd64 lifecycle;
 - current macOS 9p share replay;
 - a complete current Pigsty `configure → farrow up → install.yml` run;
-- clean-host published Homebrew/DEB/RPM consumption.
+- clean-host published Homebrew installation (the current tap formula has a local
+  upgrade and `brew test` pass, but this is not a clean-host replay);
+- clean-host published DEB/RPM consumption.
 
 Current built-in versions are `supported`, except EOL EL7 and the retained
 compatibility versions EL9 9.3/9.6 and EL10 10.0, which are `deprecated`.
@@ -64,6 +66,8 @@ release was made public; all 20 anonymous downloads returned HTTP 200 and matche
 the inspected bytes, including all 19 checksummed payloads. Public installers on
 macOS arm64 and Ubuntu amd64 installed the exact archive binaries. Download tests
 used the host's configured proxy; m3 reached it through a temporary loopback tunnel.
+The `pgsty/infra/farrow` formula was refreshed to `v0.7.0`; a local Homebrew
+upgrade and `brew test` passed, while a clean-host formula install remains open.
 
 The Ubuntu amd64/KVM recovery matrix covered corrupt ext4/XFS filesystems,
 retained disks, failed probes, busy mounts, read-only shares, and repeated healthy

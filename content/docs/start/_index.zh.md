@@ -1,19 +1,23 @@
 ---
 title: 开始使用
 linkTitle: 开始使用
-description: 两条命令启动 Farrow；其余管理、排障、镜像、构建与清理按需阅读。
+description: 用 up 启动 Farrow、用 ssh 进入客机，其余管理、排障、镜像、构建与清理按需阅读。
 weight: 10
 icon: fa-solid fa-rocket
 cascade:
   type: docs
 ---
 
-安装 Farrow 后，新用户只需阅读[快速上手](tutorial/)：
+安装 Farrow 后，新用户只需按[快速上手](tutorial/)启动测试环境：
 
 ```bash
-farrow setup
 farrow up
+farrow ssh
 ```
+
+交互式 `up` 会创建默认配置，并在缺少宿主依赖时提供准备选项。重复执行
+`farrow up` 可重试未完成的客机初始化，不会重启已经健康运行的 VM。无人值守时，
+先执行 `farrow setup --yes`，再执行 `farrow up`。
 
 公开软件包状态见[当前状态](../about/status/)；开发者与源码审查者可使用
 [从源码构建](source-build/)。

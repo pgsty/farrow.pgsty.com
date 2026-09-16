@@ -1,19 +1,24 @@
 ---
 title: Start
 linkTitle: Start
-description: Start Farrow with two commands; read operations, troubleshooting, images, builds, and cleanup only when needed.
+description: Start Farrow with up, connect with ssh, and read the other guides only when needed.
 weight: 10
 icon: fa-solid fa-rocket
 cascade:
   type: docs
 ---
 
-With Farrow installed, new users only need the [Quick Start](tutorial/):
+With Farrow installed, new users can start a test lab with the [Quick Start](tutorial/):
 
 ```bash
-farrow setup
 farrow up
+farrow ssh
 ```
+
+Interactive `up` creates the default inventory and offers to prepare missing host
+dependencies. Repeat `farrow up` to retry unfinished guest setup without
+restarting healthy VMs. For unattended setup, run `farrow setup --yes` before
+`farrow up`.
 
 Package availability is recorded on [Status](../about/status/); developers and
 source reviewers can use [Build from Source](source-build/).

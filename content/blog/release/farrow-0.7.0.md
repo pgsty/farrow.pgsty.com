@@ -74,10 +74,32 @@ pre-1.0 GitHub pre-release policy; specify `FARROW_VERSION` when installing.
 
 ## Validation
 
-The complete source gate covers unit and race tests, static checks, four-target
-compilation, installer and image-pipeline checks, and licenses. Isolated Ubuntu
-amd64/KVM tests with Ubuntu 24.04 guests exercised disk corruption and resets,
-busy mounts, failed probes, retained-disk recreation, share recovery, and repeated
-healthy `up` calls without process replacement. macOS validation includes CLI
-smoke checks and cross-compilation; this release does not claim a new HVF guest
-replay, host reboot test, or full Pigsty installation.
+The release commit is `9c6d4896d93733d1cb60a7e5d8591e9a06659c9d`. It passed the
+[source CI](https://github.com/pgsty/farrow/actions/runs/35118137961) and the
+independent [packaging snapshot](https://github.com/pgsty/farrow/actions/runs/35118137990)
+before tagging. The [tag workflow](https://github.com/pgsty/farrow/actions/runs/35119206685)
+repeated the gates and produced 20 release assets: 19 checksummed payloads plus
+the checksum manifest. All 20 assets downloaded anonymously with HTTP 200 and
+matched the inspected bytes.
+
+The public macOS arm64 and Linux amd64 installers installed the exact archive
+binaries and reported version `0.7.0` with this commit. On Ubuntu 26.04 amd64
+with KVM/QEMU 10.2.1 and Ubuntu 24.04 guests, the recovery matrix exercised
+ext4/XFS corruption, retained disks, failed probes, busy mounts, read-only share
+fallback, and repeated healthy `up` without replacing the VM process. A public
+0.6.0 bootstrap that failed its management-egress probe was resumed by 0.7.0 in
+3.3 seconds; the existing data disk and UUID survived the probe failure. The old
+0.6.0 binary still completed `status`, `stop`, `start`, and `destroy` after the
+upgrade. A fresh VM from the final 0.7.0 archive started without warnings, and a
+deliberately damaged disposable ext4 disk was reset by the public installer in
+3.2 seconds with an explicit data-loss notice while the VM process stayed in place.
+
+That interrupted 0.6.0 bootstrap may have deleted the staged control-node SSH key
+before installing it. Management SSH recovers, but peer SSH remains an explicit
+`control-ssh` limitation; the key is not reinjected during an in-place retry.
+Recreate the affected control node after reviewing `farrow plan` if peer SSH is
+required. Fresh 0.7.0 guests install the key normally.
+
+macOS validation includes CLI smoke checks and cross-compilation. This release
+does not claim a new HVF guest replay, host reboot test, Linux arm64 run, or full
+Pigsty installation.

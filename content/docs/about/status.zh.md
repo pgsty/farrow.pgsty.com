@@ -37,7 +37,9 @@ Farrow 仍是 pre-1.0。源码测试、带日期的真机重放、软件包、�
 - 当前 Linux/amd64 原生 EL7 生命周期；
 - 当前 macOS 9p share 重放；
 - 完整的 Pigsty `configure → farrow up → install.yml`；
-- 干净宿主上的公开 Homebrew/DEB/RPM 安装。
+- 干净宿主上的公开 Homebrew 安装（当前 Tap Formula 已本地升级并通过 `brew test`，但这不等于
+  干净宿主重放）；
+- 干净宿主上的公开 DEB/RPM 安装。
 
 当前内置版本均为 `supported`，只有 EOL EL7 与保留兼容版本 EL9 9.3/9.6、EL10 10.0
 为 `deprecated`。active/standby Catalog 公钥已经内置，但镜像仓库仍需迁离开发宿主，
@@ -56,6 +58,8 @@ Farrow 仍是 pre-1.0。源码测试、带日期的真机重放、软件包、�
 20 个资产的草稿，检查后公开发布。20 个匿名下载均返回 HTTP 200，字节与检查过的草稿
 一致，19 项载荷全部通过摘要校验。macOS arm64 与 Ubuntu amd64 的公开安装器安装结果
 均与发布归档中的二进制一致。下载验证使用宿主现有代理，m3 通过临时回环隧道访问该代理。
+`pgsty/infra/farrow` Formula 已刷新到 `v0.7.0`，本机 Homebrew 升级与 `brew test` 通过；
+干净宿主 Formula 安装仍待重放。
 
 Ubuntu amd64/KVM 故障矩阵覆盖 ext4/XFS 损坏、持久盘、探测失败、忙碌挂载、只读共享
 和重复健康 `up` 保留进程。公开版 0.6.0 因出网探测失败而中断，0.7.0 在 3.3 秒内接续
