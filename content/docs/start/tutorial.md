@@ -1,7 +1,7 @@
 ---
 title: Quick Start
 linkTitle: Quick Start
-description: Start a one-node lab with up, connect with ssh, and scale from the same inventory.
+description: Install Farrow 0.7.0, start an Ubuntu lab with up, connect with ssh, and scale from the same inventory.
 weight: 10
 icon: fa-solid fa-play
 aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /docs/start/pigsty/, /docs/features/]
@@ -9,32 +9,71 @@ aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /do
 
 ## Install
 
-Farrow is pre-1.0. Every release ships a user-scoped installer, a Homebrew
-formula, and DEB/RPM packages as release assets. Download them from the
-[Farrow 0.7.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.7.0),
-then pick one path:
+The current public version is [Farrow 0.7.0](https://github.com/pgsty/farrow/releases/tag/v0.7.0),
+marked **Pre-release** on GitHub. The user-scoped installer supports macOS and
+Linux on arm64 and amd64, verifies the archive checksum, and needs no sudo:
 
 ```bash
-# From a release: user-scoped, no sudo, checksum-verified
 curl -fLO https://github.com/pgsty/farrow/releases/download/v0.7.0/install.sh
 chmod +x install.sh
 FARROW_VERSION=0.7.0 ./install.sh
-
-# Homebrew formula (shipped as a release asset)
-brew install --formula ./farrow.rb
-
-# Debian/Ubuntu and RHEL-family packages are release assets too
-sudo apt install ./farrow_0.7.0_linux_amd64.deb
-sudo dnf install ./farrow_0.7.0_linux_amd64.rpm
+export PATH="$HOME/.local/bin:$PATH"
+farrow version
 ```
 
-GitHub does not expose pre-1.0 prereleases through `/releases/latest`, so the
-installer needs `FARROW_VERSION=0.7.0`. Use [Build from Source](../source-build/)
-for development and source review.
+The default installation directory is `~/.local/bin`; add the same PATH line
+to your shell configuration to keep it in new terminals. `farrow version`
+should report `0.7.0`. GitHub excludes prereleases from `/releases/latest`,
+so keep the explicit `FARROW_VERSION`.
+
+If GitHub downloads time out, configure your terminal's proxy environment;
+see [Download and PATH problems](../troubleshooting/#download-and-path-problems).
+
+### Other installation methods
+
+Choose one installation method. The [official Homebrew tap](https://github.com/pgsty/homebrew-infra/blob/main/Formula/farrow.rb)
+currently provides 0.7.0 and depends on QEMU. The Linux examples below use
+amd64 packages; use the corresponding `linux_arm64` asset on ARM64 Linux.
+
+```bash {tab="Homebrew" group="install" value="brew"}
+brew install pgsty/infra/farrow
+farrow version
+```
+
+```bash {tab="Debian / Ubuntu" value="deb"}
+farrow_release=https://github.com/pgsty/farrow/releases/download/v0.7.0
+curl -fLO "$farrow_release/farrow_0.7.0_linux_amd64.deb"
+sudo apt install ./farrow_0.7.0_linux_amd64.deb
+farrow version
+```
+
+```bash {tab="RHEL / Fedora" value="rpm"}
+farrow_release=https://github.com/pgsty/farrow/releases/download/v0.7.0
+curl -fLO "$farrow_release/farrow_0.7.0_linux_amd64.rpm"
+sudo dnf install ./farrow_0.7.0_linux_amd64.rpm
+farrow version
+```
+
+For development, see [Build from Source](../source-build/).
+
+### Host requirements
+
+| Host | Native acceleration | Minimum QEMU |
+|---|---|---|
+| macOS arm64 / amd64 | HVF | 8.2.1 |
+| Linux amd64 / arm64 | KVM | 6.2 |
+
+The host also needs `qemu-img`, OpenSSH, and firmware for the selected guest.
+Interactive `up` can prepare missing dependencies through Homebrew on macOS
+or apt/dnf on supported Linux distributions, and install the fixed-IP network.
+Host package and network changes may require sudo; run Farrow itself as your
+normal user. Linux needs usable KVM and NetworkManager or systemd-networkd.
+The dated native validation covers macOS arm64 and Ubuntu amd64; other build
+platforms have narrower evidence. See [Status](../../about/status/).
 
 ## Boot the first lab
 
-In an empty directory on a terminal, start the lab and connect:
+For a first deployment, open a terminal in an empty directory:
 
 ```bash
 mkdir -p ~/farrow-lab && cd ~/farrow-lab
@@ -42,97 +81,93 @@ farrow up
 farrow ssh
 ```
 
-Interactive `up` creates the default one-node `farrow.yml` when needed, offers
-to prepare missing host dependencies, pulls the image, and starts the VM.
-Long tasks show progress; completion gives a short result and the SSH command.
-Run `up` again to continue interrupted work or retry unfinished guest setup.
+Use `exit` to return from the guest to your host terminal before running more
+Farrow commands.
 
-For scripts, generate the inventory with `init` and prepare the host with
-`setup --yes` first. The following sections explain the available choices.
-
-## 1. Prepare the host explicitly (optional)
-
-To inspect the setup plan or prepare the host before booting, run:
-
-```bash
-farrow setup
-```
-
-Farrow shows one plan for dependencies, fixed-IP networking, and privileged
-changes before asking for confirmation. Existing dependencies are skipped, so
-installing QEMU first makes the initial setup much faster.
-
-Downloads honor configured `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, and
-`NO_PROXY` variables, including lowercase forms. Setup may preserve the names
-of configured proxy variables across sudo, but never prints their potentially
-credential-bearing values.
-
-```bash {tab="Automatic (recommended)" group="host-deps" value="auto"}
-farrow setup
-```
-
-```bash {tab="macOS: preinstall QEMU" value="macos"}
-brew install qemu
-farrow setup
-```
-
-```bash {tab="Debian / Ubuntu: preinstall QEMU" value="debian"}
-# amd64
-sudo apt-get update
-sudo apt-get install -y qemu-system-x86 qemu-utils ovmf openssh-client iproute2
-farrow setup
-```
-
-```bash {tab="RHEL / Fedora: preinstall QEMU" value="rpm"}
-# amd64
-sudo dnf install -y qemu-kvm qemu-img edk2-ovmf openssh-clients iproute
-farrow setup
-```
-
-On ARM64 Linux, use the distribution's corresponding arm64 QEMU and firmware
-packages. See [Build from Source](../source-build/) and [Status](../../about/status/)
-for exact requirements and the current host-support boundary.
+When no inventory or applied deployment exists, interactive `up` creates
+`farrow.yml` with one `meta` node. It prepares missing host dependencies and
+networking, downloads and verifies the image, starts QEMU, and waits for
+management SSH. Host changes are displayed; sudo may ask for your password.
+To review the full host plan before applying it, use `farrow setup --dry-run`.
 
 > [!NOTE]
-> In an empty directory, `farrow setup` also creates the default `meta`
-> inventory. If `farrow.yml` or `pigsty.yml` already exists, setup reuses it.
+> A new directory is not a new lab. State lives in `$FARROW_HOME` (default
+> `~/.farrow`). If a deployment already exists and no inventory is found,
+> `up` continues that deployment. Use `farrow status` to inspect it first.
 
-## 2. Configure and start
+The default template resolves to:
 
-### Generate an inventory explicitly
+| Setting | Default |
+|---|---|
+| Node / fixed IP | `meta` / `10.10.10.10` |
+| Guest image | Ubuntu 24.04, `u24:stable`, native host architecture |
+| Login | `dba`, with SSH key authentication |
+| CPU / memory | 2 vCPUs / 4 GiB per node |
+| Root / data disk | 64 GiB root + 128 GiB at `/data`, not persistent |
 
-To inspect or choose an inventory before setup, run this in an empty directory:
+Disk sizes are virtual capacities; qcow2 files grow as data is written.
+A four-node lab uses 8 vCPUs and 16 GiB of guest memory, in addition to host
+resources. Use `farrow plan` to inspect totals before starting.
+
+A fresh, unedited built-in template on the default subnet may be moved to an available private `/24`
+when setup finds a subnet conflict. An existing template is backed up as
+`farrow.yml.before-network-change`. Check the resulting `farrow.yml` and
+`farrow status` for actual addresses; explicit `-f` files, edited templates,
+and existing deployments keep their selected subnet.
+
+A healthy first start ends with a result such as:
+
+```text
+  ✓  1 node ready
+connect:   farrow ssh meta
+```
+
+`farrow ssh` selects the control node, `meta` in this template. You can also
+name it or run a command directly:
+
+```bash
+farrow ssh meta
+farrow exec meta -- hostname
+farrow st
+```
+
+`st` is the alias of `status`; its `running` state describes the VM
+process, not a fresh guest-readiness check.
+
+### Continue interrupted setup
+
+Repeat `farrow up` to continue interrupted work, retry unfinished guest setup,
+or update older guest helpers. Healthy running VMs keep their process and
+root disk. A guest with usable management SSH can finish with limitations,
+such as a read-only share or unavailable private networking. Review those
+messages; automation should inspect `nodes[].warnings` and `nodes[].repairs`
+in `farrow up --json`, as these limitations still return exit 0.
+
+> [!WARNING]
+> Data disks are disposable test storage. `up` can reset an unrecognized or
+> confirmed damaged filesystem, **including a persistent disk**, and reports
+> discarded data. `persistent` retains disks across destroy/recreate; it does
+> not protect corrupt contents during recovery. See [Data disks](../../reference/configuration/#data-disks).
+
+`--no-wait` skips guest readiness, recovery, and metadata refresh; a later
+`farrow up` completes them. Image downloads support retries and resumption.
+Use `farrow up --mirror` to prefer the official China repository; see
+[Image Repositories](../images/) for image selection and fallback behavior.
+
+## Choose an inventory before booting
+
+This is an alternative to the automatic first run above. In a fresh lab
+directory, generate and inspect the configuration before starting:
 
 ```bash
 farrow init
+farrow validate
+farrow plan
+farrow up
 ```
 
-Example output:
-
-```text
-template:  meta
-wrote:     /Users/you/farrow-lab/farrow.yml
-next:      farrow up
-```
-
-With no argument, `init` uses the one-node `meta` spec. There are four built-in
-specs:
-
-| Spec | Nodes | Addresses |
-|---|---:|---|
-| `meta` | 1 | `10.10.10.10` |
-| `dual` | 2 | `10.10.10.10`–`10.10.10.11` |
-| `trio` | 3 | `10.10.10.10`–`10.10.10.12` |
-| `full` | 4 | `10.10.10.10`–`10.10.10.13` |
-
-For example, `farrow init full` writes a four-node inventory, while
-`farrow init full -c 10.20.30.0/24` uses another subnet. Existing files are
-preserved unless `--force` is explicit. See [Configuration](../../reference/configuration/)
-for every field.
-
-### Start the first node
-
-The essential default inventory is one node:
+`init`, `validate`, and `plan` do not require QEMU or host-network setup.
+The default `meta` inventory is:
 
 ```yaml
 all:
@@ -144,37 +179,64 @@ all:
         10.10.10.10: { nodename: meta }
 ```
 
-Start it:
+There are four built-in templates:
+
+| Template | Nodes | Default addresses |
+|---|---:|---|
+| `meta` | 1 | `10.10.10.10` |
+| `dual` | 2 | `10.10.10.10`–`10.10.10.11` |
+| `trio` | 3 | `10.10.10.10`–`10.10.10.12` |
+| `full` | 4 | `10.10.10.10`–`10.10.10.13` |
+
+For example, `farrow init full` writes four nodes;
+`farrow init full -c 10.20.30.0/24` selects another subnet. Existing files are
+preserved unless `--force` is explicit. Set `vm_cpu`, `vm_mem`, `vm_image`,
+and other fields before the first `up`; see [Configuration](../../reference/configuration/).
+
+### Prepare the host explicitly
+
+`setup` prepares dependencies and networking without starting VMs:
 
 ```bash
-farrow up
+farrow setup --dry-run
+farrow setup
 ```
 
-The first run resolves, downloads, and verifies the default `u24:stable` image,
-then waits for management SSH. A healthy one-node result is compact:
+Unlike the preparation performed by `up`, standalone `setup` asks for
+confirmation before applying a mutating plan. It reuses the discovered
+inventory, or generates `meta` if no file exists. The optional `/etc/hosts`
+helper is installed only when `farrow hosts install --yes` needs it;
+ordinary startup and `farrow ssh` do not need that integration.
 
-```text
-  ✓  1 node ready
-connect:   farrow ssh meta
-```
-
-Open the VM:
+Downloads honor `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, and `NO_PROXY`,
+including lowercase forms. For unattended first setup in an empty directory:
 
 ```bash
-farrow ssh meta
+farrow setup --yes
+farrow up --json
 ```
 
-> [!TIP]
-> `up` manages the image automatically. Read [Image Repositories](../images/)
-> only when you need another distribution, a mirror, or cache management.
+`setup --yes` can generate the inventory itself; a separate `init` is needed
+only when you want to edit it first. Automation still needs credentials for
+any required sudo operation; `--yes` does not supply them.
 
-Optional limitations are listed without hiding a usable guest. Data disks are
-disposable test storage: `up` can reset unusable filesystems, including persistent
-disks. See [Data disks](../../reference/configuration/#data-disks) before storing data.
+### Use an existing Pigsty inventory
 
-## 3. Scale and operate
+```bash
+farrow validate -f pigsty.yml
+farrow plan -f pigsty.yml
+farrow up -f pigsty.yml
+```
 
-Add more nodes to `farrow.yml`:
+Farrow reads the documented VM, naming, and login fields and preserves other
+Pigsty settings. This starts the virtual machines; installing PostgreSQL or
+other Pigsty services is a separate Pigsty operation. The built-in templates
+describe VM topology and do not include a complete Pigsty service configuration.
+
+## Scale and operate
+
+To expand the default one-node lab, preserve the existing settings and add
+three hosts to `farrow.yml`:
 
 ```yaml
 all:
@@ -189,41 +251,50 @@ all:
         10.10.10.13: { nodename: node-3 }
 ```
 
-Run the same command again:
+This example assumes the default subnet; if setup chose another, use that
+subnet for every address, including `admin_ip`. Do not overwrite a customized
+inventory with `init --force` to expand it.
 
 ```bash
+farrow plan
 farrow up
-```
-
-Farrow creates only the three additions, keeps `meta` running, and refreshes
-the Farrow hosts and control-node SSH entries in running guests:
-
-```text
-  ✓  4 nodes ready
-connect:   farrow ssh meta
-```
-
-Use `st`, the alias of `status`, at any time:
-
-```bash
 farrow st
 ```
 
-```text
-NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
-meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
-node-1     running  10.10.10.11   u24@20260801.0.0     2    4.0 GiB
-node-2     running  10.10.10.12   u24@20260801.0.0     2    4.0 GiB
-node-3     running  10.10.10.13   u24@20260801.0.0     2    4.0 GiB
+With only these additions, the plan lists three nodes to create. `up` creates
+them, keeps a running `meta` process, and refreshes guest hosts and control-node
+SSH entries. A healthy result is `4 nodes ready`. The embedded 0.7.0 Catalog
+resolves `u24:stable` to `u24@20260801.0.0`; a manually updated Catalog may
+resolve another version, which appears in `plan` and `status`.
+
+Changing CPU, memory, or other consumed VM fields requires an explicit
+`farrow recreate <node>`. Removing a YAML entry never deletes its VM. Stop
+and resume the lab without recreating disks:
+
+```bash
+farrow stop
+farrow start
 ```
 
-Destroy the whole deployment when finished:
+When finished, destroy the deployment:
 
 ```bash
 farrow destroy
 ```
 
-The terminal asks you to type `destroy`. Images, keys, and declared persistent
-data disks remain. See [Uninstall and Clean Up](../uninstall/) for a complete
-reset, or [Daily Operations](../operations/) for stop, restart, logs, explicit
-changes, and scale-in.
+On a terminal, type `destroy` to confirm. Root and non-persistent data disks
+are deleted; cached images, keys, declared persistent disks, and host networking
+remain. See [Uninstall and Clean Up](../uninstall/) for complete disposal, or
+[Daily Operations](../operations/) for restart, logs, explicit changes, and scale-in.
+
+## Upgrade an existing installation
+
+Use the same installation channel: rerun the version-pinned installer, run
+`brew update` followed by `brew upgrade pgsty/infra/farrow`, or install the new
+DEB/RPM. Then check `farrow version` and `farrow plan` before `farrow up`.
+`farrow update` refreshes the image Catalog, not the Farrow executable.
+
+When upgrading an older Debian lab that omitted `vm_image`, set `vm_image: d13`
+in `all.vars` to preserve that choice; the default changed to Ubuntu 24.04 in
+0.6.0. Read the [0.7.0 upgrade notes](../../../blog/release/farrow-0.7.0/) for data-disk
+recovery and the control-node SSH limitation after an interrupted 0.6.0 bootstrap.

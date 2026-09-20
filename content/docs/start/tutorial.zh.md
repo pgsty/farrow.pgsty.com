@@ -1,7 +1,7 @@
 ---
 title: 快速上手
 linkTitle: 快速上手
-description: 用 up 启动单节点 Farrow，用 ssh 进入，再通过同一份配置增量扩容。
+description: 安装 Farrow 0.7.0，用 up 启动 Ubuntu 实验环境，用 ssh 进入，再通过同一份配置增量扩容。
 weight: 10
 icon: fa-solid fa-play
 aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /docs/start/pigsty/, /docs/features/]
@@ -9,30 +9,67 @@ aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /do
 
 ## 安装
 
-Farrow 仍是 pre-1.0。每个 Release 都附带用户态 Installer、Homebrew Formula 与 DEB/RPM
-软件包。先从 [Farrow 0.7.0 Release](https://github.com/pgsty/farrow/releases/tag/v0.7.0)
-下载资产，再任选一种路径：
+当前公开版本为 [Farrow 0.7.0](https://github.com/pgsty/farrow/releases/tag/v0.7.0)，
+在 GitHub 上标记为 **Pre-release**。用户态安装器支持 macOS / Linux 的 arm64 与 amd64，
+会校验归档的 Checksum，安装过程无需 sudo：
 
 ```bash
-# 从 Release 安装：用户态、无需 sudo、校验 Checksum
 curl -fLO https://github.com/pgsty/farrow/releases/download/v0.7.0/install.sh
 chmod +x install.sh
 FARROW_VERSION=0.7.0 ./install.sh
-
-# Homebrew Formula（作为 Release 资产发布）
-brew install --formula ./farrow.rb
-
-# Debian/Ubuntu 与 RHEL 系软件包同样是 Release 资产
-sudo apt install ./farrow_0.7.0_linux_amd64.deb
-sudo dnf install ./farrow_0.7.0_linux_amd64.rpm
+export PATH="$HOME/.local/bin:$PATH"
+farrow version
 ```
 
-GitHub 不会通过 `/releases/latest` 暴露 pre-1.0 预发布版本，因此安装器需要
-`FARROW_VERSION=0.7.0`。开发与源码审查可使用[从源码构建](../source-build/)。
+默认安装目录为 `~/.local/bin`；把同一行 PATH 设置加入 Shell 配置，后续打开的终端也能使用。
+`farrow version` 应显示 `0.7.0`。GitHub 的 `/releases/latest` 不包含预发布版本，
+因此需要保留显式的 `FARROW_VERSION`。
+
+GitHub 下载超时时，请配置终端的代理环境，见[下载与 PATH 问题](../troubleshooting/#下载与-path-问题)。
+
+### 其他安装方式
+
+任选一种安装方式即可。[官方 Homebrew Tap](https://github.com/pgsty/homebrew-infra/blob/main/Formula/farrow.rb)
+当前提供 0.7.0，并依赖 QEMU。下面的 Linux 示例使用 amd64 软件包；ARM64 Linux 请使用
+对应的 `linux_arm64` 资产。
+
+```bash {tab="Homebrew" group="install" value="brew"}
+brew install pgsty/infra/farrow
+farrow version
+```
+
+```bash {tab="Debian / Ubuntu" value="deb"}
+farrow_release=https://github.com/pgsty/farrow/releases/download/v0.7.0
+curl -fLO "$farrow_release/farrow_0.7.0_linux_amd64.deb"
+sudo apt install ./farrow_0.7.0_linux_amd64.deb
+farrow version
+```
+
+```bash {tab="RHEL / Fedora" value="rpm"}
+farrow_release=https://github.com/pgsty/farrow/releases/download/v0.7.0
+curl -fLO "$farrow_release/farrow_0.7.0_linux_amd64.rpm"
+sudo dnf install ./farrow_0.7.0_linux_amd64.rpm
+farrow version
+```
+
+开发者可使用[从源码构建](../source-build/)。
+
+### 宿主要求
+
+| 宿主 | 原生加速 | 最低 QEMU 版本 |
+|---|---|---|
+| macOS arm64 / amd64 | HVF | 8.2.1 |
+| Linux amd64 / arm64 | KVM | 6.2 |
+
+宿主还需要 `qemu-img`、OpenSSH 与所选客机对应的固件。交互式 `up` 可以通过 macOS 的
+Homebrew，或受支持 Linux 发行版的 apt/dnf 补齐依赖，并安装固定 IP 网络。宿主软件包与
+网络变更可能需要 sudo；Farrow 本身应以普通用户运行。Linux 需要可用的 KVM，以及
+NetworkManager 或 systemd-networkd。带日期的真机验证覆盖 macOS arm64 与 Ubuntu amd64，
+其他构建平台的验证范围较窄，详见[当前状态](../../about/status/)。
 
 ## 启动第一个实验环境
 
-在终端的空目录中，启动环境，然后进入虚拟机：
+首次部署时，在终端中进入一个空目录：
 
 ```bash
 mkdir -p ~/farrow-lab && cd ~/farrow-lab
@@ -40,88 +77,80 @@ farrow up
 farrow ssh
 ```
 
-交互式 `up` 在需要时生成默认单节点 `farrow.yml`，提示准备缺少的宿主依赖，拉取镜像并
-启动虚拟机。耗时任务显示进度，完成后给出简短结果和连接命令。中断或部分功能未完成时，
-再次执行 `up` 即可继续。
+用 `exit` 从客机返回宿主终端后，再执行后续 Farrow 命令。
 
-脚本中应先用 `init` 生成配置、用 `setup --yes` 准备宿主。下面说明可选的准备与配置步骤。
-
-## 1. 显式准备宿主（可选）
-
-希望提前查看安装计划或单独准备宿主时，运行：
-
-```bash
-farrow setup
-```
-
-Farrow 会先展示依赖、固定 IP 网络与权限操作，再一次性请求确认。已经安装的依赖会自动跳过，
-所以提前安装 QEMU 可以明显缩短首次 setup。
-
-下载会尊重已配置的 `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、`NO_PROXY` 及其小写形式。
-setup 跨 sudo 边界时可能保留已配置的代理变量名，但绝不会打印其中可能带凭据的值。
-
-```bash {tab="自动安装（推荐）" group="host-deps" value="auto"}
-farrow setup
-```
-
-```bash {tab="macOS：预装 QEMU" value="macos"}
-brew install qemu
-farrow setup
-```
-
-```bash {tab="Debian / Ubuntu：预装 QEMU" value="debian"}
-# amd64
-sudo apt-get update
-sudo apt-get install -y qemu-system-x86 qemu-utils ovmf openssh-client iproute2
-farrow setup
-```
-
-```bash {tab="RHEL / Fedora：预装 QEMU" value="rpm"}
-# amd64
-sudo dnf install -y qemu-kvm qemu-img edk2-ovmf openssh-clients iproute
-farrow setup
-```
-
-ARM64 Linux 将 QEMU 与固件包替换为发行版对应的 arm64 版本即可；准确依赖与宿主支持范围见
-[从源码构建](../source-build/)和[当前状态](../../about/status/)。
+没有配置文件、也没有已应用部署时，交互式 `up` 会生成只有一个 `meta` 节点的
+`farrow.yml`，准备缺少的宿主依赖与网络，下载并校验镜像，启动 QEMU，然后等待管理 SSH
+就绪。宿主变更会显示出来，sudo 可能要求输入密码。如果希望先查看完整宿主计划，运行
+`farrow setup --dry-run`。
 
 > [!NOTE]
-> 空目录中的 `farrow setup` 会顺便生成默认 `meta` 配置；若当前目录已有 `farrow.yml` 或
-> `pigsty.yml`，setup 会直接使用它。
+> 换目录不会新建一套实验环境。状态位于 `$FARROW_HOME`，默认是 `~/.farrow`。
+> 如果已有部署且当前目录没有配置文件，`up` 会继续该部署；可先用 `farrow status` 查看。
 
-## 2. 配置与启动
+默认模板解析为：
 
-### 显式生成配置
+| 配置项 | 默认值 |
+|---|---|
+| 节点 / 固定 IP | `meta` / `10.10.10.10` |
+| 客机镜像 | Ubuntu 24.04，`u24:stable`，与宿主相同的架构 |
+| 登录用户 | `dba`，使用 SSH 密钥认证 |
+| CPU / 内存 | 每节点 2 vCPU / 4 GiB |
+| 根盘 / 数据盘 | 64 GiB 根盘 + 挂载到 `/data` 的 128 GiB 非持久数据盘 |
 
-如果希望在 setup 之前先查看或选择配置，在空目录中运行：
+磁盘大小是虚拟容量，qcow2 文件随写入增长。四节点环境共配置 8 vCPU、16 GiB 客机内存，
+还需为宿主保留资源；启动前可用 `farrow plan` 查看总量。
+
+首次使用、尚未编辑且采用默认网段的内置模板遇到子网冲突时，setup 可以改用可用的私有 `/24`；若模板文件
+已经存在，会备份为 `farrow.yml.before-network-change`。请以生成后的 `farrow.yml` 和
+`farrow status` 为准。显式 `-f` 文件、编辑过的模板与已有部署会保留选定网段。
+
+健康的首次启动会以类似结果结束：
+
+```text
+  ✓  1 node ready
+connect:   farrow ssh meta
+```
+
+`farrow ssh` 默认连接控制节点，在此模板中就是 `meta`。也可以显式指定节点，或直接执行命令：
+
+```bash
+farrow ssh meta
+farrow exec meta -- hostname
+farrow st
+```
+
+`st` 是 `status` 的别名；
+其中的 `running` 表示 VM 进程在运行，不代表刚刚重新检查了客机就绪状态。
+
+### 继续未完成的初始化
+
+重复 `farrow up` 可以接续中断的操作、重试未完成的客机初始化、更新旧的客机脚本。
+健康的运行中 VM 会保留进程与根盘。管理 SSH 可用时，即使共享目录只读、私网不可用等功能
+受限，客机仍可完成启动。请查看这些提示；自动化应检查 `farrow up --json` 的
+`nodes[].warnings` 与 `nodes[].repairs`，因为这些限制仍返回退出码 0。
+
+> [!WARNING]
+> 数据盘是可丢弃的测试存储。`up` 可能清空重建无法识别或确认损坏的文件系统，
+> **包括持久盘**，并报告旧数据已丢弃。`persistent` 只控制 destroy/recreate 时保留磁盘，
+> 不保证恢复时保留损坏的内容。详见[数据盘说明](../../reference/configuration/#数据盘)。
+
+`--no-wait` 会跳过客机就绪、恢复与元数据刷新，后续执行 `farrow up` 补齐。
+镜像下载支持重试与断点续传；使用 `farrow up --mirror` 优先访问中国官方仓库。
+镜像选择与回退规则见[镜像仓库](../images/)。
+
+## 启动前选择配置
+
+这是前面自动启动流程的另一种入口。在新的实验目录中，先生成并检查配置，再启动：
 
 ```bash
 farrow init
+farrow validate
+farrow plan
+farrow up
 ```
 
-输出示例：
-
-```text
-template:  meta
-wrote:     /Users/you/farrow-lab/farrow.yml
-next:      farrow up
-```
-
-不带参数时使用单节点 `meta`。内置 spec 只有四个：
-
-| Spec | 节点 | 地址 |
-|---|---:|---|
-| `meta` | 1 | `10.10.10.10` |
-| `dual` | 2 | `10.10.10.10`–`10.10.10.11` |
-| `trio` | 3 | `10.10.10.10`–`10.10.10.12` |
-| `full` | 4 | `10.10.10.10`–`10.10.10.13` |
-
-例如 `farrow init full` 生成四节点配置，`farrow init full -c 10.20.30.0/24` 可更换网段。
-现有文件不会被覆盖，除非明确传入 `--force`。全部字段见[配置参考](../../reference/configuration/)。
-
-### 启动第一个节点
-
-默认配置的核心只有一个节点：
+`init`、`validate`、`plan` 都不要求先安装 QEMU 或配置宿主网络。默认 `meta` 配置为：
 
 ```yaml
 all:
@@ -133,37 +162,58 @@ all:
         10.10.10.10: { nodename: meta }
 ```
 
-启动它：
+内置四种模板：
+
+| 模板 | 节点数 | 默认地址 |
+|---|---:|---|
+| `meta` | 1 | `10.10.10.10` |
+| `dual` | 2 | `10.10.10.10`–`10.10.10.11` |
+| `trio` | 3 | `10.10.10.10`–`10.10.10.12` |
+| `full` | 4 | `10.10.10.10`–`10.10.10.13` |
+
+例如 `farrow init full` 生成四节点配置，`farrow init full -c 10.20.30.0/24` 指定另一网段。
+现有文件不会被覆盖，除非显式传入 `--force`。在第一次 `up` 前调整 `vm_cpu`、`vm_mem`、
+`vm_image` 等字段，全部字段见[配置参考](../../reference/configuration/)。
+
+### 显式准备宿主
+
+`setup` 只准备依赖与网络，不启动 VM：
 
 ```bash
-farrow up
+farrow setup --dry-run
+farrow setup
 ```
 
-第一次运行会自动解析、下载并校验默认的 `u24:stable` 镜像，然后等待管理 SSH 就绪。
-健康的单节点环境只输出简短结果：
+与 `up` 内部的准备流程不同，单独执行 `setup` 会在应用有变更的计划前请求确认。
+它会复用当前目录发现的配置，没有文件时生成 `meta`。可选的 `/etc/hosts` helper
+仅在 `farrow hosts install --yes` 需要时安装；普通启动与 `farrow ssh` 不依赖这项集成。
 
-```text
-  ✓  1 node ready
-connect:   farrow ssh meta
-```
-
-现在可以进入虚拟机：
+下载尊重 `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、`NO_PROXY` 及其小写形式。
+无人值守的首次部署可在空目录执行：
 
 ```bash
-farrow ssh meta
+farrow setup --yes
+farrow up --json
 ```
 
-> [!TIP]
-> `up` 会自动处理镜像。只有需要切换发行版、使用镜像站或管理缓存时，才需要阅读
-> [镜像仓库](../images/)。
+`setup --yes` 本身就能生成配置，只有需要预先编辑时才必须单独 `init`。自动化环境仍需为
+必要的 sudo 操作准备凭据；`--yes` 不会提供管理员凭据。
 
-可选功能受限时会列出具体问题，仍可进入可用的虚拟机。数据盘按可丢弃的测试存储处理：
-`up` 可能清空重建不可用的文件系统，包括持久盘。存放数据前请阅读
-[数据盘说明](../../reference/configuration/#数据盘)。
+### 使用现有 Pigsty 配置
 
-## 3. 扩容与日常操作
+```bash
+farrow validate -f pigsty.yml
+farrow plan -f pigsty.yml
+farrow up -f pigsty.yml
+```
 
-在 `farrow.yml` 中继续添加节点：
+Farrow 读取已记录的 VM、命名与登录字段，其余 Pigsty 参数保持原样。以上步骤启动虚拟机；
+PostgreSQL 与其他 Pigsty 服务仍需通过 Pigsty 单独安装。内置模板只描述 VM 拓扑，
+不包含完整的 Pigsty 服务配置。
+
+## 扩容与日常操作
+
+扩展默认单节点环境时，保留已有设置，在 `farrow.yml` 中增加三台主机：
 
 ```yaml
 all:
@@ -178,40 +228,44 @@ all:
         10.10.10.13: { nodename: node-3 }
 ```
 
-再次执行同一条命令：
+此例假定使用默认网段；如果 setup 选择了其他网段，所有地址及 `admin_ip` 都应沿用该网段。
+不要为了扩容而用 `init --force` 覆盖已经定制的配置。
 
 ```bash
+farrow plan
 farrow up
-```
-
-Farrow 只创建新增的三台节点，不会重启正在运行的 `meta`，并刷新运行中 guest 的
-Farrow hosts 与控制节点 SSH 配置：
-
-```text
-  ✓  4 nodes ready
-connect:   farrow ssh meta
-```
-
-随时用 `st`（`status` 的别名）查看状态：
-
-```bash
 farrow st
 ```
 
-```text
-NAME       STATE    ADDRESS       IMAGE                CPU  MEMORY
-meta       running  10.10.10.10   u24@20260801.0.0     2    4.0 GiB
-node-1     running  10.10.10.11   u24@20260801.0.0     2    4.0 GiB
-node-2     running  10.10.10.12   u24@20260801.0.0     2    4.0 GiB
-node-3     running  10.10.10.13   u24@20260801.0.0     2    4.0 GiB
+仅增加这三行时，计划应列出三个待创建节点。`up` 会创建它们，保留正在运行的 `meta`
+进程，并刷新客机 hosts 与控制节点 SSH 配置。健康的结果为 `4 nodes ready`。
+0.7.0 内置 Catalog 将 `u24:stable` 解析为 `u24@20260801.0.0`；手动更新 Catalog 后
+可能解析为其他版本，准确版本显示在 `plan` 和 `status` 中。
+
+修改 CPU、内存或其他被读取的 VM 字段，需要显式执行 `farrow recreate <node>`；
+删除 YAML 条目不会删除 VM。停止并恢复环境，不重建磁盘：
+
+```bash
+farrow stop
+farrow start
 ```
 
-最后销毁整套 deployment：
+使用完毕后销毁部署：
 
 ```bash
 farrow destroy
 ```
 
-终端会要求输入 `destroy` 确认。该命令保留镜像缓存、密钥与声明为 persistent 的数据盘；
-彻底清理请看[卸载与清理环境](../uninstall/)。停止、重启、日志、显式变更与缩容见
-[日常管理](../operations/)。
+在终端输入 `destroy` 确认。根盘与非持久数据盘会被删除，镜像缓存、密钥、声明为持久的
+数据盘与宿主网络保留。彻底清理见[卸载与清理环境](../uninstall/)；重启、日志、显式变更与
+缩容见[日常管理](../operations/)。
+
+## 升级已有安装
+
+沿用原来的安装渠道：重新运行固定版本的安装器，执行 `brew update` 后再执行
+`brew upgrade pgsty/infra/farrow`，或安装新版 DEB/RPM。之后先检查 `farrow version`
+与 `farrow plan`，再运行 `farrow up`。`farrow update` 更新的是镜像 Catalog，不是 Farrow 程序。
+
+从更老版本升级、且原 Debian 环境省略了 `vm_image` 时，在 `all.vars` 设置 `vm_image: d13`
+以保留原来的镜像选择；默认值在 0.6.0 改为 Ubuntu 24.04。数据盘恢复策略，以及 0.6.0
+初始化中断后控制节点 SSH 的限制，见 [0.7.0 升级说明](../../../blog/release/farrow-0.7.0/)。

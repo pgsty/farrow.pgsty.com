@@ -22,7 +22,10 @@ Farrow extracts only the documented VM and Pigsty-native fields, computes
 per-node hashes, and keeps applied state plus process identity. Additions are
 incremental. Changes require an
 explicit per-node recreate. `up` also starts selected existing stopped nodes;
-already-running peers remain untouched. Absence never authorizes deletion.
+already-running peers keep their processes while unfinished guest setup and
+managed hosts/SSH entries are refreshed. Unrecognized or confirmed damaged
+test data filesystems may be reset, including persistent disks; see
+[Data disks](../../reference/configuration/#data-disks). Absence never authorizes deletion.
 
 ## Runtime selection
 
@@ -53,6 +56,6 @@ before setup accepts the network; failure rolls the install back automatically.
 ## Safety boundary
 
 QEMU and all guest artifacts run as the caller. Root is limited to host
-network setup and the optional hosts publisher. Destruction requires matching
+package installation, network setup, and the optional hosts publisher. Destruction requires matching
 ownership, containment, node identity, QMP/process identity, and an allowlist
 of artifacts. Ambiguity stops the operation.

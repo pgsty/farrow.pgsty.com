@@ -44,6 +44,11 @@ and rejects any digest mismatch before invoking offline normalization. Debian
 12/13 install the locked XFS userspace closure; Rocky Linux 8 installs the
 locked Python/SELinux closure, and Rocky Linux 9 needs no extra package input.
 
+Debian also generates `en_US.UTF-8` while retaining `C.UTF-8` as the default.
+Both the guest normalization script and host-side marker validation check these
+postconditions so a base-image refresh cannot lose the earlier customization.
+Ubuntu uses dated, unmodified official images outside this offline matrix.
+
 Each result remains an unsigned `testing` candidate. Supplying all eight bundle
 roots to `--assemble-from` creates a new candidate static repository and runs
 `farrow repo build` plus `verify`; this still does not perform native smoke,

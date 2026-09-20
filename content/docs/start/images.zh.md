@@ -35,8 +35,8 @@ all:
 这里 `9.7` 选择最新 9.7.x Build，`9` 选择最新 9.x Release。若希望跟随仓库可移动的
 Stable Channel，则改用 `vm_image: el9:stable`。
 
-再次运行 `farrow up`。新增节点使用新镜像；已经存在的节点不会被隐式重建，定义变更需要
-显式执行 `farrow recreate <node>`。
+修改配置后先运行 `farrow plan`。新增节点使用新镜像；已有节点解析出的镜像发生变化时，
+需要显式执行 `farrow recreate <node>`，`up` 会报告漂移而不会自动重建。
 
 > [!WARNING]
 > 除兼容用途的 EOL `el7`、EL9 9.3/9.6 与 EL10 10.0 为 `deprecated` 外，
@@ -66,9 +66,12 @@ farrow up
 `FARROW_REPO` 也可以是绝对本地目录。显式本地或 HTTPS 仓库可使用未签名 Catalog；HTTP
 仓库必须提供可信密钥签名。文件大小、SHA-256 与 qcow2 结构始终校验。
 
-只有需要下载工件时仓库不可达才有影响。Catalog Upstream URL 只用于溯源，不是隐藏回退；
-选定仓库缺失工件时会直接报错。`farrow update` 获取该仓库的 Catalog，`image sync` 则获取
-或读取用户明确给出的准确源。
+镜像下载会重试临时故障，并接续中断的传输。0.7.0 中，选定官方端点无法提供镜像时，
+两个官方仓库可以互相回退，仍须匹配同一 Catalog 中的尺寸与摘要。自定义仓库不会回退
+到其他站点；Catalog Upstream URL 只用于溯源，始终不是备用下载源。
+
+这项回退只针对镜像工件。`farrow update` 获取选定仓库的 Catalog，`image sync` 读取
+明确指定的 URL 或文件；两者都不会升级 Farrow 程序。
 
 ## 构建静态仓库
 

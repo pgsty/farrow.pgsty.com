@@ -20,8 +20,8 @@ Choose the shortest path for your task:
 - **[About](about/)** — design, native validation, limits, and
   release gates.
 
-New users should follow the [Quick Start](start/tutorial/). The complete normal
-path is `farrow up` to start the lab, then `farrow ssh` to connect.
+New users should install Farrow 0.7.0 with the [Quick Start](start/tutorial/).
+With the CLI installed, the normal path is `farrow up` to start the lab, then `farrow ssh` to connect.
 
 > [!IMPORTANT]
 > Farrow is pre-1.0. Current source behavior, native validation, packaging,

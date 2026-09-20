@@ -38,9 +38,9 @@ Here `9.7` selects the newest 9.7.x build; `9` selects the newest 9.x release.
 Use `vm_image: el9:stable` instead when the repository's movable stable channel
 is the intended policy.
 
-Run `farrow up` again. New nodes use the selected image; existing nodes are
-never rebuilt implicitly. A definition change requires an explicit
-`farrow recreate <node>`.
+Run `farrow plan` after editing the inventory. New nodes use the selected image;
+existing nodes whose resolved image changes require an explicit
+`farrow recreate <node>`. `up` reports this drift instead of rebuilding them.
 
 > [!WARNING]
 > Built-in versions are `supported` except deprecated compatibility images:
@@ -73,11 +73,15 @@ an absolute local directory. Explicit local and HTTPS repositories may use an
 unsigned Catalog; HTTP repositories require a Catalog signed by a trusted key.
 Artifact size, SHA-256, and qcow2 structure are always verified.
 
-An unavailable repository only matters when an artifact must be downloaded.
-Catalog upstream URLs are provenance, not a hidden fallback: a missing artifact
-in the selected repository is an error. `farrow update` fetches that
-repository's Catalog; `image sync` fetches or reads the exact source supplied
-by the user.
+Image downloads retry transient failures and resume interrupted transfers. In
+0.7.0, the two official repositories can fall back to one another if the selected
+endpoint cannot supply an image; the same Catalog size and digest must still
+match. Custom repositories remain exclusive. Catalog upstream URLs are
+provenance, never an alternate download source.
+
+This fallback concerns image artifacts. `farrow update` fetches the selected
+repository's Catalog; `image sync` reads the exact URL or file you supply.
+Neither command upgrades the Farrow executable.
 
 ## Build a static repository
 

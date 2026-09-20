@@ -69,9 +69,12 @@ is command-scoped; `-f` is deliberately not a global flag:
 | `plan`, `up`, `reload`, `recreate` | explicit `-f`, then discovery, then the applied resolved specification |
 | other lifecycle/access commands | no desired-state inventory; they use applied state |
 
-Interactive `up` in an empty directory can generate the default inventory and
-prepare missing host dependencies. Scripts should run `init` and `setup --yes`
-explicitly.
+When neither an inventory nor an applied deployment exists, interactive `up`
+can generate the default inventory. It can also prepare missing host dependencies
+and restore an intact inactive Farrow network. This implicit preparation accepts
+the setup plan; sudo may still request credentials. Use `setup --dry-run` to
+review the host plan first. Scripts should run `setup --yes` explicitly; `init`
+is optional when no inventory exists.
 
 ## Important flags
 
@@ -159,6 +162,24 @@ The control guest's Farrow-managed SSH entries accept replacement host keys
 without recording them in known_hosts, so recreated lab nodes remain reachable.
 User-added SSH entries are preserved.
 
+## 0.8 development recovery notes
+
+These changes are in the development source, not an already published 0.8
+release. `up` and `start` isolate missing host-share failures by node; `up` also
+continues existing stopped peers when a new node fails to prepare. Partial
+results keep exit code 5 and preserve successful nodes. Retry hints retain the
+inventory, repository and applicable flags; a `start` retry remains `start`.
+
+Setup and its lifecycle retry share one `operation_id`. Even before deployment
+state exists, `farrow logs --source events --json` can read the bounded phase
+trace after failed setup. Setup traces omit command arguments and authentication
+data; retain the command output for its detailed cause. `setup --dry-run` writes
+no trace. Successful `destroy --delete-persistent` and `purge` summaries describe
+the final deletion/retention result; purge leaves the image cache and host network.
+Owned persistent disks left by a previously removed node no longer block
+destroying the remaining nodes. Ordinary destroy retains those disks; explicit
+persistent deletion or purge is still required to remove them.
+
 ## SSH passthrough and completion
 
 `farrow ssh [node] [--] [command ...]` opens a session or runs an optional
@@ -189,7 +210,7 @@ specification.
 | 5 | partial completion of node operations |
 | 6 | resource conflict |
 | 7 | integrity or ownership failure |
-| 130 | interrupted (SIGINT/SIGTERM) |
+| 130 | interrupted (SIGINT/SIGTERM) or confirmation declined |
 
 `ssh` and `exec` pass through the SSH child exit code unchanged, including
 255. That value may indicate an SSH connection failure or a remote command

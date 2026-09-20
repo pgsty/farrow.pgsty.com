@@ -5,7 +5,7 @@ weight: 30
 icon: fa-solid fa-life-ring
 ---
 
-Start read-only:
+Start with diagnostics (`status` may reconcile interrupted runtime state):
 
 ```bash
 farrow doctor --json
@@ -13,14 +13,35 @@ farrow network status --json
 farrow status --json
 ```
 
+## Download and PATH problems
+
+The installer uses GitHub Release assets; `--mirror` selects the Farrow image
+repository and does not redirect installer downloads. If your network needs a
+proxy, set `HTTPS_PROXY` or `ALL_PROXY` in the terminal to your existing proxy's
+address. A macOS system proxy setting alone does not configure these environment
+variables for command-line tools.
+
+The user-scoped installer defaults to `~/.local/bin`. If `farrow` is missing or
+reports an older version after installation, check which executable is selected:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+command -v farrow
+farrow version
+```
+
+For Homebrew or native packages, use that channel's executable instead. Keep the
+CLI and its packaged `farrow-hosts-helper` from the same release together.
+
 ## No inventory found
 
-For the first deployment, run `plan`, `up`, or `validate` beside
+Interactive `up` can create the first default inventory when no deployment
+exists. For an explicit configuration, run `plan`, `up`, or `validate` beside
 `farrow.yml`/`pigsty.yml`, pass `-f /path/to/file`, or run `farrow init` to
 write one. Once state exists, `plan`, `up`, `reload`, and `recreate` can fall
 back to its applied spec. Status, start, stop, SSH, and destroy always use
 applied state. If `status` reports `no deployment state found`, the selected
-`FARROW_HOME` has never run `up`.
+`FARROW_HOME` has no applied deployment; it may be fresh or previously purged.
 
 ## Setup needs sudo
 
@@ -37,12 +58,15 @@ arbitrary native failure never falls back. Homebrew QEMU contains both system
 emulators. Linux setup installs only the native family, so a foreign Guest also
 requires its matching `qemu-system-*` binary and firmware.
 
-`plan`, `up`, and `recreate` validate the selected emulator and firmware before
-any destructive mutation. Performance results from TCG are not meaningful.
+`plan` resolves the intended runtime without QEMU installed. `up` and `recreate`
+check the selected emulator and firmware before changing VM resources.
+Performance results from TCG are not meaningful.
 
 ## Network is partial or invalid
 
-Do not delete host files by hand. Review the owned cleanup plan:
+An intact but inactive Farrow network can be restored by interactive `up`.
+For partial or invalid installations, do not delete host files by hand; review
+the owned cleanup plan:
 
 ```bash
 farrow network status --json --verbose
@@ -102,6 +126,11 @@ automatically, **including persistent disks**; the result reports discarded data
 Failed probes, busy mounts, and I/O failures do not trigger formatting. See
 [Data disks](../../reference/configuration/#data-disks).
 
+After an interrupted 0.6.0 bootstrap, the staged control-node SSH key may already
+be missing. In that case `up` restores management access but cannot reinject
+the key in place. If peer SSH is required, review `farrow plan` and recreate
+the affected control node; see the [0.7.0 upgrade notes](../../../blog/release/farrow-0.7.0/).
+
 A repeated `up` can also clean recognized leftovers from interrupted preparation.
 `--rollback` removes failed prepare artifacts in the same run and lists them in
 `rolled_back`. `--no-wait` returns once QEMU is running and skips readiness,
@@ -109,8 +138,24 @@ guest recovery, and metadata refresh; a later `up` completes them.
 
 ## SSH fails
 
+In the **0.8 development source**, startup restores a missing deployment public
+key from the intact original private key. It also covers VMs created with 0.7.0.
+If the private key is missing, restore that same key from backup; Farrow refuses
+to generate a replacement identity for existing VMs. This host-side recovery is
+separate from the old control node's missing guest key described above.
+`up` now checks that installed guest key as well: a missing copy is a
+`control-ssh` limitation, not a management SSH failure. Restoring the original
+guest key and running `up` clears the limitation. Automatic private-key
+reinjection into old guests remains pending.
+
 Check `farrow status`, `farrow ssh-config`, and the serial log. Farrow's own
 SSH uses a loopback management port; direct Ansible traffic uses the fixed IP.
+If another process occupies a stopped VM's automatically allocated management
+port, the next start selects a free port and refreshes its SSH aliases. Running
+VM ports stay unchanged. SSH host-key trust is scoped to the VM instance UUID,
+so recreating a VM does not require deleting unrelated known-host entries.
+A changed key for the same instance still fails verification.
+
 `doctor` excludes fixed IPs reserved by the applied deployment from its generic
 eligibility scan; `up` and `start` still reject a new or stopped node address
 that already accepts SSH.

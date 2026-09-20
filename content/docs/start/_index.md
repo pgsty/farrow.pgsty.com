@@ -15,8 +15,8 @@ farrow up
 farrow ssh
 ```
 
-Interactive `up` creates the default inventory and offers to prepare missing host
-dependencies. Repeat `farrow up` to retry unfinished guest setup without
+When no inventory or deployment exists, interactive `up` creates the default
+inventory. It can prepare missing host dependencies and networking. Repeat `farrow up` to retry unfinished guest setup without
 restarting healthy VMs. For unattended setup, run `farrow setup --yes` before
 `farrow up`.
 
@@ -27,7 +27,7 @@ Everything else is separated by task:
 
 1. [Daily Operations](operations/) — status, access, start/stop, changes,
    scale-in, and destroy.
-2. [Troubleshooting](troubleshooting/) — read-only diagnosis and common fixes.
+2. [Troubleshooting](troubleshooting/) — diagnostics and common fixes.
 3. [Image Repositories](images/) — choose images, use mirrors, import, and
    prune the cache.
 4. [Build from Source](source-build/) — developer builds, checks, and local

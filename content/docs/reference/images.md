@@ -17,10 +17,31 @@ trusted.
 
 ## Aliases and pull order
 
-The embedded Catalog contains 9 families and 27 artifacts: `el7` is
+The 0.7.0 embedded Catalog (`2026090501`) contains 9 families and 27 artifacts: `el7` is
 amd64-only; every other family has amd64 and arm64 artifacts. EL9 includes
 9.3, 9.6, 9.7, and 9.8; EL10 includes 10.0, 10.1, and 10.2. `u24:stable` (Ubuntu 24.04) on
 the native architecture is the default request.
+
+
+The 0.8 workspace Catalog `2026092001` retains every previous version and grows
+to 37 artifacts. The following stable versions include both amd64 and arm64.
+They are available in the maintainer's local and LAN repositories; public
+repository and application releases are separate steps. The Catalog embedded
+in the 0.7.0 package remains unchanged.
+
+| Family | New stable | Upstream point release |
+|---|---|---|
+| `d12` | `20260909.2596.1` | Debian 12.15 |
+| `d13` | `20260914.2601.1` | Debian 13.7 |
+| `u22` | `20260913.0.0` | Ubuntu 22.04.5 |
+| `u24` | `20260911.0.0` | Ubuntu 24.04.5 |
+| `u26` | `20260918.0.0` | Ubuntu 26.04.1 |
+
+Debian retains offline-installed XFS tools and the generated `en_US.UTF-8`
+locale, with `C.UTF-8` still the default. Ubuntu retains Canonical's original
+image bytes; cloud-init configures accounts and networking at startup.
+A Catalog refresh changes newly resolved `stable` requests. Existing VMs and
+explicitly pinned versions continue using their original base images.
 
 | Alias | Distribution | Architectures | Boot | Status |
 |---|---|---|---|---|
@@ -58,8 +79,10 @@ For a pull, Farrow:
    `u24:stable`; standalone `image pull` uses the native architecture, while
    lifecycle resolution honors `vm_arch`;
 3. reuses a local file only after size, SHA-256, and qcow2 checks pass;
-4. otherwise downloads the exact Catalog-named artifact from the selected
-   repository; an immutable upstream URL is provenance, not a fallback.
+4. otherwise downloads the exact Catalog-named artifact, with retries and
+   resumption; the two official repositories can fall back to one another,
+   while custom repositories remain exclusive. All accepted bytes must match
+   the Catalog. An immutable upstream URL is provenance, not a fallback.
 
 Released builds use `https://repo.pigsty.io/farrow` by default. Long-only
 `--mirror` selects `https://repo.pigsty.cc/farrow`; precedence is `--repo`,
@@ -67,7 +90,12 @@ Released builds use `https://repo.pigsty.io/farrow` by default. Long-only
 canonical signed-Catalog trust. Farrow never refreshes the Catalog on its own,
 so a command only needs the repository when it has to download an image. Run
 `farrow update` to fetch, verify, and activate the selected repository's current
-Catalog; a failed update or missing artifact is an error.
+Catalog. Catalog updates use that selected source; a failed update is an error.
+An image download fails when none of its permitted sources supplies verified bytes.
+
+Verified writable cache files are made read-only again. A damaged, unreferenced
+cache file is preserved with a `.corrupt-<timestamp>` suffix before replacement;
+a base image still referenced by a VM is kept in place and reported as an error.
 
 ## Runtime policy
 
@@ -79,7 +107,8 @@ preserve x86 memory ordering. TCG results are not performance evidence.
 
 EL7 is deliberately limited to native Linux/amd64. Linux setup installs only
 the native QEMU family; foreign architectures require the matching system
-emulator and UEFI firmware before `plan`, `up`, or `recreate` can proceed.
+emulator and UEFI firmware before `up` or `recreate` can proceed. `plan`
+resolves the intended image and runtime without requiring those tools.
 
 ```bash
 farrow image pull d13 --mirror
@@ -136,7 +165,7 @@ The published root is deliberately small:
 farrow/
 ├── repo.yaml
 ├── catalog.json
-├── catalog.json.minisig       # optional except for HTTP
+├── catalog.json.minisig       # required for official and HTTP repositories
 └── images/
     └── <image>-<version>-<arch>.qcow2
 ```
@@ -170,7 +199,7 @@ images:
 ```
 
 With no explicit `file`, the two expected artifacts are
-`images/d13-1-amd64.qcow2` and `images/d13-1-arm64.qcow2`. A variant may use a
+`images/u24-1-amd64.qcow2` and `images/u24-1-arm64.qcow2`. A variant may use a
 safe basename override for an existing custom file.
 
 Channels and numeric prefixes are movable selectors. An exact key wins;

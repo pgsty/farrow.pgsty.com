@@ -43,15 +43,15 @@ values are errors.
 | `vm_cpu` | `2` | vCPU count |
 | `vm_mem` | `4096` | MiB integer, or a size such as `8GiB` |
 | `vm_disk` | `64` | root disk GiB |
-| `vm_disks` | `[{path: /data}]` | extra disks |
+| `vm_disks` | `[{path: /data}]` | extra disks (one 128 GiB non-persistent disk at `/data` by default) |
 | `vm_alias` | `[]` | guest `/etc/hosts`, SSH-config, and optional host aliases |
 | `vm_shares` | `[]` | QEMU 9p host-directory shares |
 
 An empty host entry is a complete VM. A deployment contains 1–20 managed
 hosts; `vm_cpu` accepts 1–256 and memory must be at least 512 MiB.
 
-Farrow 0.6.0 changes the omitted `vm_image` default from Debian 13 to Ubuntu
-24.04. To keep an existing Debian lab, set `vm_image: d13` under `all.vars`.
+Since Farrow 0.6.0, omitting `vm_image` selects Ubuntu 24.04 instead of Debian 13.
+To keep an existing Debian lab, set `vm_image: d13` under `all.vars`.
 Upgrading the executable does not replace VM disks; inspect `farrow plan`
 before applying the inventory again.
 
@@ -100,6 +100,13 @@ shares are outside this recovery path.
 
 ## Shares
 
+**macOS limitation:** on the tested macOS arm64 / QEMU 11.1.1 host, QEMU cannot
+open Farrow's securely held directory descriptor. A node with `vm_shares` cannot
+start. Omit shares in new macOS labs; full macOS sharing support remains pending.
+Changing an existing node's shares requires `recreate`, which replaces the root
+disk. Preserve needed data before considering that operation. Farrow does not
+fall back to unchecked host paths.
+
 ```yaml
 vm_shares:
   - host: /absolute/owned/source
@@ -112,6 +119,12 @@ trusted development files, not PostgreSQL data. If a requested writable share
 cannot support guest writes, Farrow tries read-only access and reports the
 limitation. Correct permissions and repeat `up` to retry; Farrow does not
 recursively change the ownership of host files.
+
+In the **0.8 development source**, a missing source fails only its node during
+`up` or `start`. Other selected nodes continue. Restore the original directory or
+its host mount and retry that node; Farrow never creates an empty replacement.
+Restart, reload and recreate validate sources before stopping existing nodes.
+This is not yet a claim about the installed 0.7.0 release.
 
 ## Names and addresses
 

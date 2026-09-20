@@ -37,14 +37,14 @@ Farrow 读取主机 IP、`nodename`、`admin_ip`、`pg_cluster`、`pg_seq`、
 | `vm_cpu` | `2` | vCPU 数量 |
 | `vm_mem` | `4096` | MiB 整数，或 `8GiB` 等尺寸 |
 | `vm_disk` | `64` | 根盘 GiB |
-| `vm_disks` | `[{path: /data}]` | 额外数据盘 |
+| `vm_disks` | `[{path: /data}]` | 额外数据盘，默认一块挂载到 `/data` 的 128 GiB 非持久盘 |
 | `vm_alias` | `[]` | Guest `/etc/hosts`、SSH config 与可选宿主别名 |
 | `vm_shares` | `[]` | QEMU 9p 宿主目录共享 |
 
 空主机条目就是一台完整 VM。每套 deployment 支持 1–20 台托管主机；`vm_cpu` 范围
 1–256，内存至少 512 MiB。
 
-Farrow 0.6.0 将省略 `vm_image` 时的默认值从 Debian 13 改为 Ubuntu 24.04。
+从 Farrow 0.6.0 起，省略 `vm_image` 时的默认值由 Debian 13 改为 Ubuntu 24.04。
 旧环境若要继续使用 Debian，请在 `all.vars` 中写明 `vm_image: d13`。升级程序不会自动
 替换 VM 磁盘；再次应用配置前先查看 `farrow plan`。
 
@@ -86,6 +86,11 @@ vm_disks:
 
 ## 目录共享
 
+**macOS 限制：** 在本轮测试的 macOS arm64 / QEMU 11.1.1 环境中，QEMU 无法打开
+Farrow 安全持有的目录描述符，配置了 `vm_shares` 的节点无法启动。新建 macOS 实验环境
+应先省略共享；完整共享支持仍待完成。修改已有节点的共享配置需要 `recreate`，会替换
+根盘，请先保留所需数据。Farrow 不会退回未经身份校验的宿主路径。
+
 ```yaml
 vm_shares:
   - host: /absolute/owned/source
@@ -96,6 +101,11 @@ vm_shares:
 源目录必须真实、属于调用者且互不重叠。9p 只适合可信开发文件，不能放 PostgreSQL 数据。
 请求可写共享但客机无法写入时，Farrow 尝试只读访问并报告限制；修正权限后再次 `up`
 即可重试。Farrow 不会递归修改宿主文件的属主。
+
+**0.8 开发源码**中的 `up`、`start` 会将源目录缺失的影响限制在对应节点，其余选中节点
+继续执行。恢复原目录或宿主挂载后，再重试该节点；Farrow 不会创建空目录代替。
+restart、reload、recreate 会在停止已有节点前校验源目录。这不代表已安装的 0.7.0
+已经具有上述新恢复行为。
 
 ## 名称与地址
 

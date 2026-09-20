@@ -5,7 +5,7 @@ weight: 30
 icon: fa-solid fa-life-ring
 ---
 
-先做只读检查：
+先收集诊断信息（`status` 可能收敛中断的运行时状态）：
 
 ```bash
 farrow doctor --json
@@ -13,13 +13,32 @@ farrow network status --json
 farrow status --json
 ```
 
+## 下载与 PATH 问题
+
+安装器从 GitHub Release 下载程序；`--mirror` 选择的是 Farrow 镜像仓库，不会重定向安装器
+下载。如果访问 GitHub 需要代理，在终端将 `HTTPS_PROXY` 或 `ALL_PROXY` 设置为已有代理的
+地址。macOS 系统代理设置本身不会替命令行工具配置这些环境变量。
+
+用户态安装器默认写入 `~/.local/bin`。安装后找不到 `farrow`，或版本仍旧时，检查当前使用的
+程序路径：
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+command -v farrow
+farrow version
+```
+
+Homebrew 或系统软件包安装应使用对应渠道的程序。CLI 与配套 `farrow-hosts-helper` 应来自
+同一 Release，并保留软件包规定的相对位置。
+
 ## 找不到 Inventory
 
-第一次部署时，在 `farrow.yml`/`pigsty.yml` 所在目录运行 `plan`、`up`、`validate`，
+尚无部署时，交互式 `up` 可以生成首份默认配置。显式使用配置时，在
+`farrow.yml`/`pigsty.yml` 所在目录运行 `plan`、`up`、`validate`，
 传入 `-f /path/to/file`，或运行 `farrow init` 生成一份。状态存在后，`plan`、`up`、
 `reload`、`recreate` 可回退到已应用规格；status、start、stop、SSH 与 destroy 始终使用
 已应用状态。如果 `status` 报告 `no deployment state found`，说明所选 `FARROW_HOME`
-从未运行过 `up`。
+没有已应用部署，可能是首次使用，也可能已执行过 purge。
 
 ## setup 需要 sudo
 
@@ -32,11 +51,12 @@ farrow status --json
 才会选择 TCG；任意原生失败绝不会静默回退。Homebrew QEMU 包含两个 System Emulator；
 Linux setup 只安装宿主原生家族，因此外来 Guest 还需要对应 `qemu-system-*` 与固件。
 
-`plan`、`up`、`recreate` 会在任何破坏性修改前验证所选模拟器与固件。TCG 性能结果没有
-参考意义。
+`plan` 无需安装 QEMU 就能解析目标运行时；`up`、`recreate` 在变更 VM 资源前检查
+所选模拟器与固件。TCG 性能结果没有参考意义。
 
 ## 网络是 partial 或 invalid
 
+完整但未激活的 Farrow 网络可由交互式 `up` 恢复；对于 partial 或 invalid 安装，
 不要手工删宿主文件，先查看受控清理计划：
 
 ```bash
@@ -91,14 +111,29 @@ farrow status
 结果会报告旧数据已丢弃。探测失败、忙碌挂载和 I/O 故障不会触发格式化。详见
 [数据盘说明](../../reference/configuration/#数据盘)。
 
+0.6.0 初始化中断时，暂存的控制节点 SSH 私钥可能已经丢失。此时 `up` 可以恢复管理访问，
+但无法原位重新注入密钥；若需要节点间 SSH，应查看 `farrow plan` 后重建受影响的控制节点。
+详见 [0.7.0 升级说明](../../../blog/release/farrow-0.7.0/)。
+
 重复 `up` 也可清理能够确认归属的中断准备残留。`--rollback` 在同一次运行中清除 prepare
 失败的产物，并在 `rolled_back` 中列出。`--no-wait` 在 QEMU 运行后即返回，跳过就绪检查、
 客机恢复与元数据刷新；后续执行 `up` 补齐。
 
 ## SSH 失败
 
+**0.8 开发源码**在启动时会从完好的原私钥恢复缺失的部署公钥，也适用于 0.7.0 创建的
+VM。若私钥丢失，需要从备份恢复同一把私钥；Farrow 不会为已有 VM 生成替代身份。
+这是宿主侧派生公钥的恢复，与前述旧控制节点中缺失的 Guest 私钥是两种情况。
+`up` 也会检查当前安装的 Guest key：文件缺失时报告 `control-ssh` 限制，管理 SSH
+仍可使用。恢复原 Guest key 后执行 `up` 会清除限制；向旧 Guest 自动重新注入私钥
+仍是待完成的功能。
+
 检查 `farrow status`、`farrow ssh-config` 与串口日志。Farrow 自身 SSH 使用回环管理端口；
 Ansible 直连固定 IP。
+若已停止 VM 的自动分配管理端口被其他进程占用，下次启动会选择空闲端口并刷新 SSH 别名；
+运行中的 VM 保留原端口。SSH 主机密钥信任按 VM 实例 UUID 区分，重建 VM 无需删除无关的
+known-host 条目；同一实例的密钥变化仍会校验失败。
+
 `doctor` 的通用可用性扫描会排除已应用部署保留的固定 IP；`up` 与 `start` 仍会拒绝
 已经接受 SSH 的新增节点或已停止节点地址。
 

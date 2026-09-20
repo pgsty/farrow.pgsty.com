@@ -39,6 +39,10 @@ Source Epoch 都锁定在 `official-v1.json`。
 安装锁定的 XFS 用户态闭包；Rocky Linux 8 安装锁定的 Python/SELinux 闭包；Rocky Linux 9
 不需要额外软件包输入。
 
+Debian 同时生成 `en_US.UTF-8`，并保留 `C.UTF-8` 作为默认 locale；归一化脚本和
+宿主端 Marker 校验都会检查这两项。镜像更新不能丢失这项历史调整。Ubuntu 使用固定
+日期的官方原始镜像，不经过这套离线定制流程。
+
 每份结果仍是未签名的 `testing` Candidate。把八个 Bundle Root 全部传给
 `--assemble-from` 会创建新的候选静态仓库，并运行 `farrow repo build` 与 `verify`；这仍不
 包含真机 Smoke、签名、上传或 Catalog 发布。
