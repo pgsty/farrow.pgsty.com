@@ -17,13 +17,18 @@ columns:
       - { label: CLI, url: docs/reference/cli/ }
       - { label: Images, url: docs/reference/images/ }
       - { label: Image Pipeline, url: docs/reference/image-pipeline/ }
-  - title: About
+  - title: "Project"
     links:
       - { label: Design, url: docs/about/design/ }
       - { label: Status, url: docs/about/status/ }
       - { label: Engineering, url: docs/about/engineering/ }
-  - title: Blog
+      - { label: "Articles", url: "blog/article/" }
+      - { label: "Design posts", url: "blog/design/" }
+      - { label: "Release notes", url: "blog/release/" }
+  - title: "Development ecosystem"
     links:
-      - { label: Article, url: blog/article/ }
-      - { label: Design, url: blog/design/ }
-      - { label: Release, url: blog/release/ }
+      - { label: "Pigsty", url: "https://pigsty.io/", external: true }
+      - { label: "Piglet", url: "https://piglet.run/", external: true }
+      - { label: "PIG", url: "https://pig.pgsty.com/", external: true }
+      - { label: "PG Center", url: "https://pg.center/docs/reference/", external: true }
+      - { label: "PGSQL.CC", url: "https://pgsql.cc/docs/", external: true }

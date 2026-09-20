@@ -186,7 +186,7 @@ outputs:
 params:
   description: Native Go and QEMU runtime for reproducible Pigsty development virtual machines on macOS and Linux.
   logo: images/farrow-mark.svg
-  version: pre-1.0
+  version: 0.7.0
   copyright:
     authors: '[PGSTY](https://pgsty.com/) and Farrow contributors'
     from_year: 2026

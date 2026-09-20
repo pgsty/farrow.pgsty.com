@@ -8,20 +8,20 @@ sections:
   - cta
 
 hero:
-  eyebrow: Pre-1.0 · Native Go + QEMU
+  eyebrow: Farrow 0.7.0 · Pre-release · Go + QEMU
   title_lines:
     - One inventory.
     - One deployment.
   title_size: 4.15rem
   lead: >-
     Farrow boots a Pigsty-compatible inventory into fixed-IP QEMU virtual
-    machines on macOS and Linux. The same file describes the VMs and deploys
-    Pigsty; there is no project model or second configuration to reconcile.
-  note: Farrow 0.7.0 improves startup and recovery. Linux KVM recovery was replayed on 2026-09-16; the latest macOS HVF lifecycle replay is dated 2026-09-05.
+    machines on macOS and Linux. Use the same inventory to provision your VMs
+    with Farrow and deploy services with Pigsty.
+  note: Ubuntu 24.04 by default. Repeat farrow up to continue interrupted setup and retry limited guest features without restarting healthy VMs.
   note_icon: fa-solid fa-flask
   image:
-    light: images/farrow-hero-light.svg?v=0.7.0
-    dark: images/farrow-hero-dark.svg?v=0.7.0
+    light: images/farrow-hero-light.svg?v=0.7.0-docs2
+    dark: images/farrow-hero-dark.svg?v=0.7.0-docs2
     alt: One Pigsty inventory becomes one fixed-IP Farrow deployment
   actions:
     - { label: Quick Start, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
@@ -39,10 +39,10 @@ facts:
   columns: 4
   link_label: Details
   items:
-    - { value: 2, label: normal commands, desc: up + ssh, url: docs/start/tutorial/ }
+    - { value: 2, label: commands after installation, desc: up + ssh, url: docs/start/tutorial/ }
     - { value: 1, label: inventory, desc: farrow.yml or pigsty.yml, url: docs/reference/configuration/ }
     - { value: 1, label: deployment per user, desc: state under ~/.farrow, url: docs/about/design/ }
-    - { value: 4, label: nodes replayed, desc: additive scale-out, url: docs/start/tutorial/ }
+    - { value: 9, label: image families, desc: "Ubuntu, Debian, Rocky, CentOS", url: docs/reference/images/ }
 
 entry_points:
   eyebrow: Two top-level sections
@@ -61,7 +61,7 @@ entry_points:
 first_command:
   eyebrow: Normal path
   title: Start the lab, then connect
-  text: Run them in an empty directory on a terminal; up creates the default inventory and offers to prepare missing dependencies.
+  text: Install Farrow from the Quick Start, then run these commands in an empty directory on a terminal for your first deployment. Interactive up prepares missing host dependencies and creates the default inventory when no deployment exists.
   code: |-
     farrow up
     farrow ssh
@@ -74,7 +74,7 @@ principles:
   columns: 4
   items:
     - { icon: fa-solid fa-file-lines, title: One fact, desc: The Pigsty inventory is the VM specification and deployment inventory. }
-    - { icon: fa-solid fa-server, title: Node-granular, desc: Additions are incremental; changes and deletion require explicit commands. }
+    - { icon: fa-solid fa-server, title: Incremental, desc: Add nodes with up; apply definition changes with recreate and remove nodes with destroy. }
     - { icon: fa-solid fa-fingerprint, title: Owned, desc: "Process identity, ownership, paths, and network manifests are verified before mutation." }
     - { icon: fa-solid fa-microchip, title: Explicit runtime, desc: Native HVF/KVM by default; catalogued or requested TCG is always visible. }
 
@@ -87,14 +87,16 @@ faq:
       open: true
     - question: Can I use pigsty.yml directly?
       answer: Yes. Farrow consumes the documented VM fields plus a small naming, control-node, and node-admin whitelist; other Pigsty settings stay opaque.
-    - question: Does setup modify the host?
-      answer: Yes. It prints and confirms dependency, fixed-IP network, and hosts-helper changes. In an empty directory it also creates the default one-node inventory.
+    - question: Does the first up modify the host?
+      answer: It can install missing dependencies and fixed-IP networking, requesting sudo when needed. Use setup --dry-run to inspect the host plan first. The optional hosts helper is installed only by hosts install.
+    - question: Does up install PostgreSQL or Pigsty?
+      answer: It prepares the virtual machines and guest access. Deploy PostgreSQL and other services separately with Pigsty; the built-in templates describe VM topology.
     - question: Is Farrow ready for production?
       answer: No. It is a pre-1.0 local development runtime; read the status page for the exact verified matrix and open release gates.
 
 cta:
   title: Start with two commands.
-  desc: Follow the Quick Start, then read focused guides and reference pages only as needed.
+  desc: Install 0.7.0, start with up, connect with ssh, and add nodes when you need them.
   actions:
     - { label: Quick Start, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
     - { label: Reference, url: docs/reference/, icon: fa-solid fa-book-open, style: ghost }
