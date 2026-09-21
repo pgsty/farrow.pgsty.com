@@ -138,7 +138,7 @@ guest recovery, and metadata refresh; a later `up` completes them.
 
 ## SSH fails
 
-In the **0.8 development source**, startup restores a missing deployment public
+In Farrow 0.8, startup restores a missing deployment public
 key from the intact original private key. It also covers VMs created with 0.7.0.
 If the private key is missing, restore that same key from backup; Farrow refuses
 to generate a replacement identity for existing VMs. This host-side recovery is

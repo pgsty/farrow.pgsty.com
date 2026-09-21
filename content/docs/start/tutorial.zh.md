@@ -1,7 +1,7 @@
 ---
 title: 快速上手
 linkTitle: 快速上手
-description: 安装 Farrow 0.7.0，用 up 启动 Ubuntu 实验环境，用 ssh 进入，再通过同一份配置增量扩容。
+description: 安装 Farrow 0.8.0，用 up 启动 Ubuntu 实验环境，用 ssh 进入，再通过同一份配置增量扩容。
 weight: 10
 icon: fa-solid fa-play
 aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /docs/start/pigsty/, /docs/features/]
@@ -9,20 +9,20 @@ aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /do
 
 ## 安装
 
-当前公开版本为 [Farrow 0.7.0](https://github.com/pgsty/farrow/releases/tag/v0.7.0)，
+当前公开版本为 [Farrow 0.8.0](https://github.com/pgsty/farrow/releases/tag/v0.8.0)，
 在 GitHub 上标记为 **Pre-release**。用户态安装器支持 macOS / Linux 的 arm64 与 amd64，
 会校验归档的 Checksum，安装过程无需 sudo：
 
 ```bash
-curl -fLO https://github.com/pgsty/farrow/releases/download/v0.7.0/install.sh
+curl -fLO https://github.com/pgsty/farrow/releases/download/v0.8.0/install.sh
 chmod +x install.sh
-FARROW_VERSION=0.7.0 ./install.sh
+FARROW_VERSION=0.8.0 ./install.sh
 export PATH="$HOME/.local/bin:$PATH"
 farrow version
 ```
 
 默认安装目录为 `~/.local/bin`；把同一行 PATH 设置加入 Shell 配置，后续打开的终端也能使用。
-`farrow version` 应显示 `0.7.0`。GitHub 的 `/releases/latest` 不包含预发布版本，
+`farrow version` 应显示 `0.8.0`。GitHub 的 `/releases/latest` 不包含预发布版本，
 因此需要保留显式的 `FARROW_VERSION`。
 
 GitHub 下载超时时，请配置终端的代理环境，见[下载与 PATH 问题](../troubleshooting/#下载与-path-问题)。
@@ -30,7 +30,7 @@ GitHub 下载超时时，请配置终端的代理环境，见[下载与 PATH 问
 ### 其他安装方式
 
 任选一种安装方式即可。[官方 Homebrew Tap](https://github.com/pgsty/homebrew-infra/blob/main/Formula/farrow.rb)
-当前提供 0.7.0，并依赖 QEMU。下面的 Linux 示例使用 amd64 软件包；ARM64 Linux 请使用
+当前提供 0.8.0，并依赖 QEMU。下面的 Linux 示例使用 amd64 软件包；ARM64 Linux 请使用
 对应的 `linux_arm64` 资产。
 
 ```bash {tab="Homebrew" group="install" value="brew"}
@@ -39,16 +39,16 @@ farrow version
 ```
 
 ```bash {tab="Debian / Ubuntu" value="deb"}
-farrow_release=https://github.com/pgsty/farrow/releases/download/v0.7.0
-curl -fLO "$farrow_release/farrow_0.7.0_linux_amd64.deb"
-sudo apt install ./farrow_0.7.0_linux_amd64.deb
+farrow_release=https://github.com/pgsty/farrow/releases/download/v0.8.0
+curl -fLO "$farrow_release/farrow_0.8.0_linux_amd64.deb"
+sudo apt install ./farrow_0.8.0_linux_amd64.deb
 farrow version
 ```
 
 ```bash {tab="RHEL / Fedora" value="rpm"}
-farrow_release=https://github.com/pgsty/farrow/releases/download/v0.7.0
-curl -fLO "$farrow_release/farrow_0.7.0_linux_amd64.rpm"
-sudo dnf install ./farrow_0.7.0_linux_amd64.rpm
+farrow_release=https://github.com/pgsty/farrow/releases/download/v0.8.0
+curl -fLO "$farrow_release/farrow_0.8.0_linux_amd64.rpm"
+sudo dnf install ./farrow_0.8.0_linux_amd64.rpm
 farrow version
 ```
 
@@ -239,7 +239,7 @@ farrow st
 
 仅增加这三行时，计划应列出三个待创建节点。`up` 会创建它们，保留正在运行的 `meta`
 进程，并刷新客机 hosts 与控制节点 SSH 配置。健康的结果为 `4 nodes ready`。
-0.7.0 内置 Catalog 将 `u24:stable` 解析为 `u24@20260801.0.0`；手动更新 Catalog 后
+0.8.0 内置 Catalog 将 `u24:stable` 解析为 `u24@20260911.0.0`；手动更新 Catalog 后
 可能解析为其他版本，准确版本显示在 `plan` 和 `status` 中。
 
 修改 CPU、内存或其他被读取的 VM 字段，需要显式执行 `farrow recreate <node>`；
@@ -265,6 +265,7 @@ farrow destroy
 沿用原来的安装渠道：重新运行固定版本的安装器，执行 `brew update` 后再执行
 `brew upgrade pgsty/infra/farrow`，或安装新版 DEB/RPM。之后先检查 `farrow version`
 与 `farrow plan`，再运行 `farrow up`。`farrow update` 更新的是镜像 Catalog，不是 Farrow 程序。
+恢复改进与真机验证范围见 [0.8.0 发布说明](../../../blog/release/farrow-0.8.0/)。
 
 从更老版本升级、且原 Debian 环境省略了 `vm_image` 时，在 `all.vars` 设置 `vm_image: d13`
 以保留原来的镜像选择；默认值在 0.6.0 改为 Ubuntu 24.04。数据盘恢复策略，以及 0.6.0

@@ -73,7 +73,7 @@ an absolute local directory. Explicit local and HTTPS repositories may use an
 unsigned Catalog; HTTP repositories require a Catalog signed by a trusted key.
 Artifact size, SHA-256, and qcow2 structure are always verified.
 
-Image downloads retry transient failures and resume interrupted transfers. In
+Image downloads retry transient failures and resume interrupted transfers. Since
 0.7.0, the two official repositories can fall back to one another if the selected
 endpoint cannot supply an image; the same Catalog size and digest must still
 match. Custom repositories remain exclusive. Catalog upstream URLs are

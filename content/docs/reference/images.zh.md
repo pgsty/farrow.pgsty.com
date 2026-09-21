@@ -15,14 +15,16 @@ Farrow 使用物化的静态 Catalog 与不可变 qcow2 工件。官方与 HTTP 
 
 ## 别名与拉取顺序
 
-0.7.0 内置 Catalog（`2026090501`）包含 9 个 Family、27 个工件：`el7` 只有 amd64，其余 Family 均有
-amd64 与 arm64。EL9 包含 9.3、9.6、9.7、9.8；EL10 包含 10.0、10.1、10.2。
+Farrow 0.8.0 内置 Catalog `2026092001`，包含 9 个 Family、37 个工件，保留前一版的
+全部 27 个工件。`el7` 只有 amd64，其余 Family 均有 amd64 与 arm64。
+EL9 包含 9.3、9.6、9.7、9.8；EL10 包含 10.0、10.1、10.2。
 默认请求为本机架构的 `u24:stable`（Ubuntu 24.04）。
 
-
-0.8 工作区的 Catalog `2026092001` 在保留全部旧版本的基础上扩充到 37 个工件，
-以下 `stable` 均覆盖 amd64 和 arm64。当前已更新维护者的本地与局域网仓库；
-公开仓库与应用发布是单独的发布步骤，0.7.0 安装包内嵌的 Catalog 保持不变。
+以下九月 `stable` 均覆盖 amd64 和 arm64。两个官方镜像入口均提供 Catalog `2026092001`，
+正文与内置、本地和局域网副本逐字节一致；两端隔离的 `farrow update` 均成功验签并激活
+该 revision。十个新增镜像对象在两端均可访问，内容长度
+符合 Catalog；此次端点检查没有重新下载并计算全部公开镜像的摘要。验证范围见
+[当前状态](../../about/status/)。
 
 | Family | 新 stable | 上游小版本 |
 |---|---|---|
@@ -181,8 +183,8 @@ Channel 与数值前缀都是可移动 Selector。存在精确 Key 时优先精�
 
 ```text
 d13:stable + native
-  -> d13@20260810.2566.1 + arm64
-  -> images/d13-20260810.2566.1-arm64.qcow2
+  -> d13@20260914.2601.1 + arm64
+  -> images/d13-20260914.2601.1-arm64.qcow2
 ```
 
 `farrow repo scan` 只读；`build` 执行严格 YAML 校验、完整 qcow2 inspect/check，

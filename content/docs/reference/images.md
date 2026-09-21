@@ -17,17 +17,18 @@ trusted.
 
 ## Aliases and pull order
 
-The 0.7.0 embedded Catalog (`2026090501`) contains 9 families and 27 artifacts: `el7` is
-amd64-only; every other family has amd64 and arm64 artifacts. EL9 includes
-9.3, 9.6, 9.7, and 9.8; EL10 includes 10.0, 10.1, and 10.2. `u24:stable` (Ubuntu 24.04) on
-the native architecture is the default request.
+Farrow 0.8.0 embeds Catalog `2026092001`: 9 families and 37 artifacts, retaining
+all 27 artifacts from the previous Catalog. `el7` is amd64-only; every other
+family has amd64 and arm64 artifacts. EL9 includes 9.3, 9.6, 9.7, and 9.8;
+EL10 includes 10.0, 10.1, and 10.2. `u24:stable` (Ubuntu 24.04) on the native
+architecture is the default request.
 
-
-The 0.8 workspace Catalog `2026092001` retains every previous version and grows
-to 37 artifacts. The following stable versions include both amd64 and arm64.
-They are available in the maintainer's local and LAN repositories; public
-repository and application releases are separate steps. The Catalog embedded
-in the 0.7.0 package remains unchanged.
+The September stable versions below include both amd64 and arm64. Both official
+repository endpoints serve Catalog `2026092001`, byte-for-byte identical to the
+embedded and LAN copies; isolated `farrow update` runs against both verified the
+signatures and activated that revision. The ten new image objects are reachable
+at both endpoints with the expected content lengths; this endpoint check did not download and
+rehash every public image. See [Status](../../about/status/) for verification scope.
 
 | Family | New stable | Upstream point release |
 |---|---|---|
@@ -210,8 +211,8 @@ numerically newest version (`el9@9.7` selects the newest 9.7 build, while
 
 ```text
 d13:stable + native
-  -> d13@20260810.2566.1 + arm64
-  -> images/d13-20260810.2566.1-arm64.qcow2
+  -> d13@20260914.2601.1 + arm64
+  -> images/d13-20260914.2601.1-arm64.qcow2
 ```
 
 `farrow repo scan` is read-only. `build` performs strict YAML validation,

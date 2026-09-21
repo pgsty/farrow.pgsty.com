@@ -162,10 +162,9 @@ The control guest's Farrow-managed SSH entries accept replacement host keys
 without recording them in known_hosts, so recreated lab nodes remain reachable.
 User-added SSH entries are preserved.
 
-## 0.8 development recovery notes
+## Recovery in 0.8
 
-These changes are in the development source, not an already published 0.8
-release. `up` and `start` isolate missing host-share failures by node; `up` also
+`up` and `start` isolate missing host-share failures by node; `up` also
 continues existing stopped peers when a new node fails to prepare. Partial
 results keep exit code 5 and preserve successful nodes. Retry hints retain the
 inventory, repository and applicable flags; a `start` retry remains `start`.
@@ -179,6 +178,11 @@ the final deletion/retention result; purge leaves the image cache and host netwo
 Owned persistent disks left by a previously removed node no longer block
 destroying the remaining nodes. Ordinary destroy retains those disks; explicit
 persistent deletion or purge is still required to remove them.
+
+On macOS, fresh network setup finishes Homebrew discovery/installation or the
+pinned-archive download before requesting administrator authentication. Homebrew
+can invalidate an earlier sudo credential; the new order avoids that failure
+without widening the privileged operation. Failed downloads do not prompt.
 
 ## SSH passthrough and completion
 

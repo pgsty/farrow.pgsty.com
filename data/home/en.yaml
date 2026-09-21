@@ -8,7 +8,7 @@ sections:
   - cta
 
 hero:
-  eyebrow: Farrow 0.7.0 · Pre-release · Go + QEMU
+  eyebrow: Farrow 0.8.0 · Pre-release · Go + QEMU
   title_lines:
     - One inventory.
     - One deployment.
@@ -20,8 +20,8 @@ hero:
   note: Ubuntu 24.04 by default. Repeat farrow up to continue interrupted setup and retry limited guest features without restarting healthy VMs.
   note_icon: fa-solid fa-flask
   image:
-    light: images/farrow-hero-light.svg?v=0.7.0-docs2
-    dark: images/farrow-hero-dark.svg?v=0.7.0-docs2
+    light: images/farrow-hero-light.svg?v=0.8.0-docs2
+    dark: images/farrow-hero-dark.svg?v=0.8.0-docs2
     alt: One Pigsty inventory becomes one fixed-IP Farrow deployment
   actions:
     - { label: Quick Start, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
@@ -96,7 +96,7 @@ faq:
 
 cta:
   title: Start with two commands.
-  desc: Install 0.7.0, start with up, connect with ssh, and add nodes when you need them.
+  desc: Install 0.8.0, start with up, connect with ssh, and add nodes when you need them.
   actions:
     - { label: Quick Start, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
     - { label: Reference, url: docs/reference/, icon: fa-solid fa-book-open, style: ghost }

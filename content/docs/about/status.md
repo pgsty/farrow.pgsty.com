@@ -10,17 +10,18 @@ Farrow is pre-1.0. Source tests, dated native replays, packages, release, CI,
 and the public site are separate gates. Install instructions are in the
 [Quick Start](../../start/tutorial/#install).
 
-The current public release is
-[`v0.7.0`](https://github.com/pgsty/farrow/releases/tag/v0.7.0). It improves first-run
-setup, progress output, and recovery through `up`. See the
-[release notes](../../../blog/release/farrow-0.7.0/) for upgrade instructions and
-the automatic test-data reset policy. The new recovery replay used an isolated
-Ubuntu amd64/KVM lab; macOS HVF and other results retain their original dates.
+The current release is [`v0.8.0`](https://github.com/pgsty/farrow/releases/tag/v0.8.0).
+It improves partial-start recovery, host preparation, cleanup reporting, and
+setup authentication, and embeds the September image Catalog. See the
+[release notes](../../../blog/release/farrow-0.8.0/) for changes and upgrade guidance.
 
 ## Summary
 
-| Host | Path | Last verified | Result |
+| Host or artifact | Path | Last verified | Result |
 |---|---|---|---|
+| Two Linux amd64 hosts (`m0`, `m3`) | KVM, seven operating systems per host | 2026-09-21 (0.8.0) | clean initialization, first SSH, final candidate upgrade, repeated up, stop/start, disk identity, and Ansible configuration reads passed |
+| Two macOS arm64 hosts (`m1`, `m5`) | HVF, seven operating systems per host | 2026-09-21 (0.8.0) | the same lifecycle checks plus seven-node Ansible ping passed |
+| Catalog `2026092001` | 9 families, 37 artifacts; September Debian/Ubuntu refresh | 2026-09-21 | embedded/local/LAN/public Catalog bytes match; ten new image objects reachable at both public endpoints with expected sizes; selected images passed the four native pro runs |
 | Ubuntu 26.04 amd64 | KVM, QEMU 10.2.1, Ubuntu 24.04 guest | 2026-09-16 (0.7.0 recovery) | damaged disk resets, failed probes, busy mounts, retained-disk recreation, share recovery, and repeated healthy up passed |
 | macOS arm64 | HVF, Ubuntu 24.04.4 guests | 2026-09-05 (0.6.0 lifecycle changes) | create, scale-out, peer SSH, stop/start, reload, recreate, partial status, and scale-in passed |
 | macOS 26.6.2 arm64 | HVF, QEMU 11.1, socket_vmnet | 2026-09-01 (`v0.2.0`) | selected create/SSH/stop/start, incremental cached create, whole status, whole destroy passed |
@@ -31,29 +32,87 @@ Ubuntu amd64/KVM lab; macOS HVF and other results retain their original dates.
 | Published Catalog `2026090501` | 9 families, 27 qcow2 artifacts | 2026-09-05 | artifact verification, embedded/public byte equality, and signed update through both official endpoints passed |
 | Published Catalog `2026082903` | 9 families, 27 signed qcow2 artifacts | 2026-08-29 | full SHA-256 sweep and clean-client `d13:stable` pull passed |
 
+The 0.8 run covered Rocky Linux 9.8/10.2, Debian 12.15/13.7, and Ubuntu
+22.04.5/24.04.5/26.04.1 on each host: 28 successful guest instances in total.
+The temporary acceptance VMs were subsequently cleaned up. Both public Catalogs
+have SHA-256 `23e8dbf6c19bd192d56c6d71eb30901f17945b3487e427a43abe108463780306`.
+Isolated `farrow update` runs at both endpoints verified the signatures and
+activated revision `2026092001`. The public image check used HEAD/content lengths
+for ten new objects at each endpoint, not a fresh download/hash of every public
+artifact.
+
 ## Still open
 
-- EL9 + NetworkManager + firewalld native replay;
-- current systemd-networkd replay;
-- host reboot persistence;
-- macOS amd64 and Linux arm64 native runs;
+- EL9 hosts with NetworkManager and firewalld, and a current systemd-networkd replay;
+- physical-host reboot persistence;
+- macOS amd64 and Linux arm64 native runs, beyond their build/package checks;
 - EL7 through the current native Linux/amd64 lifecycle;
-- current macOS 9p share replay;
+- macOS directory sharing: the tested QEMU cannot reopen Farrow's securely held directory descriptor;
 - a complete current Pigsty `configure → farrow up → install.yml` run;
-- clean-host published Homebrew installation (the current tap formula has a local
-  upgrade and `brew test` pass, but this is not a clean-host replay);
-- clean-host published DEB/RPM consumption.
+- a native replay of the corrected fresh Homebrew socket_vmnet authentication path;
+- clean-host setup and VM creation through the public installer, Homebrew, or published DEB/RPM packages.
 
 Current built-in versions are `supported`, except EOL EL7 and the retained
 compatibility versions EL9 9.3/9.6 and EL10 10.0, which are `deprecated`.
-Active and standby Catalog public keys are embedded, but the repository must
-move off the development host and private-key custody/rotation plus release
-custody must be formalized before 1.0.
+Active and standby Catalog public keys are embedded. Private-key custody and
+rotation, together with release custody, must be formalized before 1.0.
 
 ## Verification history
 
 Each entry belongs to the exact checkpoint exercised that day. Later source or
 documentation edits do not inherit native proof without another replay.
+
+### Farrow 0.8.0 — 2026-09-21
+
+Release tag `v0.8.0` points to `320a32afa8f6fca02592215aa0d5607ca4e852b2`.
+The [source CI](https://github.com/pgsty/farrow/actions/runs/35568664994), independent
+[packaging snapshot](https://github.com/pgsty/farrow/actions/runs/35568664948), and
+[tag workflow](https://github.com/pgsty/farrow/actions/runs/35569143101) passed.
+The tag workflow produced 20 assets, including 19 checksummed payloads. The
+publication commit changes only README and release notes relative to the tested
+runtime below; a new local build at the tag passed the archive/package checks.
+
+The release became public on 2026-09-21. All 20 assets were downloaded
+anonymously through the host's configured proxy, without GitHub credentials.
+Every request returned HTTP 200 and the full-body SHA-256 matched both the API
+digest and inspected draft; all 19 checksummed payloads matched the manifest.
+Public installers succeeded in isolated user directories on macOS arm64 and
+Linux amd64. Both reported 0.8.0 / `320a32a` and installed exactly the CLI/helper
+bytes from their verified public archives. Linux downloads used a temporary SSH
+loopback forward to the existing proxy, removed afterward. Default installations
+and VM/network state stayed unchanged. These checks verify binary installation;
+fresh-host setup and VM creation through the public installer remain untested.
+
+The [Homebrew tap](https://github.com/pgsty/homebrew-infra/commit/9c3401958a435248ebf0e5402e7efff712ee1c4c)
+now selects 0.8.0 for all four targets with the public archive digests. Local
+syntax, updater tests, consistency/style/platform checks, strict online audit,
+and native arm64 `brew fetch` passed. Its macOS and Linux
+[CI jobs](https://github.com/pgsty/homebrew-infra/actions/runs/35570285428)
+also passed metadata, updater, style, platform, and audit checks. There was no
+new `brew install`, upgrade, relink, or `brew test` in this release verification.
+
+The clean initialization baseline was `6d7870e26cb2f4082a00c188f746783fc027687e`.
+On each of four hosts, the run removed the owned old lab and network, started
+from an empty Farrow user state/cache, and created the seven-system pro inventory
+using one LAN repository. Linux used the actual DEB; macOS used a complete
+checksum-verified user installation of the archive's paired CLI/helper.
+
+The runtime candidate `1c054a027420b5410c6f6feb344e27e001ae1af1` added the
+Homebrew authentication-order fix and passed complete local `make check` and
+release archive/package verification. It was installed in place on all four
+hosts, then passed healthy `up`, two rounds of guest SSH, stop/start, and Ansible
+configuration reads. Both Macs also passed Ansible ping on every node. VM UUIDs,
+image identities, and root/data disk paths and inodes were retained; healthy
+`up` also kept the running processes. All runs checked real data-disk access,
+Debian locales/XFS, and control-node SSH to the other guests.
+
+This is a clean 6d baseline followed by a final 1c in-place lifecycle replay,
+not a second clean initialization at 1c. The new Homebrew ordering has a regression
+that fails before the fix and passes after it; the native clean runs used the
+pinned backend archive, so they do not exercise a new Homebrew formula install.
+No physical host was rebooted, and no full Pigsty installation or macOS shared
+folder was included. The [release notes](../../../blog/release/farrow-0.8.0/)
+include the measured lifecycle samples and image versions.
 
 ### Farrow 0.7.0 release — 2026-09-16
 

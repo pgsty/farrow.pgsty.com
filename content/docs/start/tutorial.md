@@ -1,7 +1,7 @@
 ---
 title: Quick Start
 linkTitle: Quick Start
-description: Install Farrow 0.7.0, start an Ubuntu lab with up, connect with ssh, and scale from the same inventory.
+description: Install Farrow 0.8.0, start an Ubuntu lab with up, connect with ssh, and scale from the same inventory.
 weight: 10
 icon: fa-solid fa-play
 aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /docs/start/pigsty/, /docs/features/]
@@ -9,21 +9,21 @@ aliases: [/docs/start/installation/, /docs/start/upgrade/, /docs/start/lab/, /do
 
 ## Install
 
-The current public version is [Farrow 0.7.0](https://github.com/pgsty/farrow/releases/tag/v0.7.0),
+The current public version is [Farrow 0.8.0](https://github.com/pgsty/farrow/releases/tag/v0.8.0),
 marked **Pre-release** on GitHub. The user-scoped installer supports macOS and
 Linux on arm64 and amd64, verifies the archive checksum, and needs no sudo:
 
 ```bash
-curl -fLO https://github.com/pgsty/farrow/releases/download/v0.7.0/install.sh
+curl -fLO https://github.com/pgsty/farrow/releases/download/v0.8.0/install.sh
 chmod +x install.sh
-FARROW_VERSION=0.7.0 ./install.sh
+FARROW_VERSION=0.8.0 ./install.sh
 export PATH="$HOME/.local/bin:$PATH"
 farrow version
 ```
 
 The default installation directory is `~/.local/bin`; add the same PATH line
 to your shell configuration to keep it in new terminals. `farrow version`
-should report `0.7.0`. GitHub excludes prereleases from `/releases/latest`,
+should report `0.8.0`. GitHub excludes prereleases from `/releases/latest`,
 so keep the explicit `FARROW_VERSION`.
 
 If GitHub downloads time out, configure your terminal's proxy environment;
@@ -32,7 +32,7 @@ see [Download and PATH problems](../troubleshooting/#download-and-path-problems)
 ### Other installation methods
 
 Choose one installation method. The [official Homebrew tap](https://github.com/pgsty/homebrew-infra/blob/main/Formula/farrow.rb)
-currently provides 0.7.0 and depends on QEMU. The Linux examples below use
+currently provides 0.8.0 and depends on QEMU. The Linux examples below use
 amd64 packages; use the corresponding `linux_arm64` asset on ARM64 Linux.
 
 ```bash {tab="Homebrew" group="install" value="brew"}
@@ -41,16 +41,16 @@ farrow version
 ```
 
 ```bash {tab="Debian / Ubuntu" value="deb"}
-farrow_release=https://github.com/pgsty/farrow/releases/download/v0.7.0
-curl -fLO "$farrow_release/farrow_0.7.0_linux_amd64.deb"
-sudo apt install ./farrow_0.7.0_linux_amd64.deb
+farrow_release=https://github.com/pgsty/farrow/releases/download/v0.8.0
+curl -fLO "$farrow_release/farrow_0.8.0_linux_amd64.deb"
+sudo apt install ./farrow_0.8.0_linux_amd64.deb
 farrow version
 ```
 
 ```bash {tab="RHEL / Fedora" value="rpm"}
-farrow_release=https://github.com/pgsty/farrow/releases/download/v0.7.0
-curl -fLO "$farrow_release/farrow_0.7.0_linux_amd64.rpm"
-sudo dnf install ./farrow_0.7.0_linux_amd64.rpm
+farrow_release=https://github.com/pgsty/farrow/releases/download/v0.8.0
+curl -fLO "$farrow_release/farrow_0.8.0_linux_amd64.rpm"
+sudo dnf install ./farrow_0.8.0_linux_amd64.rpm
 farrow version
 ```
 
@@ -263,8 +263,8 @@ farrow st
 
 With only these additions, the plan lists three nodes to create. `up` creates
 them, keeps a running `meta` process, and refreshes guest hosts and control-node
-SSH entries. A healthy result is `4 nodes ready`. The embedded 0.7.0 Catalog
-resolves `u24:stable` to `u24@20260801.0.0`; a manually updated Catalog may
+SSH entries. A healthy result is `4 nodes ready`. The embedded 0.8.0 Catalog
+resolves `u24:stable` to `u24@20260911.0.0`; a manually updated Catalog may
 resolve another version, which appears in `plan` and `status`.
 
 Changing CPU, memory, or other consumed VM fields requires an explicit
@@ -293,6 +293,8 @@ Use the same installation channel: rerun the version-pinned installer, run
 `brew update` followed by `brew upgrade pgsty/infra/farrow`, or install the new
 DEB/RPM. Then check `farrow version` and `farrow plan` before `farrow up`.
 `farrow update` refreshes the image Catalog, not the Farrow executable.
+See the [0.8.0 release notes](../../../blog/release/farrow-0.8.0/) for recovery
+changes and the native validation scope.
 
 When upgrading an older Debian lab that omitted `vm_image`, set `vm_image: d13`
 in `all.vars` to preserve that choice; the default changed to Ubuntu 24.04 in

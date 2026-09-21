@@ -120,11 +120,10 @@ cannot support guest writes, Farrow tries read-only access and reports the
 limitation. Correct permissions and repeat `up` to retry; Farrow does not
 recursively change the ownership of host files.
 
-In the **0.8 development source**, a missing source fails only its node during
+In Farrow 0.8, a missing source fails only its node during
 `up` or `start`. Other selected nodes continue. Restore the original directory or
 its host mount and retry that node; Farrow never creates an empty replacement.
 Restart, reload and recreate validate sources before stopping existing nodes.
-This is not yet a claim about the installed 0.7.0 release.
 
 ## Names and addresses
 

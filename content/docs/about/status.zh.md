@@ -9,45 +9,91 @@ aliases: [/docs/project/, /docs/project/status/, /docs/project/roadmap/, /docs/p
 Farrow 仍是 pre-1.0。源码测试、带日期的真机重放、软件包、发布、CI 与线上站点是不同门禁。
 安装方法见[快速上手](../../start/tutorial/#安装)。
 
-当前公开版本为 [`v0.7.0`](https://github.com/pgsty/farrow/releases/tag/v0.7.0)，
-改进首次启动、进度输出，并统一通过 `up` 恢复故障。升级方法与测试数据自动清盘规则见
-[发布说明](../../../blog/release/farrow-0.7.0/)。新增恢复验证使用隔离的 Ubuntu amd64/KVM
-环境；macOS HVF 与其他验证保留各自的原始日期。
+当前版本为 [`v0.8.0`](https://github.com/pgsty/farrow/releases/tag/v0.8.0)，
+改进部分节点启动恢复、宿主准备、清理摘要和初始化认证，并内置九月镜像 Catalog。
+变化与升级方法见[发布说明](../../../blog/release/farrow-0.8.0/)。
 
 ## 概览
 
-| 宿主 | 路径 | 最后验证 | 结果 |
+| 宿主或产物 | 路径 | 最后验证 | 结果 |
 |---|---|---|---|
+| 两台 Linux amd64（`m0`、`m3`） | KVM，每机七系统 | 2026-09-21（0.8.0） | 从零初始化、首次 SSH、最终候选原位升级、重复 up、stop/start、磁盘身份与 Ansible 配置读取通过 |
+| 两台 macOS arm64（`m1`、`m5`） | HVF，每机七系统 | 2026-09-21（0.8.0） | 同样的生命周期检查通过，另通过每机七节点 Ansible ping |
+| Catalog `2026092001` | 9 个 Family、37 个工件；九月 Debian/Ubuntu 更新 | 2026-09-21 | 内置/本地/LAN/公开 Catalog 字节一致；十个新增镜像在两个公开入口可访问且大小正确；所选镜像通过四机原生 pro 验收 |
 | Ubuntu 26.04 amd64 | KVM、QEMU 10.2.1、Ubuntu 24.04 Guest | 2026-09-16（0.7.0 恢复） | 损坏盘重置、探测失败、忙碌挂载、保留盘重建、共享目录恢复与重复健康 up 通过 |
 | macOS arm64 | HVF、Ubuntu 24.04.4 Guest | 2026-09-05（0.6.0 生命周期修改） | 创建、扩容、同伴 SSH、stop/start、reload、recreate、部分状态与缩容通过 |
 | macOS 26.6.2 arm64 | HVF、QEMU 11.1、socket_vmnet | 2026-09-01（`v0.2.0`） | 选点创建/SSH/stop/start、增量创建已缓存镜像、whole status、whole destroy 通过 |
 | macOS 26.6.2 arm64 | HVF、QEMU 11.1、socket_vmnet | 2026-08-27 | 单节点与增量四节点通过 |
 | Ubuntu 26.04 amd64（`mx`） | KVM、QEMU 10.2.1、NetworkManager | 2026-09-01（`v0.2.0`） | 审计现存四节点 deployment 为存活并进入控制 Guest |
-| Ubuntu 26.04 amd64（`mx`） | KVM、QEMU 10.2.1、NetworkManager | 2026-08-27 | setup、单节点、增量四节点与卸载通过 |
+| Ubuntu 26.04 amd64（`mx`） | KVM、QEMU 10.2.1、NetworkManager | 2026-08-27 | setup、单节点、增量创建四节点与卸载通过 |
 | macOS arm64 | HVF 宿主、TCG 兼容规则、Rocky Linux 8.10 arm64 | 2026-08-28 | 启动、stop/start、44.2 秒达到 readiness 通过 |
 | 已发布 Catalog `2026090501` | 9 个 Family、27 个 qcow2 工件 | 2026-09-05 | 工件校验、内置/公开字节一致，以及两个官方入口的签名更新通过 |
 | 已发布 Catalog `2026082903` | 9 个 Family、27 个已签名 qcow2 工件 | 2026-08-29 | 全量 SHA-256 校验与干净客户端拉取 `d13:stable` 通过 |
 
+本轮每台宿主均覆盖 Rocky Linux 9.8/10.2、Debian 12.15/13.7、Ubuntu
+22.04.5/24.04.5/26.04.1，共 28 个成功的客机实例。临时验收 VM 已在之后清理。
+两个公开 Catalog 的 SHA-256 均为
+`23e8dbf6c19bd192d56c6d71eb30901f17945b3487e427a43abe108463780306`。
+两端分别执行隔离的 `farrow update`，成功验签并激活 revision `2026092001`。
+公开镜像检查覆盖每端十个新增对象的 HEAD/内容长度，没有重新下载并计算全部公开工件摘要。
+
 ## 仍未完成
 
-- EL9 + NetworkManager + firewalld 真机重放；
-- 当前 systemd-networkd 重放；
-- 宿主重启持久性；
-- macOS amd64 与 Linux arm64 真机；
+- EL9 宿主的 NetworkManager + firewalld，以及当前 systemd-networkd 重放；
+- 物理宿主重启后的持久性；
+- macOS amd64 与 Linux arm64 真机运行，目前仅有构建/打包检查；
 - 当前 Linux/amd64 原生 EL7 生命周期；
-- 当前 macOS 9p share 重放；
+- macOS 目录共享：已测 QEMU 无法重开 Farrow 安全持有的目录描述符；
 - 完整的 Pigsty `configure → farrow up → install.yml`；
-- 干净宿主上的公开 Homebrew 安装（当前 Tap Formula 已本地升级并通过 `brew test`，但这不等于
-  干净宿主重放）；
-- 干净宿主上的公开 DEB/RPM 安装。
+- 修正后的全新 Homebrew socket_vmnet 安装认证路径原生重放；
+- 通过公开安装器、Homebrew 或公开 DEB/RPM 软件包完成干净宿主准备与 VM 创建。
 
 当前内置版本均为 `supported`，只有 EOL EL7 与保留兼容版本 EL9 9.3/9.6、EL10 10.0
-为 `deprecated`。active/standby Catalog 公钥已经内置，但镜像仓库仍需迁离开发宿主，
-私钥托管/轮换与 Release 职责也必须在 1.0 前正式落实。
+为 `deprecated`。active/standby Catalog 公钥已经内置；私钥托管、轮换与 Release 职责
+必须在 1.0 前正式落实。
 
 ## 验证历史
 
 每条记录只属于当天真正执行过的准确 Checkpoint；后续源码或文档修改不会自动继承真机证明。
+
+### Farrow 0.8.0：2026-09-21
+
+发布 tag `v0.8.0` 指向 `320a32afa8f6fca02592215aa0d5607ca4e852b2`。
+[源码 CI](https://github.com/pgsty/farrow/actions/runs/35568664994)、独立
+[打包 Snapshot](https://github.com/pgsty/farrow/actions/runs/35568664948) 和
+[Tag 工作流](https://github.com/pgsty/farrow/actions/runs/35569143101)通过。
+Tag 工作流生成 20 个资产，其中 19 项载荷列入校验清单。发布提交相对下述已验收运行时
+只更新 README 与发布说明；在该 tag 上重新本地构建也通过归档/软件包检查。
+
+Release 于 2026-09-21 公开。通过宿主已配置的代理匿名下载全部 20 个资产，不携带
+GitHub 凭据；每项均返回 HTTP 200，完整正文 SHA-256 与 API 摘要及已检查草稿一致，
+19 项载荷全部匹配校验清单。公开安装器在 macOS arm64 与 Linux amd64 的隔离用户目录
+均成功安装，报告 0.8.0 / `320a32a`，CLI/helper 字节与各自已校验的公开归档一致。
+Linux 下载通过临时 SSH 回环转发访问已有代理，验证后已关闭。默认安装与 VM/网络状态
+保持不变。这些检查验证了二进制安装；通过公开安装器准备全新宿主并创建 VM 仍待验证。
+
+[Homebrew Tap](https://github.com/pgsty/homebrew-infra/commit/9c3401958a435248ebf0e5402e7efff712ee1c4c)
+四个平台均已选择 0.8.0，归档摘要与公开发布一致。本地语法、更新器测试、一致性/样式/
+平台检查、严格在线 audit 和原生 arm64 `brew fetch` 通过。macOS 与 Linux 上的
+[CI 任务](https://github.com/pgsty/homebrew-infra/actions/runs/35570285428)也通过元数据、
+更新器、样式、平台和 audit 检查。本轮没有重新执行 `brew install`、升级、relink 或
+`brew test`。
+
+从零初始化的基线为 `6d7870e26cb2f4082a00c188f746783fc027687e`。四台宿主分别清理
+已确认归属的旧环境与网络，从空 Farrow 用户状态和缓存开始，使用同一局域网仓库拉起
+七系统 pro 配置。Linux 实际安装 DEB；macOS 使用完整已校验归档，以用户级安装保留
+配对的 CLI/helper。
+
+运行时候选 `1c054a027420b5410c6f6feb344e27e001ae1af1` 加入 Homebrew 认证顺序修复，
+通过完整本地 `make check` 及发布归档/软件包检查。随后在四机原位安装，完成健康 `up`、
+两轮客机 SSH、stop/start 和 Ansible 配置读取；两台 Mac 还分别通过七节点 Ansible ping。
+VM UUID、镜像身份、根盘/数据盘路径及 inode 保持，健康重复 `up` 还保持运行进程。
+验证包括真实数据盘访问、Debian locale/XFS 和控制节点到其他客机的 SSH。
+
+这是从零 6d 基线，再用最终 1c 候选原位复验生命周期，不能写成 1c 再次从零初始化。
+新的 Homebrew 顺序有修复前失败、修复后通过的回归；原生从零阶段使用固定后端归档，
+未覆盖全新 Homebrew Formula 安装。没有重启物理宿主，没有运行完整 Pigsty 安装或
+macOS 目录共享。[发布说明](../../../blog/release/farrow-0.8.0/)列出生命周期计时样本和镜像版本。
 
 ### Farrow 0.7.0 发布：2026-09-16
 

@@ -8,7 +8,7 @@ sections:
   - cta
 
 hero:
-  eyebrow: Farrow 0.7.0 · 预发布 · Go + QEMU
+  eyebrow: Farrow 0.8.0 · 预发布 · Go + QEMU
   title_lines:
     - 一份 Inventory，
     - 一套 Deployment。
@@ -19,8 +19,8 @@ hero:
   note: 默认 Ubuntu 24.04。重复 farrow up 可接续初始化、重试受限功能，健康 VM 保持运行。
   note_icon: fa-solid fa-flask
   image:
-    light: images/farrow-hero-light.svg?v=0.7.0-docs2
-    dark: images/farrow-hero-dark.svg?v=0.7.0-docs2
+    light: images/farrow-hero-light.svg?v=0.8.0-docs2
+    dark: images/farrow-hero-dark.svg?v=0.8.0-docs2
     alt: 一份 Pigsty Inventory 变成一套固定 IP 的 Farrow deployment
   actions:
     - { label: 快速上手, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
@@ -95,7 +95,7 @@ faq:
 
 cta:
   title: 从两条命令开始。
-  desc: 安装 0.7.0，用 up 启动、ssh 进入，再按需要添加节点。
+  desc: 安装 0.8.0，用 up 启动、ssh 进入，再按需要添加节点。
   actions:
     - { label: 快速上手, url: docs/start/tutorial/, icon: fa-solid fa-rocket, style: primary }
     - { label: 参考, url: docs/reference/, icon: fa-solid fa-book-open, style: ghost }
